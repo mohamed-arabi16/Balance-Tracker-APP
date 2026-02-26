@@ -2,11 +2,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { FormScreen } from '@/components/layout/FormScreen';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMode } from '@/contexts/ModeContext';
+import { useClients } from '@/hooks/useClients';
 import { useAddIncome, useIncomes, useUpdateIncome } from '@/hooks/useIncomes';
 import { haptics } from '@/lib/haptics';
 
@@ -23,6 +25,8 @@ export default function AddIncomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
+  const { isAdvanced } = useMode();
+  const { data: clients = [] } = useClients();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
 
@@ -40,6 +44,8 @@ export default function AddIncomeScreen() {
   const [status, setStatus] = useState<IncomeStatus>('expected');
   const [dateValue, setDateValue] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [clientModalVisible, setClientModalVisible] = useState(false);
 
   // Pre-fill form in edit mode once existing income is loaded
   useEffect(() => {
@@ -50,6 +56,7 @@ export default function AddIncomeScreen() {
       setCategory(existingIncome.category as IncomeCategory);
       setStatus(existingIncome.status);
       setDateValue(new Date(existingIncome.date));
+      setSelectedClientId(existingIncome.client_id ?? null);
     }
   }, [existingIncome]);
 
@@ -85,7 +92,7 @@ export default function AddIncomeScreen() {
           category,
           status,
           date: isoDate,
-          client_id: existingIncome?.client_id ?? null,
+          client_id: isAdvanced ? selectedClientId : null,
         });
       } else {
         await addIncomeMutation.mutateAsync({
@@ -96,7 +103,7 @@ export default function AddIncomeScreen() {
           category,
           status,
           date: isoDate,
-          client_id: null,
+          client_id: isAdvanced ? selectedClientId : null,
         });
       }
       haptics.onSave();
@@ -216,6 +223,56 @@ export default function AddIncomeScreen() {
             ))}
           </View>
         </View>
+
+        {/* Client Picker — visible only in Advanced mode */}
+        {isAdvanced && (
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>{t('transactions.form.client', 'Client (Optional)')}</Text>
+            <TouchableOpacity
+              onPress={() => setClientModalVisible(true)}
+              style={styles.clientButton}
+              accessibilityRole="button"
+              accessibilityLabel="Select client"
+            >
+              <Text style={styles.clientButtonText}>
+                {selectedClientId
+                  ? (clients.find((c) => c.id === selectedClientId)?.name ?? 'Select Client')
+                  : t('transactions.form.noClient', 'No Client')}
+              </Text>
+            </TouchableOpacity>
+            <Modal visible={clientModalVisible} transparent animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <FlatList
+                    data={[{ id: null as string | null, name: t('transactions.form.noClient', 'No Client') }, ...clients]}
+                    keyExtractor={(item) => item.id ?? 'none'}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedClientId(item.id);
+                          setClientModalVisible(false);
+                        }}
+                        style={[
+                          styles.modalItem,
+                          item.id === selectedClientId && styles.modalItemSelected,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.modalItemText,
+                            item.id === selectedClientId && styles.modalItemTextSelected,
+                          ]}
+                        >
+                          {item.name}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </View>
+            </Modal>
+          </View>
+        )}
 
         {/* Date */}
         <View style={styles.fieldGroup}>
@@ -343,5 +400,44 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  clientButton: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#ffffff',
+  },
+  clientButtonText: {
+    fontSize: 15,
+    color: '#111827',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    maxHeight: '60%' as unknown as number,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  modalItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  modalItemSelected: {
+    backgroundColor: '#eff6ff',
+  },
+  modalItemText: {
+    fontSize: 15,
+    color: '#111827',
+  },
+  modalItemTextSelected: {
+    color: '#2563eb',
+    fontWeight: '600',
   },
 });
