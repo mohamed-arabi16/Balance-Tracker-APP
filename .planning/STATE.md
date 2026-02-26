@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 13: Apple HIG UI Polish
+**Current focus:** v2.0 iOS Native App — Phase 12: App Store Compliance
 
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 13 of 14 (Apple HIG UI Polish)
-Plan: 5 of 5 in Phase 13 (next: 13-05)
-Status: Phase 13 Plan 02 COMPLETE (executed after 13-03/13-04) — four list screens polished: grouped bg, dark mode rows via COLORS.cellBg, 44pt minHeight, press opacity, FAB removed from Transactions (Stack.Screen headerRight), hairline separators #C6C6C8; POLISH-02 and POLISH-04 complete
-Last activity: 2026-02-26 — 13-02 complete: expenses.tsx FAB removed + SafeScreen removed; debts/index.tsx and assets/index.tsx grouped bg + dark mode rows + #007AFF add buttons; tsc clean
+Phase: 12 of 14 (App Store Compliance & Submission)
+Plan: 1 of 3 complete in Phase 12 (next: 12-02)
+Status: Phase 12 Plan 01 COMPLETE — account deletion RPC (delete_user_data), Delete Account in Settings, Privacy Policy screen, password reset deep link + screen; STORE-01 + STORE-02 requirements met
+Last activity: 2026-02-26 — 12-01 complete: delete_user_data migration, settings.tsx Danger Zone, privacy-policy.tsx, reset-password.tsx, AuthContext redirectTo
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -53,6 +53,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 13-apple-hig-ui-polish P04 | 3 | 2 tasks | 7 files |
 | Phase 13-apple-hig-ui-polish P03 | 6 | 2 tasks | 4 files |
 | Phase 13-apple-hig-ui-polish P02 | 7 | 2 tasks | 4 files |
+| Phase 12 P01 | 5 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Key decisions for v2.0:
 - [Phase 13-apple-hig-ui-polish]: ExpenseScreen SafeScreen removed — TransactionsScreen grouped wrapper is the only screen-level wrapper to avoid double safe area insets
 - [Phase 13-apple-hig-ui-polish]: Stack.Screen headerRight in TransactionsScreen reads activeTab state to route plus button to correct add screen (income vs expense)
 - [Phase 13-apple-hig-ui-polish]: Debts add button stays in ListHeaderComponent (not headerRight) — only color updated to #007AFF; structure not changed
+- [Phase 12]: delete_user_data RPC uses SECURITY DEFINER + search_path = public, auth to delete from auth.users
+- [Phase 12]: reset-password screen uses 3-second timeout guard to redirect direct navigation to sign-in
 
 ### Pending Todos
 
@@ -140,5 +143,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 13-02-PLAN.md — four list screens polished to Apple HIG grouped standard; dark mode rows, 44pt targets, FAB removed from Transactions, POLISH-02 and POLISH-04 complete; Phase 13 Plan 05 next
+Stopped at: Completed 12-01-PLAN.md — delete_user_data RPC migration, Delete Account in Settings (Danger Zone section), Privacy Policy screen (5 sections), password reset deep link redirectTo + reset-password.tsx; STORE-01 + STORE-02 complete; Phase 12 Plan 02 next
 Resume file: None

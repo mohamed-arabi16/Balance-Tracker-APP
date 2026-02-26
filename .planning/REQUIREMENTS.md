@@ -92,10 +92,18 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### App Store
 
-- [ ] **STORE-01**: User can delete their account from within the app (Apple requirement)
-- [ ] **STORE-02**: Privacy policy accessible from app
+- [x] **STORE-01**: User can delete their account from within the app (Apple requirement)
+- [x] **STORE-02**: Privacy policy accessible from app
 - [ ] **STORE-03**: App submitted to App Store via EAS Build + Submit
 - [ ] **STORE-04**: App passes TestFlight testing on physical device
+
+### Android Support (Phase 14)
+
+- [ ] **DROID-01**: App compiles and runs on Android without crashes — all existing screens function on Android device/emulator
+- [ ] **DROID-02**: Tab bar icons render correctly on Android — cross-platform icon solution replaces or wraps iOS-only expo-symbols
+- [ ] **DROID-03**: Android-specific UX is correct — system back button handled, KeyboardAvoidingView behavior correct, safe areas respected on Android cutout devices, status bar styled correctly
+- [ ] **DROID-04**: Visual brand consistency maintained across platforms — same colors, card styling, typography tokens from Phase 13; no visual regression on iOS
+- [ ] **DROID-05**: Production APK/AAB built via EAS Build and installs successfully on a physical Android device
 
 ## Future Requirements
 
@@ -110,7 +118,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 
 ### Platform Expansion
 
-- **DROID-01**: Android version of the app
+- **DROID-v3-01**: Google Play Store submission and listing
 
 ### UX Polish
 
@@ -132,7 +140,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | Push notifications | Requires APNs infrastructure — separate milestone |
 | Biometric auth (Face ID / Touch ID) | Requires expo-local-authentication + keychain — separate milestone |
 | Home screen widgets | Requires native Swift WidgetKit extension — separate milestone |
-| Android support | iOS first — Android is a separate milestone |
+| Google Play Store submission | Phase 14 builds APK only — Play Store listing is a future milestone |
 | Offline write-then-sync | Conflict resolution on financial data is dangerous — block writes when offline |
 | In-app PDF viewer | Share sheet handles viewing — no need for custom viewer |
 | Real-time collaboration | Single-user app per RLS design |
@@ -194,8 +202,8 @@ Deferred to v2.x milestones. Not in current roadmap.
 | I18N-04 | Phase 7 | Complete |
 | THEME-01 | Phase 7 | Complete |
 | THEME-02 | Phase 7 | Complete |
-| STORE-01 | Phase 12 | Pending |
-| STORE-02 | Phase 12 | Pending |
+| STORE-01 | Phase 12 | Complete |
+| STORE-02 | Phase 12 | Complete |
 | STORE-03 | Phase 12 | Pending |
 | STORE-04 | Phase 12 | Pending |
 | POLISH-01 | Phase 13 | Complete |
@@ -203,10 +211,15 @@ Deferred to v2.x milestones. Not in current roadmap.
 | POLISH-03 | Phase 13 | Complete |
 | POLISH-04 | Phase 13 | Complete |
 | POLISH-05 | Phase 13 | Complete |
+| DROID-01 | Phase 14 | Pending |
+| DROID-02 | Phase 14 | Pending |
+| DROID-03 | Phase 14 | Pending |
+| DROID-04 | Phase 14 | Pending |
+| DROID-05 | Phase 14 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 59 total
-- Mapped to phases: 59
+- v2.0 requirements: 64 total
+- Mapped to phases: 64
 - Unmapped: 0
 
 ---

@@ -55,6 +55,7 @@ Plans:
 - [x] **Phase 11: Advanced Mode + PDF Export** - Clients, invoicing, invoice lifecycle, expo-print PDF generation, and transaction-client linking (completed 2026-02-26)
 - [ ] **Phase 12: App Store Compliance + Submission** - Account deletion, privacy policy, TestFlight, EAS Submit, and App Store approval
 - [ ] **Phase 13: Apple HIG UI Polish** - Dashboard cards, list screen styling, form sheet design, typography/spacing, and empty state polish across all screens
+- [ ] **Phase 14: Android Support + APK Build** - Cross-platform icon library, Android app.json config, EAS Android build profile, platform-specific polish, and APK distribution
 
 ## Phase Details
 
@@ -179,10 +180,22 @@ Plans:
 - [ ] 13-04-PLAN.md — EmptyState SF Symbol icons, optional CTA props, Settings screen card shadows (Wave 2)
 - [ ] 13-05-PLAN.md — Human verification checkpoint across all 5 POLISH requirements on iOS device (Wave 3)
 
+### Phase 14: Android Support + APK Build
+**Goal**: The existing Expo app compiles and runs on Android with a consistent brand experience — same visual design as iOS, icons that display on both platforms, proper Android UX (back button, keyboard, safe areas, status bar), and a distributable APK/AAB built via EAS Build
+**Depends on**: Phase 13
+**Requirements**: DROID-01, DROID-02, DROID-03, DROID-04, DROID-05
+**Success Criteria** (what must be TRUE):
+  1. The app compiles and runs on an Android device or emulator without crashing — all screens accessible
+  2. Tab bar icons render correctly on Android — no blank icon placeholders (expo-symbols is iOS-only and replaced/conditionally handled)
+  3. The app visual design is consistent with iOS — same colors, same layout, same card/list styling from Phase 13 tokens
+  4. Android-specific UX works correctly — system back button handled, keyboard avoidance works, safe areas respected on Android notch devices, status bar styled correctly
+  5. A production APK/AAB is generated via EAS Build and installs successfully on a physical Android device
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13
+Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -197,5 +210,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 9. Simple Mode Screens | 4/4 | Complete    | 2026-02-26 | - |
 | 10. Dashboard + CSV Export | 3/3 | Complete    | 2026-02-26 | - |
 | 11. Advanced Mode + PDF Export | 5/5 | Complete    | 2026-02-26 | - |
-| 12. App Store Compliance + Submission | v2.0 | 0/3 | Not started | - |
+| 12. App Store Compliance + Submission | 1/3 | In Progress|  | - |
 | 13. Apple HIG UI Polish | 4/5 | In Progress|  | - |
+| 14. Android Support + APK Build | v2.0 | 0/TBD | Not started | - |
