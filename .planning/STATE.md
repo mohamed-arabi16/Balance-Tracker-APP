@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 13 of 14 (Apple HIG UI Polish)
-Plan: 4 of 5 in Phase 13 (COMPLETE)
-Status: Phase 13 Plan 04 COMPLETE — EmptyState SF Symbol icons (SymbolView, 56pt); symbolName on all 5 list screen empty states; EmptyState ctaLabel/onCta made optional; Settings SettingsCard upgraded to SHADOWS.card; POLISH-05 complete
-Last activity: 2026-02-26 — 13-04 complete: EmptyState with SymbolView/symbolName/optional-CTA; chart.bar (dashboard), arrow.up.circle (income), arrow.down.circle (expenses), creditcard (debts), banknote (assets); Settings SHADOWS.card; tsc clean
+Plan: 5 of 5 in Phase 13 (next: 13-05)
+Status: Phase 13 Plan 02 COMPLETE (executed after 13-03/13-04) — four list screens polished: grouped bg, dark mode rows via COLORS.cellBg, 44pt minHeight, press opacity, FAB removed from Transactions (Stack.Screen headerRight), hairline separators #C6C6C8; POLISH-02 and POLISH-04 complete
+Last activity: 2026-02-26 — 13-02 complete: expenses.tsx FAB removed + SafeScreen removed; debts/index.tsx and assets/index.tsx grouped bg + dark mode rows + #007AFF add buttons; tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -52,6 +52,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 13-apple-hig-ui-polish P01 | 2 | 2 tasks | 6 files |
 | Phase 13-apple-hig-ui-polish P04 | 3 | 2 tasks | 7 files |
 | Phase 13-apple-hig-ui-polish P03 | 6 | 2 tasks | 4 files |
+| Phase 13-apple-hig-ui-polish P02 | 7 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,9 @@ Key decisions for v2.0:
 - [Phase 13-apple-hig-ui-polish]: SettingsCard shadow: StyleSheet.create({ card: SHADOWS.card }) pattern used — cleaner than inline spread; consistent with Phase 13 shadow token pattern
 - [Phase 13-apple-hig-ui-polish]: dynamicStyles pattern: compute isDark from useColorScheme, build per-element color overrides, spread as second element in style arrays — chosen for direct StyleSheet control over form input colors without NativeWind className interference
 - [Phase 13-apple-hig-ui-polish]: Stack.Screen headerLeft Cancel button pattern for form screens pushed via router.push — overrides navigation bar Cancel affordance from within the screen component
+- [Phase 13-apple-hig-ui-polish]: ExpenseScreen SafeScreen removed — TransactionsScreen grouped wrapper is the only screen-level wrapper to avoid double safe area insets
+- [Phase 13-apple-hig-ui-polish]: Stack.Screen headerRight in TransactionsScreen reads activeTab state to route plus button to correct add screen (income vs expense)
+- [Phase 13-apple-hig-ui-polish]: Debts add button stays in ListHeaderComponent (not headerRight) — only color updated to #007AFF; structure not changed
 
 ### Pending Todos
 
@@ -136,5 +140,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 13-04-PLAN.md — EmptyState SF Symbol icons; symbolName on all list screens; optional ctaLabel/onCta; Settings SHADOWS.card; POLISH-05 complete; Phase 13 Plan 05 next
+Stopped at: Completed 13-02-PLAN.md — four list screens polished to Apple HIG grouped standard; dark mode rows, 44pt targets, FAB removed from Transactions, POLISH-02 and POLISH-04 complete; Phase 13 Plan 05 next
 Resume file: None
