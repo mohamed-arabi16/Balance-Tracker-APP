@@ -49,9 +49,9 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: Dashboard shows net worth and financial overview with charts (Victory Native)
-- [ ] **DASH-02**: Dashboard financial cards are clickable and navigate to their respective sections
-- [ ] **DASH-03**: Charts respond to taps with callout (replacing web hover tooltips)
+- [x] **DASH-01**: Dashboard shows net worth and financial overview with charts (Victory Native)
+- [x] **DASH-02**: Dashboard financial cards are clickable and navigate to their respective sections
+- [x] **DASH-03**: Charts respond to taps with callout (replacing web hover tooltips)
 
 ### Export
 
@@ -161,9 +161,9 @@ Deferred to v2.x milestones. Not in current roadmap.
 | ASST-02 | Phase 9 | Complete |
 | ASST-03 | Phase 9 | Complete |
 | ASST-04 | Phase 9 | Complete |
-| DASH-01 | Phase 10 | Pending |
-| DASH-02 | Phase 10 | Pending |
-| DASH-03 | Phase 10 | Pending |
+| DASH-01 | Phase 10 | Complete |
+| DASH-02 | Phase 10 | Complete |
+| DASH-03 | Phase 10 | Complete |
 | EXPRT-01 | Phase 10 | Complete |
 | EXPRT-02 | Phase 11 | Pending |
 | ADV-01 | Phase 11 | Pending |

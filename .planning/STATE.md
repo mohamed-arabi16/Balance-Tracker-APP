@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 9 of 12 (Simple Mode Screens)
-Plan: 4 of 4 in Phase 9 (COMPLETE)
-Status: In progress — Phase 9 Plans 01, 03, 04 complete (02 pending)
-Last activity: 2026-02-26 — 09-04 complete: Assets FlatList with live prices, ReanimatedSwipeable, add/edit formSheet with auto_update Switch
+Phase: 10 of 12 (Dashboard + CSV Export)
+Plan: 1 of 3 in Phase 10 (COMPLETE)
+Status: In progress — Phase 10 Plan 01 complete (DASH-01, DASH-02, DASH-03 delivered)
+Last activity: 2026-02-26 — 10-01 complete: Victory Native XL + Skia dashboard with NetWorthCard, IncomeExpenseChart (tap callout), 4x FinancialSummaryCards
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -42,6 +42,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 09 P03 | 4 | 2 tasks | 5 files |
 | Phase 09 P02 | 3 | 2 tasks | 3 files |
 | Phase 10 P02 | 3 | 2 tasks | 3 files |
+| Phase 10-dashboard-csv-export P01 | 5 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Key decisions for v2.0:
 - [Phase 09]: index.tsx tab chip switcher: useState<'income'|'expenses'> drives conditional render of IncomeScreen vs ExpenseScreen
 - [Phase 10]: expo-file-system v19 new API used (File + Paths) instead of deprecated legacy writeAsStringAsync + cacheDirectory
 - [Phase 10]: Hook types (Income, Expense, Debt, Asset) imported from hook files, not Database types — hooks define own interfaces with extra fields like is_receivable
+- [Phase 10-dashboard-csv-export]: useAnimatedReaction+runOnJS replaces useDerivedValue+animatedProps for callout label — RN Text has no text prop natively, so animatedProps pattern fails
+- [Phase 10-dashboard-csv-export]: dashboard.tsx alongside index.tsx — tab bar uses index as dashboard; dashboard.tsx accessible as /dashboard route for Phase 10 testing without modifying tab bar
+- [Phase 10-dashboard-csv-export]: Inter-Medium.ttf downloaded from rsms/inter v4.0 GitHub raw URL (299KB) for chart axis label rendering via victory-native useFont()
 
 ### Pending Todos
 
@@ -95,12 +99,11 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 10]: Victory Native v5 API confidence is MEDIUM — validate tap-to-callout and responsive width before building dashboard charts
 - [Phase 11]: expo-print Arabic font rendering not validated — run minimal proof-of-concept on physical device before full PDF template build
 - [Phase 12]: Apple Developer Program enrollment needs 24–48hr processing — start no later than Phase 11 to avoid blocking submission
 
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 10-02-PLAN.md — exportCsv utility (expo-file-system v19 File API + expo-sharing) + Settings screen with Export button wired to all four data hooks, EXPRT-01 complete
+Stopped at: Completed 10-01-PLAN.md — Dashboard with Victory Native charts, Skia Circle tap-callout, NetWorthCard, 4 FinancialSummaryCards, DASH-01/02/03 complete
 Resume file: None
