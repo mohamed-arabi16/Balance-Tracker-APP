@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 12.0.0"
+    "version": ">= 16.0.0"
   },
   "build": {
     "development": {
@@ -11,6 +11,9 @@
       "distribution": "internal",
       "ios": {
         "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
@@ -18,6 +21,9 @@
       "distribution": "store",
       "ios": {
         "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   },
