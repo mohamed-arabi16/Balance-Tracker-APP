@@ -3,10 +3,13 @@ import { SymbolView } from 'expo-symbols';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
+
 export default function TabsLayout() {
   const { t } = useTranslation();
 
   return (
+    <CurrencyProvider>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -59,6 +62,8 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="dashboard" options={{ href: null }} />
     </Tabs>
+    </CurrencyProvider>
   );
 }
