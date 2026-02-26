@@ -520,7 +520,18 @@ export const resources = {
 
       // Export
       "export.success": "Data exported successfully!",
-      "export.error": "Failed to export data"
+      "export.error": "Failed to export data",
+
+      // Tab bar labels (Phase 8 - iOS native app)
+      "tabs.dashboard": "Dashboard",
+      "tabs.transactions": "Transactions",
+      "tabs.debts": "Debts",
+      "tabs.assets": "Assets",
+      "tabs.more": "More",
+
+      // Settings screen (Phase 8)
+      "settings.signOut": "Sign Out",
+      "settings.signedInAs": "Signed in as"
     }
   },
   ar: {
@@ -1031,7 +1042,18 @@ export const resources = {
 
       // Export
       "export.success": "تم تصدير البيانات بنجاح!",
-      "export.error": "فشل في تصدير البيانات"
+      "export.error": "فشل في تصدير البيانات",
+
+      // Tab bar labels (Phase 8 - iOS native app)
+      "tabs.dashboard": "الرئيسية",
+      "tabs.transactions": "المعاملات",
+      "tabs.debts": "الديون",
+      "tabs.assets": "الأصول",
+      "tabs.more": "المزيد",
+
+      // Settings screen (Phase 8)
+      "settings.signOut": "تسجيل الخروج",
+      "settings.signedInAs": "مسجل الدخول بـ"
     }
   }
 };
