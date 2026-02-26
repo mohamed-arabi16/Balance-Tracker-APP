@@ -1,16 +1,17 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React, { useCallback } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
 
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useDeleteExpense, useExpenses, useUpdateExpense, type Expense } from '@/hooks/useExpenses';
 import { haptics } from '@/lib/haptics';
+import { COLORS } from '@/lib/tokens';
 
 // ─────────────────────────────────────────────
 // Delete action rendered inside the swipeable
@@ -74,6 +75,7 @@ function StatusBadge({ item }: StatusBadgeProps) {
       style={[styles.badge, isPaid ? styles.badgePaid : styles.badgePending]}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Text style={[styles.badgeText, isPaid ? styles.badgeTextPaid : styles.badgeTextPending]}>
         {isPaid ? 'Paid' : 'Pending'}
@@ -93,6 +95,8 @@ interface ExpenseRowProps {
 function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
+  const { colorScheme } = useColorScheme();
+  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
 
   const formattedDate = format(new Date(item.date), 'MMM d, yyyy');
   const formattedAmount = formatCurrency(item.amount, item.currency);
@@ -113,7 +117,14 @@ function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
       rightThreshold={40}
       renderRightActions={renderRightActions}
     >
-      <Pressable onPress={handlePress} style={styles.row}>
+      <Pressable
+        onPress={handlePress}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: rowBg },
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
+      >
         <View style={styles.rowLeft}>
           <Text style={styles.rowTitle} numberOfLines={1}>
             {item.title}
@@ -139,6 +150,7 @@ function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
 
 // ─────────────────────────────────────────────
 // Main expense screen (named + default export)
+// Renders directly — wrapping SafeScreen is in TransactionsScreen (index.tsx)
 // ─────────────────────────────────────────────
 export function ExpenseScreen() {
   const router = useRouter();
@@ -164,37 +176,27 @@ export function ExpenseScreen() {
   const keyExtractor = useCallback((item: Expense) => item.id, []);
 
   return (
-    <SafeScreen edges={['bottom']}>
-      <FlatList
-        data={expenses ?? []}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        contentContainerStyle={
-          (expenses?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
-        }
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            symbolName="arrow.down.circle"
-            title="No expenses yet"
-            message="Start tracking your expenses to see them here."
-            ctaLabel="Add Expense"
-            onCta={handleAddExpense}
-          />
-        }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
-      <TouchableOpacity
-        onPress={handleAddExpense}
-        style={styles.fab}
-        accessibilityRole="button"
-        accessibilityLabel="Add Expense"
-      >
-        <Text style={styles.fabText}>+ Add Expense</Text>
-      </TouchableOpacity>
-    </SafeScreen>
+    <FlatList
+      data={expenses ?? []}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      contentContainerStyle={
+        (expenses?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
+      }
+      refreshControl={
+        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+      }
+      ListEmptyComponent={
+        <EmptyState
+          symbolName="arrow.down.circle"
+          title="No expenses yet"
+          message="Start tracking your expenses to see them here."
+          ctaLabel="Add Expense"
+          onCta={handleAddExpense}
+        />
+      }
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
   );
 }
 
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    minHeight: 44,
   },
   rowLeft: {
     flex: 1,
@@ -306,28 +308,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   separator: {
-    height: 1,
-    backgroundColor: '#f3f4f6',
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C6C6C8',
     marginStart: 16,
-  },
-  // FAB
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
-    backgroundColor: '#ef4444',
-    borderRadius: 24,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  fabText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
   },
 });
