@@ -1,7 +1,6 @@
-import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { FormScreen } from '@/components/layout/FormScreen';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +28,7 @@ export default function AddAssetScreen() {
   const [currency, setCurrency] = useState<AssetCurrency>('USD');
   const [autoUpdate, setAutoUpdate] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
 
   // Pre-fill form in edit mode once the existing asset is loaded
   useEffect(() => {
@@ -183,17 +183,32 @@ export default function AddAssetScreen() {
           {/* Currency */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label]}>Currency</Text>
-            <View style={[styles.pickerWrapper]}>
-              <Picker
-                selectedValue={currency}
-                onValueChange={(val) => setCurrency(val as AssetCurrency)}
-                style={[styles.picker]}
-              >
-                {CURRENCIES.map((cur) => (
-                  <Picker.Item key={cur} label={cur} value={cur} />
-                ))}
-              </Picker>
-            </View>
+            <TouchableOpacity
+              onPress={() => setCurrencyModalVisible(true)}
+              style={styles.pickerButton}
+              accessibilityRole="button"
+              accessibilityLabel="Select currency"
+            >
+              <Text style={styles.pickerButtonText}>{currency}</Text>
+            </TouchableOpacity>
+            <Modal visible={currencyModalVisible} transparent animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <FlatList
+                    data={CURRENCIES}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => { setCurrency(item as AssetCurrency); setCurrencyModalVisible(false); }}
+                        style={[styles.modalItem, item === currency && styles.modalItemSelected]}
+                      >
+                        <Text style={[styles.modalItemText, item === currency && styles.modalItemTextSelected]}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </View>
+            </Modal>
           </View>
 
           {/* Auto Update */}
@@ -257,21 +272,52 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#000000',
   },
   input: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 15,
+    color: '#000000',
   },
-  pickerWrapper: {
-    borderWidth: 1,
+  pickerButton: {
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
-    overflow: 'hidden',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  picker: {
-    height: 44,
+  pickerButtonText: {
+    fontSize: 15,
+    color: '#000000',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    maxHeight: '60%' as unknown as number,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  modalItem: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
+  },
+  modalItemSelected: {
+    backgroundColor: '#EFF6FF',
+  },
+  modalItemText: {
+    fontSize: 15,
+    color: '#111827',
+  },
+  modalItemTextSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
   switchRow: {
     flexDirection: 'row',
@@ -285,18 +331,16 @@ const styles = StyleSheet.create({
   },
   switchNote: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#6B7280',
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#FEF2F2',
     borderRadius: 8,
     padding: 12,
-    borderWidth: 1,
-    borderColor: '#fecaca',
   },
   errorText: {
     fontSize: 14,
-    color: '#dc2626',
+    color: '#DC2626',
   },
   saveButton: {
     backgroundColor: '#007AFF',

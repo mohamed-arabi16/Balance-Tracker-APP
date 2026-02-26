@@ -23,19 +23,13 @@ import {
 import type { Invoice } from '@/hooks/useInvoices';
 import { useClients } from '@/hooks/useClients';
 import { haptics } from '@/lib/haptics';
+import {
+  invoiceStatusBadgeClasses,
+  type InvoiceDisplayStatus,
+} from '@/lib/statusBadgeTheme';
 
 // ─── Status badge colors ──────────────────────────────────────────────────────
-type DisplayStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-
-const STATUS_COLORS: Record<DisplayStatus, { bg: string; text: string }> = {
-  draft: { bg: '#f3f4f6', text: '#6b7280' },
-  sent: { bg: '#dbeafe', text: '#1d4ed8' },
-  paid: { bg: '#d1fae5', text: '#065f46' },
-  overdue: { bg: '#fee2e2', text: '#b91c1c' },
-  cancelled: { bg: '#f3f4f6', text: '#6b7280' },
-};
-
-const STATUS_LABELS: Record<DisplayStatus, string> = {
+const STATUS_LABELS: Record<InvoiceDisplayStatus, string> = {
   draft: 'Draft',
   sent: 'Sent',
   paid: 'Paid',
@@ -77,7 +71,7 @@ interface InvoiceRowProps {
 function InvoiceRow({ item, clientName, onDelete }: InvoiceRowProps) {
   const router = useRouter();
   const displayStatus = getDisplayStatus(item.status, item.due_date);
-  const statusColor = STATUS_COLORS[displayStatus];
+  const statusClasses = invoiceStatusBadgeClasses[displayStatus];
   const total = `${Number(item.total ?? 0).toFixed(2)} ${item.currency}`;
 
   const rowContent = (
@@ -91,8 +85,8 @@ function InvoiceRow({ item, clientName, onDelete }: InvoiceRowProps) {
         <Text style={styles.invoiceNumber} numberOfLines={1}>
           INV-{item.invoice_number}
         </Text>
-        <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
-          <Text style={[styles.statusText, { color: statusColor.text }]}>
+        <View style={styles.statusBadge} className={statusClasses.container}>
+          <Text style={styles.statusText} className={statusClasses.text}>
             {STATUS_LABELS[displayStatus]}
           </Text>
         </View>

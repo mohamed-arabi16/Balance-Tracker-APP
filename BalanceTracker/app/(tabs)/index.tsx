@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useColorScheme } from 'nativewind';
 
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
@@ -23,19 +22,13 @@ import { useClients } from '@/hooks/useClients';
 import { parseNetWorthConfig } from '@/lib/netWorth';
 import { sumInDisplayCurrency } from '@/lib/finance';
 import { SHADOWS } from '@/lib/tokens';
+import {
+  invoiceStatusBadgeClasses,
+  type InvoiceDisplayStatus,
+} from '@/lib/statusBadgeTheme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type DisplayStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-
-const STATUS_COLORS: Record<DisplayStatus, { bg: string; text: string }> = {
-  draft:     { bg: '#f3f4f6', text: '#6b7280' },
-  sent:      { bg: '#dbeafe', text: '#1d4ed8' },
-  paid:      { bg: '#d1fae5', text: '#065f46' },
-  overdue:   { bg: '#fee2e2', text: '#b91c1c' },
-  cancelled: { bg: '#f3f4f6', text: '#6b7280' },
-};
-
-const STATUS_LABELS: Record<DisplayStatus, string> = {
+const STATUS_LABELS: Record<InvoiceDisplayStatus, string> = {
   draft:     'Draft',
   sent:      'Sent',
   paid:      'Paid',
@@ -171,7 +164,7 @@ function OutstandingInvoicesWidget({
           {/* Individual invoices */}
           {outstandingInvoices.map((inv) => {
             const displayStatus = getDisplayStatus(inv.status, inv.due_date);
-            const statusColor = STATUS_COLORS[displayStatus];
+            const statusClasses = invoiceStatusBadgeClasses[displayStatus];
             const clientName = clientMap[inv.client_id] ?? 'Unknown Client';
             const amount = fmt(convertCurrency(Number(inv.total ?? 0), inv.currency));
 
@@ -190,12 +183,12 @@ function OutstandingInvoicesWidget({
                     </Text>
                   ) : null}
                 </View>
-                <View className="items-end" style={{ gap: 4 }}>
+                <View className="items-end gap-1">
                   <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {amount}
                   </Text>
-                  <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, backgroundColor: statusColor.bg }}>
-                    <Text style={{ fontSize: 11, fontWeight: '600', color: statusColor.text }}>
+                  <View className={`px-2 py-0.5 rounded ${statusClasses.container}`}>
+                    <Text className={`text-[11px] font-semibold ${statusClasses.text}`}>
                       {STATUS_LABELS[displayStatus]}
                     </Text>
                   </View>
@@ -212,8 +205,6 @@ function OutstandingInvoicesWidget({
 // ─── DashboardScreen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
-  const pageBg = colorScheme === 'dark' ? '#1C1C1E' : '#F2F2F7';
   const { currency, convertCurrency } = useCurrency();
   const { isAdvanced } = useMode();
 
@@ -230,11 +221,11 @@ export default function DashboardScreen() {
   const isLoading =
     incomesLoading || expensesLoading || debtsLoading || assetsLoading || settingsLoading;
 
-  const incomes = incomesData ?? [];
-  const expenses = expensesData ?? [];
-  const debts = debtsData ?? [];
-  const assets = assetsData ?? [];
-  const invoices = invoicesData ?? [];
+  const incomes = useMemo(() => incomesData ?? [], [incomesData]);
+  const expenses = useMemo(() => expensesData ?? [], [expensesData]);
+  const debts = useMemo(() => debtsData ?? [], [debtsData]);
+  const assets = useMemo(() => assetsData ?? [], [assetsData]);
+  const invoices = useMemo(() => invoicesData ?? [], [invoicesData]);
 
   const isAllEmpty =
     incomes.length === 0 &&
@@ -348,9 +339,10 @@ export default function DashboardScreen() {
   }
 
   return (
-    <SafeScreen edges={['top']} style={{ backgroundColor: pageBg }}>
+    <SafeScreen edges={['top']} className="bg-gray-50 dark:bg-gray-950">
       <ScrollView
-        contentContainerStyle={{ padding: 16, backgroundColor: pageBg }}
+        className="bg-gray-50 dark:bg-gray-950"
+        contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -378,39 +370,49 @@ export default function DashboardScreen() {
         />
 
         {/* Section: Summary */}
-        <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 mt-2 px-1">
+        <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 mt-4 px-1">
           Summary
         </Text>
 
         {/* Financial Summary Cards */}
-        <FinancialSummaryCard
-          title={t('dashboard.cards.income.title')}
-          value={formatValue(totalIncome)}
-          subtitle={t('dashboard.cards.income.subtitle')}
-          route="/(tabs)/transactions"
-          color="#34C759"
-        />
-        <FinancialSummaryCard
-          title={t('dashboard.cards.expenses.title')}
-          value={formatValue(totalExpenses)}
-          subtitle={t('dashboard.cards.expenses.subtitle')}
-          route="/expenses"
-          color="#FF3B30"
-        />
-        <FinancialSummaryCard
-          title={t('dashboard.cards.debt.totalTitle')}
-          value={formatValue(totalDebt)}
-          subtitle={t('dashboard.cards.debt.totalSubtitle')}
-          route="/debts"
-          color="#FF9500"
-        />
-        <FinancialSummaryCard
-          title={t('dashboard.cards.assets.title')}
-          value={formatValue(totalAssets)}
-          subtitle={t('dashboard.cards.assets.subtitle')}
-          route="/assets"
-          color="#007AFF"
-        />
+        <View className="flex-row flex-wrap justify-between">
+          <View className="w-[48.5%] mb-3">
+            <FinancialSummaryCard
+              title={t('dashboard.cards.income.title')}
+              value={formatValue(totalIncome)}
+              subtitle={t('dashboard.cards.income.subtitle')}
+              route="/(tabs)/transactions"
+              variant="income"
+            />
+          </View>
+          <View className="w-[48.5%] mb-3">
+            <FinancialSummaryCard
+              title={t('dashboard.cards.expenses.title')}
+              value={formatValue(totalExpenses)}
+              subtitle={t('dashboard.cards.expenses.subtitle')}
+              route="/expenses"
+              variant="expense"
+            />
+          </View>
+          <View className="w-[48.5%] mb-3">
+            <FinancialSummaryCard
+              title={t('dashboard.cards.debt.totalTitle')}
+              value={formatValue(totalDebt)}
+              subtitle={t('dashboard.cards.debt.totalSubtitle')}
+              route="/debts"
+              variant="debt"
+            />
+          </View>
+          <View className="w-[48.5%] mb-3">
+            <FinancialSummaryCard
+              title={t('dashboard.cards.assets.title')}
+              value={formatValue(totalAssets)}
+              subtitle={t('dashboard.cards.assets.subtitle')}
+              route="/assets"
+              variant="asset"
+            />
+          </View>
+        </View>
 
         {/* Advanced mode widgets */}
         {isAdvanced && (
@@ -435,4 +437,3 @@ export default function DashboardScreen() {
     </SafeScreen>
   );
 }
-

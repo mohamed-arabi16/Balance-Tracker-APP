@@ -34,7 +34,8 @@
     },
     "androidStatusBar": {
       "barStyle": "auto",
-      "translucent": true
+      "translucent": true,
+      "backgroundColor": "#ffffff"
     },
     "plugins": [
       "expo-router",
@@ -48,9 +49,11 @@
       "typedRoutes": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "3704a6da-c6a4-485d-8758-1c5227700d79"
       }
-    }
+    },
+    "owner": "mohamedkhairs-organization"
   }
 }

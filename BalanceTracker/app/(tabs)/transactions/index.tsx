@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
-import { Stack, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter, type Href } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
@@ -12,49 +12,42 @@ import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useDeleteIncome, useIncomes, useUpdateIncome, type Income } from '@/hooks/useIncomes';
 import { haptics } from '@/lib/haptics';
-import { COLORS } from '@/lib/tokens';
+import { incomeStatusBadgeClasses } from '@/lib/statusBadgeTheme';
 import { ExpenseScreen } from './expenses';
 
-// ─────────────────────────────────────────────
-// Delete action rendered inside the swipeable
-// ─────────────────────────────────────────────
+type Tab = 'income' | 'expenses';
+
 function DeleteAction(
   _prog: SharedValue<number>,
   drag: SharedValue<number>,
   onDelete: () => void,
 ) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const styleAnimation = useAnimatedStyle(() => ({
-    transform: [{ translateX: drag.value + 80 }],
+    transform: [{ translateX: drag.value + 88 }],
   }));
 
   return (
-    <Reanimated.View style={[styleAnimation, styles.deleteContainer]}>
+    <Reanimated.View style={[styleAnimation, { width: 88, overflow: 'hidden' }]}>
       <Pressable
         onPress={() => {
           haptics.onDelete();
           onDelete();
         }}
-        style={styles.deleteButton}
+        className="w-[88px] h-full items-center justify-center bg-expense-500 dark:bg-expense-600"
         accessibilityRole="button"
         accessibilityLabel="Delete income"
       >
-        <Text style={styles.deleteText}>Delete</Text>
+        <Text className="text-white font-semibold text-sm">Delete</Text>
       </Pressable>
     </Reanimated.View>
   );
 }
 
-// ─────────────────────────────────────────────
-// Inline status badge — toggles expected/received
-// ─────────────────────────────────────────────
-interface StatusBadgeProps {
-  item: Income;
-}
-
-function StatusBadge({ item }: StatusBadgeProps) {
+function StatusBadge({ item }: { item: Income }) {
   const updateIncome = useUpdateIncome();
   const isReceived = item.status === 'received';
+  const statusKey = isReceived ? 'received' : 'expected';
+  const statusClasses = incomeStatusBadgeClasses[statusKey];
 
   function handleToggle() {
     haptics.onToggle();
@@ -73,31 +66,21 @@ function StatusBadge({ item }: StatusBadgeProps) {
   return (
     <Pressable
       onPress={handleToggle}
-      style={[styles.badge, isReceived ? styles.badgeReceived : styles.badgeExpected]}
+      className={`mt-1.5 px-2 py-0.5 rounded-full ${statusClasses.container}`}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Text style={[styles.badgeText, isReceived ? styles.badgeTextReceived : styles.badgeTextExpected]}>
+      <Text className={`text-[11px] font-semibold ${statusClasses.text}`}>
         {isReceived ? 'Received' : 'Expected'}
       </Text>
     </Pressable>
   );
 }
 
-// ─────────────────────────────────────────────
-// Single income row with swipe-to-delete
-// ─────────────────────────────────────────────
-interface IncomeRowProps {
-  item: Income;
-  onDelete: (income: Income) => void;
-}
-
-function IncomeRow({ item, onDelete }: IncomeRowProps) {
+function IncomeRow({ item, onDelete }: { item: Income; onDelete: (income: Income) => void }) {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
-  const { colorScheme } = useColorScheme();
-  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
 
   const formattedDate = format(new Date(item.date), 'MMM d, yyyy');
   const formattedAmount = formatCurrency(item.amount, item.currency);
@@ -108,76 +91,74 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
     [item, onDelete],
   );
 
-  function handlePress() {
-    router.push(`/(tabs)/transactions/add-income?id=${item.id}` as any);
-  }
-
   return (
     <Swipeable
       friction={2}
       rightThreshold={40}
       renderRightActions={renderRightActions}
     >
-      <Pressable
-        onPress={handlePress}
-        style={({ pressed }) => [
-          styles.row,
-          { backgroundColor: rowBg },
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <View style={styles.rowLeft}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <View style={styles.rowMeta}>
-            <Text style={styles.rowDate}>{formattedDate}</Text>
-            <View style={styles.categoryChip}>
-              <Text style={styles.categoryText}>{item.category}</Text>
+      <View className="px-4 mb-3">
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: '/(tabs)/transactions/add-income',
+              params: { id: item.id },
+            });
+          }}
+          className="rounded-2xl bg-white dark:bg-neutral-900"
+          style={({ pressed }) => [{ opacity: pressed ? 0.82 : 1 }]}
+        >
+          <View className="flex-row items-start justify-between px-4 py-3 min-h-[72px]">
+            <View className="flex-1 mr-3">
+              <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
+                {item.title}
+              </Text>
+              <View className="flex-row items-center mt-1.5">
+                <Text className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</Text>
+                <View className="ml-2 rounded-md bg-gray-100 dark:bg-gray-800 px-2 py-0.5">
+                  <Text className="text-[11px] text-gray-600 dark:text-gray-300">{item.category}</Text>
+                </View>
+              </View>
+            </View>
+            <View className="items-end">
+              <Text className="text-base font-bold text-gray-900 dark:text-white">{formattedAmount}</Text>
+              <StatusBadge item={item} />
             </View>
           </View>
-        </View>
-        <View style={styles.rowRight}>
-          <Text style={styles.rowAmount}>{formattedAmount}</Text>
-          <StatusBadge item={item} />
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     </Swipeable>
   );
 }
 
-// ─────────────────────────────────────────────
-// Income list content (used when tab = 'income')
-// ─────────────────────────────────────────────
 function IncomeScreen() {
+  const router = useRouter();
   const { data: incomes, isRefetching, refetch } = useIncomes();
   const deleteIncome = useDeleteIncome();
-
-  function handleDelete(income: Income) {
-    deleteIncome.mutate(income);
-  }
-
-  function handleAddIncome() {
-    // Handled via headerRight nav button in TransactionsScreen
-  }
+  const hasItems = (incomes?.length ?? 0) > 0;
 
   const renderItem = useCallback(
     ({ item }: { item: Income }) => (
-      <IncomeRow item={item} onDelete={handleDelete} />
+      <IncomeRow
+        item={item}
+        onDelete={(income) => {
+          deleteIncome.mutate(income);
+        }}
+      />
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [deleteIncome],
   );
-
-  const keyExtractor = useCallback((item: Income) => item.id, []);
 
   return (
     <FlatList
+      className="flex-1"
       data={incomes ?? []}
-      keyExtractor={keyExtractor}
+      keyExtractor={(item) => item.id}
       renderItem={renderItem}
       contentContainerStyle={
-        (incomes?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
+        hasItems
+          ? { paddingTop: 12, paddingBottom: 120 }
+          : { flexGrow: 1, paddingTop: 24, paddingBottom: 120 }
       }
       refreshControl={
         <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
@@ -188,18 +169,14 @@ function IncomeScreen() {
           title="No income yet"
           message="Start tracking your income to see it here."
           ctaLabel="Add Income"
-          onCta={handleAddIncome}
+          onCta={() => {
+            router.push('/(tabs)/transactions/add-income');
+          }}
         />
       }
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
   );
 }
-
-// ─────────────────────────────────────────────
-// Main transactions screen with tab switcher
-// ─────────────────────────────────────────────
-type Tab = 'income' | 'expenses';
 
 export default function TransactionsScreen() {
   const router = useRouter();
@@ -210,184 +187,69 @@ export default function TransactionsScreen() {
     setActiveTab(tab);
   }
 
+  const fabRoute: Href =
+    activeTab === 'income'
+      ? '/(tabs)/transactions/add-income'
+      : '/(tabs)/transactions/add-expense';
+
   return (
     <SafeScreen edges={['bottom']} grouped>
-      <Stack.Screen
-        options={{
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => router.push(
-                activeTab === 'income'
-                  ? '/(tabs)/transactions/add-income'
-                  : '/(tabs)/transactions/add-expense' as any
-              )}
-              style={{ paddingHorizontal: 8 }}
-              accessibilityRole="button"
-              accessibilityLabel={activeTab === 'income' ? 'Add Income' : 'Add Expense'}
+      <View className="flex-1">
+        <View className="px-4 pt-3 pb-2 border-b border-gray-200 dark:border-gray-800">
+          <View className="flex-row bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+            <Pressable
+              onPress={() => handleTabPress('income')}
+              className={`flex-1 rounded-lg py-2 items-center justify-center ${
+                activeTab === 'income' ? 'bg-white dark:bg-gray-700' : ''
+              }`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === 'income' }}
             >
-              <Text style={{ color: '#007AFF', fontSize: 17 }}>+</Text>
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      {/* Tab chip switcher */}
-      <View style={styles.tabBar}>
+              <Text className={`text-sm font-medium ${
+                activeTab === 'income'
+                  ? 'text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}>
+                Income
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleTabPress('expenses')}
+              className={`flex-1 rounded-lg py-2 items-center justify-center ${
+                activeTab === 'expenses' ? 'bg-white dark:bg-gray-700' : ''
+              }`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === 'expenses' }}
+            >
+              <Text className={`text-sm font-medium ${
+                activeTab === 'expenses'
+                  ? 'text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}>
+                Expenses
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {activeTab === 'income' ? <IncomeScreen /> : <ExpenseScreen />}
+
         <Pressable
-          onPress={() => handleTabPress('income')}
-          style={[styles.tabChip, activeTab === 'income' && styles.tabChipActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'income' }}
+          onPress={() => {
+            haptics.onToggle();
+            router.push(fabRoute);
+          }}
+          className={`absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg ${
+            activeTab === 'income'
+              ? 'bg-balance-500 dark:bg-balance-600'
+              : 'bg-expense-500 dark:bg-expense-600'
+          }`}
+          accessibilityRole="button"
+          accessibilityLabel={activeTab === 'income' ? 'Add Income' : 'Add Expense'}
         >
-          <Text style={[styles.tabChipText, activeTab === 'income' && styles.tabChipTextActive]}>
-            Income
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress('expenses')}
-          style={[styles.tabChip, activeTab === 'expenses' && styles.tabChipActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'expenses' }}
-        >
-          <Text style={[styles.tabChipText, activeTab === 'expenses' && styles.tabChipTextActive]}>
-            Expenses
-          </Text>
+          <Ionicons name="add" size={28} color="#ffffff" />
         </Pressable>
       </View>
-
-      {/* Content */}
-      {activeTab === 'income' ? <IncomeScreen /> : <ExpenseScreen />}
     </SafeScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  // Tab bar
-  tabBar: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#C6C6C8',
-  },
-  tabChip: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  tabChipActive: {
-    backgroundColor: '#dbeafe',
-    borderColor: '#3b82f6',
-  },
-  tabChipText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6b7280',
-  },
-  tabChipTextActive: {
-    color: '#1d4ed8',
-    fontWeight: '600',
-  },
-  // Delete action
-  deleteContainer: {
-    width: 80,
-    overflow: 'hidden',
-  },
-  deleteButton: {
-    backgroundColor: '#ef4444',
-    width: 80,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Badge
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginTop: 6,
-  },
-  badgeReceived: {
-    backgroundColor: '#dcfce7',
-  },
-  badgeExpected: {
-    backgroundColor: '#fef9c3',
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  badgeTextReceived: {
-    color: '#166534',
-  },
-  badgeTextExpected: {
-    color: '#854d0e',
-  },
-  // Row
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  rowLeft: {
-    flex: 1,
-    marginEnd: 12,
-  },
-  rowTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  rowMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 8,
-  },
-  rowDate: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  categoryChip: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  categoryText: {
-    fontSize: 11,
-    color: '#374151',
-  },
-  rowRight: {
-    alignItems: 'flex-end',
-  },
-  rowAmount: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  // List
-  listContainer: {
-    paddingBottom: 80,
-  },
-  emptyContainer: {
-    flex: 1,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#C6C6C8',
-    marginStart: 16,
-  },
-});

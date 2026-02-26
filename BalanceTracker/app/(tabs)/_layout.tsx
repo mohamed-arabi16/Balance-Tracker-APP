@@ -1,12 +1,27 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useColorScheme } from 'nativewind';
 
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
-import { TabIcon } from '@/components/ui/TabIcon';
+
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+function tabIcon(active: IoniconName, inactive: IoniconName) {
+  return ({ color, focused }: { color: string; focused: boolean }) => (
+    <Ionicons
+      name={focused ? active : inactive}
+      color={color}
+      size={24}
+    />
+  );
+}
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
     <CurrencyProvider>
@@ -15,41 +30,45 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: '#007AFF',   // iOS system blue
         tabBarInactiveTintColor: '#8E8E93', // iOS system gray
+        tabBarStyle: {
+          borderTopColor: isDark ? '#374151' : '#e5e7eb',
+          backgroundColor: isDark ? '#1c1c1e' : '#ffffff',
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: t('tabs.dashboard'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="house.fill" color={color} />,
+          tabBarIcon: tabIcon('home', 'home-outline'),
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
           title: t('tabs.transactions'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="list.bullet" color={color} />,
+          tabBarIcon: tabIcon('list', 'list-outline'),
         }}
       />
       <Tabs.Screen
         name="debts"
         options={{
           title: t('tabs.debts'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="creditcard.fill" color={color} />,
+          tabBarIcon: tabIcon('card', 'card-outline'),
         }}
       />
       <Tabs.Screen
         name="assets"
         options={{
           title: t('tabs.assets'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="chart.bar.fill" color={color} />,
+          tabBarIcon: tabIcon('bar-chart', 'bar-chart-outline'),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: t('tabs.more'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="ellipsis.circle.fill" color={color} />,
+          tabBarIcon: tabIcon('ellipsis-horizontal-circle', 'ellipsis-horizontal-circle-outline'),
         }}
       />
       <Tabs.Screen name="dashboard" options={{ href: null }} />
@@ -59,7 +78,7 @@ export default function TabsLayout() {
         options={{
           href: null,
           title: t('nav.clients', 'Clients'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="person.2.fill" color={color} />,
+          tabBarIcon: tabIcon('people', 'people-outline'),
         }}
       />
       <Tabs.Screen
@@ -67,7 +86,7 @@ export default function TabsLayout() {
         options={{
           href: null,
           title: t('nav.invoices', 'Invoices'),
-          tabBarIcon: ({ color }) => <TabIcon sfSymbol="doc.text.fill" color={color} />,
+          tabBarIcon: tabIcon('document-text', 'document-text-outline'),
         }}
       />
     </Tabs>

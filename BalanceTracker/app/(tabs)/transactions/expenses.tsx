@@ -1,8 +1,7 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React, { useCallback } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
@@ -11,48 +10,39 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useDeleteExpense, useExpenses, useUpdateExpense, type Expense } from '@/hooks/useExpenses';
 import { haptics } from '@/lib/haptics';
-import { COLORS } from '@/lib/tokens';
+import { expenseDebtStatusBadgeClasses } from '@/lib/statusBadgeTheme';
 
-// ─────────────────────────────────────────────
-// Delete action rendered inside the swipeable
-// ─────────────────────────────────────────────
 function DeleteAction(
   _prog: SharedValue<number>,
   drag: SharedValue<number>,
   onDelete: () => void,
 ) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const styleAnimation = useAnimatedStyle(() => ({
-    transform: [{ translateX: drag.value + 80 }],
+    transform: [{ translateX: drag.value + 88 }],
   }));
 
   return (
-    <Reanimated.View style={[styleAnimation, styles.deleteContainer]}>
+    <Reanimated.View style={[styleAnimation, { width: 88, overflow: 'hidden' }]}>
       <Pressable
         onPress={() => {
           haptics.onDelete();
           onDelete();
         }}
-        style={styles.deleteButton}
+        className="w-[88px] h-full items-center justify-center bg-expense-500 dark:bg-expense-600"
         accessibilityRole="button"
         accessibilityLabel="Delete expense"
       >
-        <Text style={styles.deleteText}>Delete</Text>
+        <Text className="text-white font-semibold text-sm">Delete</Text>
       </Pressable>
     </Reanimated.View>
   );
 }
 
-// ─────────────────────────────────────────────
-// Inline status badge — toggles pending/paid
-// ─────────────────────────────────────────────
-interface StatusBadgeProps {
-  item: Expense;
-}
-
-function StatusBadge({ item }: StatusBadgeProps) {
+function StatusBadge({ item }: { item: Expense }) {
   const updateExpense = useUpdateExpense();
   const isPaid = item.status === 'paid';
+  const statusKey = isPaid ? 'paid' : 'pending';
+  const statusClasses = expenseDebtStatusBadgeClasses[statusKey];
 
   function handleToggle() {
     haptics.onToggle();
@@ -72,31 +62,21 @@ function StatusBadge({ item }: StatusBadgeProps) {
   return (
     <Pressable
       onPress={handleToggle}
-      style={[styles.badge, isPaid ? styles.badgePaid : styles.badgePending]}
+      className={`mt-1.5 px-2 py-0.5 rounded-full ${statusClasses.container}`}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Text style={[styles.badgeText, isPaid ? styles.badgeTextPaid : styles.badgeTextPending]}>
+      <Text className={`text-[11px] font-semibold ${statusClasses.text}`}>
         {isPaid ? 'Paid' : 'Pending'}
       </Text>
     </Pressable>
   );
 }
 
-// ─────────────────────────────────────────────
-// Single expense row with swipe-to-delete
-// ─────────────────────────────────────────────
-interface ExpenseRowProps {
-  item: Expense;
-  onDelete: (expense: Expense) => void;
-}
-
-function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
+function ExpenseRow({ item, onDelete }: { item: Expense; onDelete: (expense: Expense) => void }) {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
-  const { colorScheme } = useColorScheme();
-  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
 
   const formattedDate = format(new Date(item.date), 'MMM d, yyyy');
   const formattedAmount = formatCurrency(item.amount, item.currency);
@@ -107,81 +87,77 @@ function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
     [item, onDelete],
   );
 
-  function handlePress() {
-    router.push(`/(tabs)/transactions/add-expense?id=${item.id}` as any);
-  }
-
   return (
     <Swipeable
       friction={2}
       rightThreshold={40}
       renderRightActions={renderRightActions}
     >
-      <Pressable
-        onPress={handlePress}
-        style={({ pressed }) => [
-          styles.row,
-          { backgroundColor: rowBg },
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <View style={styles.rowLeft}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <View style={styles.rowMeta}>
-            <Text style={styles.rowDate}>{formattedDate}</Text>
-            <View style={styles.categoryChip}>
-              <Text style={styles.categoryText}>{item.category}</Text>
+      <View className="px-4 mb-3">
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: '/(tabs)/transactions/add-expense',
+              params: { id: item.id },
+            });
+          }}
+          className="rounded-2xl bg-white dark:bg-neutral-900"
+          style={({ pressed }) => [{ opacity: pressed ? 0.82 : 1 }]}
+        >
+          <View className="flex-row items-start justify-between px-4 py-3 min-h-[72px]">
+            <View className="flex-1 mr-3">
+              <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
+                {item.title}
+              </Text>
+              <View className="flex-row items-center mt-1.5 flex-wrap">
+                <Text className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</Text>
+                <View className="ml-2 rounded-md bg-gray-100 dark:bg-gray-800 px-2 py-0.5">
+                  <Text className="text-[11px] text-gray-600 dark:text-gray-300">{item.category}</Text>
+                </View>
+                <View className="ml-2 rounded-md bg-asset-100 dark:bg-asset-900 px-2 py-0.5">
+                  <Text className="text-[11px] text-asset-700 dark:text-asset-300">{item.type}</Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.typeChip}>
-              <Text style={styles.typeText}>{item.type}</Text>
+            <View className="items-end">
+              <Text className="text-base font-bold text-gray-900 dark:text-white">{formattedAmount}</Text>
+              <StatusBadge item={item} />
             </View>
           </View>
-        </View>
-        <View style={styles.rowRight}>
-          <Text style={styles.rowAmount}>{formattedAmount}</Text>
-          <StatusBadge item={item} />
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     </Swipeable>
   );
 }
 
-// ─────────────────────────────────────────────
-// Main expense screen (named + default export)
-// Renders directly — wrapping SafeScreen is in TransactionsScreen (index.tsx)
-// ─────────────────────────────────────────────
 export function ExpenseScreen() {
   const router = useRouter();
   const { data: expenses, isRefetching, refetch } = useExpenses();
   const deleteExpense = useDeleteExpense();
-
-  function handleDelete(expense: Expense) {
-    deleteExpense.mutate(expense);
-  }
-
-  function handleAddExpense() {
-    router.push('/(tabs)/transactions/add-expense' as any);
-  }
+  const hasItems = (expenses?.length ?? 0) > 0;
 
   const renderItem = useCallback(
     ({ item }: { item: Expense }) => (
-      <ExpenseRow item={item} onDelete={handleDelete} />
+      <ExpenseRow
+        item={item}
+        onDelete={(expense) => {
+          deleteExpense.mutate(expense);
+        }}
+      />
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [deleteExpense],
   );
-
-  const keyExtractor = useCallback((item: Expense) => item.id, []);
 
   return (
     <FlatList
+      className="flex-1"
       data={expenses ?? []}
-      keyExtractor={keyExtractor}
+      keyExtractor={(item) => item.id}
       renderItem={renderItem}
       contentContainerStyle={
-        (expenses?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
+        hasItems
+          ? { paddingTop: 12, paddingBottom: 120 }
+          : { flexGrow: 1, paddingTop: 24, paddingBottom: 120 }
       }
       refreshControl={
         <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
@@ -192,124 +168,13 @@ export function ExpenseScreen() {
           title="No expenses yet"
           message="Start tracking your expenses to see them here."
           ctaLabel="Add Expense"
-          onCta={handleAddExpense}
+          onCta={() => {
+            router.push('/(tabs)/transactions/add-expense');
+          }}
         />
       }
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
   );
 }
 
 export default ExpenseScreen;
-
-const styles = StyleSheet.create({
-  // Delete action
-  deleteContainer: {
-    width: 80,
-    overflow: 'hidden',
-  },
-  deleteButton: {
-    backgroundColor: '#ef4444',
-    width: 80,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Badge
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginTop: 6,
-  },
-  badgePaid: {
-    backgroundColor: '#dcfce7',
-  },
-  badgePending: {
-    backgroundColor: '#fef9c3',
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  badgeTextPaid: {
-    color: '#166534',
-  },
-  badgeTextPending: {
-    color: '#854d0e',
-  },
-  // Row
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  rowLeft: {
-    flex: 1,
-    marginEnd: 12,
-  },
-  rowTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  rowMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  rowDate: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  categoryChip: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  categoryText: {
-    fontSize: 11,
-    color: '#374151',
-  },
-  typeChip: {
-    backgroundColor: '#ede9fe',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  typeText: {
-    fontSize: 11,
-    color: '#5b21b6',
-  },
-  rowRight: {
-    alignItems: 'flex-end',
-  },
-  rowAmount: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  // List
-  listContainer: {
-    paddingBottom: 80,
-  },
-  emptyContainer: {
-    flex: 1,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#C6C6C8',
-    marginStart: 16,
-  },
-});

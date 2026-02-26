@@ -1,8 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { FormScreen } from '@/components/layout/FormScreen';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +37,7 @@ export default function AddDebtScreen() {
   const [dueDateValue, setDueDateValue] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isReceivable, setIsReceivable] = useState(false);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
 
   // Pre-fill in edit mode
   useEffect(() => {
@@ -194,17 +194,32 @@ export default function AddDebtScreen() {
           {/* Currency */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label]}>Currency</Text>
-            <View style={[styles.pickerWrapper]}>
-              <Picker
-                selectedValue={currency}
-                onValueChange={(val) => setCurrency(val as DebtCurrency)}
-                style={[styles.picker]}
-              >
-                {CURRENCIES.map((cur) => (
-                  <Picker.Item key={cur} label={cur} value={cur} />
-                ))}
-              </Picker>
-            </View>
+            <TouchableOpacity
+              onPress={() => setCurrencyModalVisible(true)}
+              style={styles.pickerButton}
+              accessibilityRole="button"
+              accessibilityLabel="Select currency"
+            >
+              <Text style={styles.pickerButtonText}>{currency}</Text>
+            </TouchableOpacity>
+            <Modal visible={currencyModalVisible} transparent animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <FlatList
+                    data={CURRENCIES}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => { setCurrency(item as DebtCurrency); setCurrencyModalVisible(false); }}
+                        style={[styles.modalItem, item === currency && styles.modalItemSelected]}
+                      >
+                        <Text style={[styles.modalItemText, item === currency && styles.modalItemTextSelected]}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </View>
+            </Modal>
           </View>
 
           {/* Type */}
@@ -217,9 +232,7 @@ export default function AddDebtScreen() {
                   onPress={() => setType(t)}
                   style={[
                     styles.toggleButton,
-                    styles.label,
                     type === t && styles.toggleButtonActive,
-                    type === t && styles.label,
                   ]}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: type === t }}
@@ -242,9 +255,7 @@ export default function AddDebtScreen() {
                   onPress={() => setStatus(s)}
                   style={[
                     styles.toggleButton,
-                    styles.label,
                     status === s && styles.toggleButtonActive,
-                    status === s && styles.label,
                   ]}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: status === s }}
@@ -329,53 +340,94 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#000000',
   },
   input: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 15,
+    color: '#000000',
   },
-  pickerWrapper: {
-    borderWidth: 1,
+  pickerButton: {
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
-    overflow: 'hidden',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  picker: {
-    height: 44,
+  pickerButtonText: {
+    fontSize: 15,
+    color: '#000000',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    maxHeight: '60%' as unknown as number,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  modalItem: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
+  },
+  modalItemSelected: {
+    backgroundColor: '#EFF6FF',
+  },
+  modalItemText: {
+    fontSize: 15,
+    color: '#111827',
+  },
+  modalItemTextSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  // iOS segmented control style
   toggleRow: {
+    backgroundColor: '#E8E8ED',
+    borderRadius: 10,
+    padding: 2,
     flexDirection: 'row',
-    gap: 10,
+    gap: 2,
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
+    paddingVertical: 9,
+    borderRadius: 8,
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   toggleButtonActive: {
-    // base active styles; color overridden by styles.label
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
   toggleText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6B7280',
     fontWeight: '500',
   },
   toggleTextActive: {
-    color: '#1d4ed8',
+    color: '#000000',
     fontWeight: '600',
   },
   dateButton: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   dateButtonText: {
     fontSize: 15,
+    color: '#000000',
   },
   switchRow: {
     flexDirection: 'row',
@@ -389,7 +441,7 @@ const styles = StyleSheet.create({
   },
   switchSubLabel: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#6B7280',
   },
   saveButton: {
     backgroundColor: '#007AFF',

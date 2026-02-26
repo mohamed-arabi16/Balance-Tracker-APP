@@ -99,11 +99,11 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Android Support (Phase 14)
 
-- [ ] **DROID-01**: App compiles and runs on Android without crashes — all existing screens function on Android device/emulator
-- [ ] **DROID-02**: Tab bar icons render correctly on Android — cross-platform icon solution replaces or wraps iOS-only expo-symbols
-- [ ] **DROID-03**: Android-specific UX is correct — system back button handled, KeyboardAvoidingView behavior correct, safe areas respected on Android cutout devices, status bar styled correctly
-- [ ] **DROID-04**: Visual brand consistency maintained across platforms — same colors, card styling, typography tokens from Phase 13; no visual regression on iOS
-- [ ] **DROID-05**: Production APK/AAB built via EAS Build and installs successfully on a physical Android device
+- [x] **DROID-01**: App compiles and runs on Android without crashes — all existing screens function on Android device/emulator
+- [x] **DROID-02**: Tab bar icons render correctly on Android — cross-platform icon solution replaces or wraps iOS-only expo-symbols
+- [x] **DROID-03**: Android-specific UX is correct — system back button handled, KeyboardAvoidingView behavior correct, safe areas respected on Android cutout devices, status bar styled correctly
+- [x] **DROID-04**: Visual brand consistency maintained across platforms — same colors, card styling, typography tokens from Phase 13; no visual regression on iOS
+- [x] **DROID-05**: Production APK/AAB built via EAS Build and installs successfully on a physical Android device
 
 ## Future Requirements
 
@@ -211,11 +211,11 @@ Deferred to v2.x milestones. Not in current roadmap.
 | POLISH-03 | Phase 13 | Complete |
 | POLISH-04 | Phase 13 | Complete |
 | POLISH-05 | Phase 13 | Complete |
-| DROID-01 | Phase 14 | Pending |
-| DROID-02 | Phase 14 | Pending |
-| DROID-03 | Phase 14 | Pending |
-| DROID-04 | Phase 14 | Pending |
-| DROID-05 | Phase 14 | Pending |
+| DROID-01 | Phase 14 | Complete |
+| DROID-02 | Phase 14 | Complete |
+| DROID-03 | Phase 14 | Complete |
+| DROID-04 | Phase 14 | Complete |
+| DROID-05 | Phase 14 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 64 total

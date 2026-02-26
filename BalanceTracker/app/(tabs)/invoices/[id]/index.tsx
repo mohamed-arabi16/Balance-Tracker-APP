@@ -22,20 +22,12 @@ import {
 import { useClients } from '@/hooks/useClients';
 import { haptics } from '@/lib/haptics';
 import { generateInvoiceHtml } from '@/lib/pdfTemplate';
+import {
+  invoiceStatusBadgeClasses,
+  type InvoiceDisplayStatus,
+} from '@/lib/statusBadgeTheme';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type DisplayStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-
-// ─── Status badge styles ──────────────────────────────────────────────────────
-const STATUS_COLORS: Record<DisplayStatus, { bg: string; text: string }> = {
-  draft:     { bg: '#f3f4f6', text: '#6b7280' },
-  sent:      { bg: '#dbeafe', text: '#1d4ed8' },
-  paid:      { bg: '#d1fae5', text: '#065f46' },
-  overdue:   { bg: '#fee2e2', text: '#b91c1c' },
-  cancelled: { bg: '#f3f4f6', text: '#6b7280' },
-};
-
-const STATUS_LABELS: Record<DisplayStatus, string> = {
+const STATUS_LABELS: Record<InvoiceDisplayStatus, string> = {
   draft:     'Draft',
   sent:      'Sent',
   paid:      'Paid',
@@ -111,7 +103,7 @@ export default function InvoiceDetailScreen() {
 
   // ─── Computed values ───────────────────────────────────────────────────────
   const displayStatus = getDisplayStatus(inv.status, inv.due_date);
-  const statusColor = STATUS_COLORS[displayStatus];
+  const statusClasses = invoiceStatusBadgeClasses[displayStatus];
   const clientName = clientMap[inv.client_id] ?? 'Unknown Client';
 
   const subtotal = inv.items.reduce((sum, item) => {
@@ -166,10 +158,8 @@ export default function InvoiceDetailScreen() {
             <Text style={styles.invoiceNumber}>
               INV-{inv.invoice_number}
             </Text>
-            <View
-              style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}
-            >
-              <Text style={[styles.statusText, { color: statusColor.text }]}>
+            <View style={styles.statusBadge} className={statusClasses.container}>
+              <Text style={styles.statusText} className={statusClasses.text}>
                 {STATUS_LABELS[displayStatus]}
               </Text>
             </View>

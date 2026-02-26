@@ -1,5 +1,4 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -45,6 +44,8 @@ export default function AddIncomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [clientModalVisible, setClientModalVisible] = useState(false);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
 
   // Pre-fill form in edit mode once existing income is loaded
   useEffect(() => {
@@ -176,38 +177,64 @@ export default function AddIncomeScreen() {
 
           {/* Currency */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, styles.label]}>{t('income.form.currency')}</Text>
-            <View style={[styles.pickerWrapper]}>
-              <Picker
-                selectedValue={currency}
-                onValueChange={(val) => setCurrency(val as IncomeCurrency)}
-                style={[styles.picker]}
-              >
-                {CURRENCIES.map((cur) => (
-                  <Picker.Item key={cur} label={cur} value={cur} />
-                ))}
-              </Picker>
-            </View>
+            <Text style={[styles.label]}>{t('income.form.currency')}</Text>
+            <TouchableOpacity
+              onPress={() => setCurrencyModalVisible(true)}
+              style={styles.clientButton}
+              accessibilityRole="button"
+              accessibilityLabel="Select currency"
+            >
+              <Text style={styles.clientButtonText}>{currency}</Text>
+            </TouchableOpacity>
+            <Modal visible={currencyModalVisible} transparent animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <FlatList
+                    data={CURRENCIES}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => { setCurrency(item as IncomeCurrency); setCurrencyModalVisible(false); }}
+                        style={[styles.modalItem, item === currency && styles.modalItemSelected]}
+                      >
+                        <Text style={[styles.modalItemText, item === currency && styles.modalItemTextSelected]}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </View>
+            </Modal>
           </View>
 
           {/* Category */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, styles.label]}>{t('income.form.category')}</Text>
-            <View style={[styles.pickerWrapper]}>
-              <Picker
-                selectedValue={category}
-                onValueChange={(val) => setCategory(val as IncomeCategory)}
-                style={[styles.picker]}
-              >
-                {CATEGORIES.map((cat) => (
-                  <Picker.Item
-                    key={cat}
-                    label={t(`income.form.category.${cat}`)}
-                    value={cat}
+            <Text style={[styles.label]}>{t('income.form.category')}</Text>
+            <TouchableOpacity
+              onPress={() => setCategoryModalVisible(true)}
+              style={styles.clientButton}
+              accessibilityRole="button"
+              accessibilityLabel="Select category"
+            >
+              <Text style={styles.clientButtonText}>{t(`income.form.category.${category}`)}</Text>
+            </TouchableOpacity>
+            <Modal visible={categoryModalVisible} transparent animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <FlatList
+                    data={CATEGORIES}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => { setCategory(item as IncomeCategory); setCategoryModalVisible(false); }}
+                        style={[styles.modalItem, item === category && styles.modalItemSelected]}
+                      >
+                        <Text style={[styles.modalItemText, item === category && styles.modalItemTextSelected]}>{t(`income.form.category.${item}`)}</Text>
+                      </TouchableOpacity>
+                    )}
                   />
-                ))}
-              </Picker>
-            </View>
+                </View>
+              </View>
+            </Modal>
           </View>
 
           {/* Status */}
@@ -340,56 +367,65 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#000000',
   },
   input: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 15,
+    color: '#000000',
   },
   pickerWrapper: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     overflow: 'hidden',
   },
   picker: {
     height: 44,
   },
+  // iOS segmented control style
   statusRow: {
+    backgroundColor: '#E8E8ED',
+    borderRadius: 10,
+    padding: 2,
     flexDirection: 'row',
-    gap: 10,
+    gap: 2,
   },
   statusButton: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
+    paddingVertical: 9,
+    borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'transparent',
   },
   statusButtonActive: {
-    backgroundColor: '#dbeafe',
-    borderColor: '#3b82f6',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
   statusButtonText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6B7280',
     fontWeight: '500',
   },
   statusButtonTextActive: {
-    color: '#1d4ed8',
+    color: '#000000',
     fontWeight: '600',
   },
   dateButton: {
-    borderWidth: 1,
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   dateButtonText: {
     fontSize: 15,
+    color: '#000000',
   },
   saveButton: {
     backgroundColor: '#007AFF',
@@ -407,16 +443,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   clientButton: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
+    backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    paddingVertical: 12,
   },
   clientButtonText: {
     fontSize: 15,
-    color: '#111827',
+    color: '#000000',
   },
   modalOverlay: {
     flex: 1,
@@ -431,18 +465,18 @@ const styles = StyleSheet.create({
   },
   modalItem: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
   },
   modalItemSelected: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#EFF6FF',
   },
   modalItemText: {
     fontSize: 15,
     color: '#111827',
   },
   modalItemTextSelected: {
-    color: '#2563eb',
+    color: '#007AFF',
     fontWeight: '600',
   },
 });

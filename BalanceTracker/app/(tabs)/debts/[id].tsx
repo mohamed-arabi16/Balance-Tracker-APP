@@ -6,6 +6,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useDebts, DebtAmountHistory } from '@/hooks/useDebts';
+import { expenseDebtStatusBadgeClasses } from '@/lib/statusBadgeTheme';
 
 // ─── PaymentHistoryRow ────────────────────────────────────────────────────────
 function PaymentHistoryRow({ entry }: { entry: DebtAmountHistory }) {
@@ -54,6 +55,8 @@ export default function DebtDetailScreen() {
   );
 
   const isPaid = debt.status === 'paid';
+  const statusKey = isPaid ? 'paid' : 'pending';
+  const statusClasses = expenseDebtStatusBadgeClasses[statusKey];
 
   return (
     <SafeScreen edges={['bottom']}>
@@ -65,8 +68,8 @@ export default function DebtDetailScreen() {
           <Text style={styles.debtAmount}>
             {debt.currency} {debt.amount.toLocaleString()}
           </Text>
-          <View style={[styles.statusBadge, isPaid ? styles.statusPaid : styles.statusPending]}>
-            <Text style={[styles.statusText, isPaid ? styles.statusPaidText : styles.statusPendingText]}>
+          <View style={styles.statusBadge} className={statusClasses.container}>
+            <Text style={styles.statusText} className={statusClasses.text}>
               {isPaid ? 'Paid' : 'Pending'}
             </Text>
           </View>
@@ -144,21 +147,9 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 99,
   },
-  statusPaid: {
-    backgroundColor: '#dcfce7',
-  },
-  statusPending: {
-    backgroundColor: '#fef9c3',
-  },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  statusPaidText: {
-    color: '#15803d',
-  },
-  statusPendingText: {
-    color: '#92400e',
   },
   receivableTag: {
     fontSize: 12,

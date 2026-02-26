@@ -20,6 +20,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useDebts, useDeleteDebt, useUpdateDebt, Debt } from '@/hooks/useDebts';
 import { haptics } from '@/lib/haptics';
 import { COLORS } from '@/lib/tokens';
+import { expenseDebtStatusBadgeClasses } from '@/lib/statusBadgeTheme';
 
 // ─── DeleteAction ────────────────────────────────────────────────────────────
 function DeleteAction(
@@ -70,15 +71,18 @@ function DebtStatusBadge({ item }: { item: Debt }) {
   }
 
   const isPaid = item.status === 'paid';
+  const statusKey = isPaid ? 'paid' : 'pending';
+  const statusClasses = expenseDebtStatusBadgeClasses[statusKey];
   return (
     <Pressable
       onPress={handleToggle}
-      style={[styles.badge, isPaid ? styles.badgePaid : styles.badgePending]}
+      style={styles.badge}
+      className={statusClasses.container}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Text style={[styles.badgeText, isPaid ? styles.badgePaidText : styles.badgePendingText]}>
+      <Text style={styles.badgeText} className={statusClasses.text}>
         {isPaid ? 'Paid' : 'Pending'}
       </Text>
     </Pressable>
@@ -345,21 +349,9 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 99,
   },
-  badgePaid: {
-    backgroundColor: '#dcfce7',
-  },
-  badgePending: {
-    backgroundColor: '#fef9c3',
-  },
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  badgePaidText: {
-    color: '#15803d',
-  },
-  badgePendingText: {
-    color: '#92400e',
   },
   deleteContainer: {
     width: 80,

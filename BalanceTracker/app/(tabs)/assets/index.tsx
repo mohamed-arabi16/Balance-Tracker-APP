@@ -21,6 +21,7 @@ import { Asset, useAssets, useDeleteAsset } from '@/hooks/useAssets';
 import { AssetPriceSnapshot, AssetPrices, useAssetPrices } from '@/hooks/useAssetPrices';
 import { haptics } from '@/lib/haptics';
 import { COLORS } from '@/lib/tokens';
+import { assetWarningBadgeClasses } from '@/lib/statusBadgeTheme';
 
 // ------------------------------------------------------------------
 // DeleteAction — plain function to match ReanimatedSwipeable signature
@@ -77,6 +78,7 @@ function AssetRow({ asset, prices, loading, snapshot, onDelete, onPress }: Asset
   const showWarning =
     asset.auto_update && !loading && snapshot !== null && Boolean(snapshot?.warning);
   const showLoadingIndicator = asset.auto_update && loading;
+  const warningClasses = assetWarningBadgeClasses.stale;
 
   function handleDelete() {
     haptics.onDelete();
@@ -130,9 +132,11 @@ function AssetRow({ asset, prices, loading, snapshot, onDelete, onPress }: Asset
                 {formatCurrency(totalValue, asset.currency)}
               </Text>
               {showWarning && (
-                <Text style={styles.warningBadge} accessibilityLabel="Stale price warning">
-                  {' '}⚠
-                </Text>
+                <View className={`ml-2 px-2 py-0.5 rounded-full ${warningClasses.container}`}>
+                  <Text className={`text-[11px] font-semibold ${warningClasses.text}`} accessibilityLabel="Stale price warning">
+                    Stale
+                  </Text>
+                </View>
               )}
             </View>
           )}
@@ -277,10 +281,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#111827',
-  },
-  warningBadge: {
-    fontSize: 14,
-    color: '#d97706',
   },
   separator: {
     height: StyleSheet.hairlineWidth,

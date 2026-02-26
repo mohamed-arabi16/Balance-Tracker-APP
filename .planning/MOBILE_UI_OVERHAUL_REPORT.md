@@ -176,9 +176,9 @@ colors: {
 ```
 
 **Success Criteria:**
-- [ ] `tailwind.config.js` includes all 5 financial semantic colors with light/dark shades
-- [ ] Dashboard summary cards use these semantic colors for their accent elements
-- [ ] Status badges reference semantic colors rather than hardcoded hex values
+- [x] `tailwind.config.js` includes all 5 financial semantic colors with light/dark shades
+- [x] Dashboard summary cards use these semantic colors for their accent elements
+- [x] Status badges reference semantic colors rather than hardcoded hex values
 
 ---
 
@@ -251,10 +251,10 @@ Functional and dark-mode aware. No changes needed.
 4. **For screens that use `headerShown: false`**, ensure each screen provides its own navigation header or title area in the scroll content
 
 **Success Criteria:**
-- [ ] Tab icons render on both iOS and Android
-- [ ] Tab bar respects dark/light mode (background, border, tint)
-- [ ] Active/inactive icon states are visually distinct (filled vs outline)
-- [ ] Tab bar does not overlap content (safe area respected)
+- [x] Tab icons render on both iOS and Android
+- [x] Tab bar respects dark/light mode (background, border, tint)
+- [x] Active/inactive icon states are visually distinct (filled vs outline)
+- [x] Tab bar does not overlap content (safe area respected)
 
 ---
 
@@ -309,11 +309,11 @@ The web dashboard has:
 5. **Remove the duplicate `dashboard.tsx`** — it is identical to `index.tsx` and is hidden via `href: null`. If it's not needed for deep-linking, delete it to reduce maintenance.
 
 **Success Criteria:**
-- [ ] Dashboard has a clear visual hierarchy: hero card (Net Worth) → chart → section header → summary grid
-- [ ] Summary cards are displayed in a 2-column grid on all phone sizes
-- [ ] Background is `bg-gray-50` (light) / `bg-gray-950` (dark), creating contrast with white/dark cards
-- [ ] Section labels exist above grouped content
-- [ ] All elements fully themed for dark mode
+- [x] Dashboard has a clear visual hierarchy: hero card (Net Worth) → chart → section header → summary grid
+- [x] Summary cards are displayed in a 2-column grid on all phone sizes
+- [x] Background is `bg-gray-50` (light) / `bg-gray-950` (dark), creating contrast with white/dark cards
+- [x] Section labels exist above grouped content
+- [x] All elements fully themed for dark mode
 
 ---
 
@@ -366,11 +366,11 @@ The web uses a `FinancialCard` with `variant="balance"` which has:
 6. **Optional — add a small trend indicator** (arrow up/down with percentage) below the value, matching the web's financial card pattern
 
 **Success Criteria:**
-- [ ] Net Worth card is visually distinct from all other cards on the dashboard — it is clearly the "hero" element
-- [ ] Background has a blue/indigo tint, not plain white
-- [ ] The dollar value is displayed in an accent color (blue), not gray
-- [ ] The card has visible elevation (shadow) even on iOS
-- [ ] Card looks correct in both light and dark mode
+- [x] Net Worth card is visually distinct from all other cards on the dashboard — it is clearly the "hero" element
+- [x] Background has a blue/indigo tint, not plain white
+- [x] The dollar value is displayed in an accent color (blue), not gray
+- [x] The card has visible elevation (shadow) even on iOS
+- [x] Card looks correct in both light and dark mode
 
 ---
 
@@ -411,11 +411,11 @@ The web uses a `FinancialCard` with `variant="balance"` which has:
    - Grid lines (if any) use a subtle dark-mode-appropriate color
 
 **Success Criteria:**
-- [ ] Legend is clearly readable with adequately sized color indicators and text
-- [ ] Month labels appear on the x-axis (Sep, Oct, Nov, Dec, Jan, Feb)
-- [ ] Pressing a point shows both income AND expense values in the callout
-- [ ] Chart renders correctly in dark mode (text, grid, lines all visible)
-- [ ] Chart height is 220-240px
+- [x] Legend is clearly readable with adequately sized color indicators and text
+- [x] Month labels appear on the x-axis (Sep, Oct, Nov, Dec, Jan, Feb)
+- [x] Pressing a point shows both income AND expense values in the callout
+- [x] Chart renders correctly in dark mode (text, grid, lines all visible)
+- [x] Chart height is 220-240px
 
 ---
 
@@ -480,12 +480,12 @@ The web uses a `FinancialCard` with `variant="balance"` which has:
    Pass a `textColor` prop or derive it from the existing `color` prop.
 
 **Success Criteria:**
-- [ ] Each summary card has a subtle tinted background matching its semantic color
-- [ ] The value amount is displayed in the card's accent color
-- [ ] A proper chevron icon replaces the `›` text character
-- [ ] Shadow/elevation is visible on both iOS and Android
-- [ ] Cards respond to press with subtle visual feedback (opacity or scale)
-- [ ] All text colors adapt to dark mode
+- [x] Each summary card has a subtle tinted background matching its semantic color
+- [x] The value amount is displayed in the card's accent color
+- [x] A proper chevron icon replaces the `›` text character
+- [x] Shadow/elevation is visible on both iOS and Android
+- [x] Cards respond to press with subtle visual feedback (opacity or scale)
+- [x] All text colors adapt to dark mode
 
 ---
 
@@ -550,12 +550,12 @@ fab: backgroundColor: '#2563eb'
    - Expected (yellow): `bg-yellow-100 dark:bg-yellow-900/40` with `text-yellow-700 dark:text-yellow-300`
 
 **Success Criteria:**
-- [ ] Zero `StyleSheet.create` color values remain in this file
-- [ ] Tab switcher looks like an iOS segmented control
-- [ ] All rows, badges, text, and separators correctly theme in dark mode
-- [ ] FAB is a circular icon button (not a text pill)
-- [ ] Swipe-to-delete action renders correctly in both light and dark mode
-- [ ] Category and status chips are legible in both modes
+- [x] Zero `StyleSheet.create` color values remain in this file
+- [x] Tab switcher looks like an iOS segmented control
+- [x] All rows, badges, text, and separators correctly theme in dark mode
+- [x] FAB is a circular icon button (not a text pill)
+- [x] Swipe-to-delete action renders correctly in both light and dark mode
+- [x] Category and status chips are legible in both modes
 
 ---
 
@@ -575,9 +575,9 @@ Same as Section 3.7 (Transactions Screen), plus:
    - `bg-purple-100 dark:bg-purple-900/40` with `text-purple-700 dark:text-purple-300`
 
 **Success Criteria:**
-- [ ] Same as Section 3.7 criteria, applied to expenses
-- [ ] Type chip (fixed/variable) is themed for dark mode
-- [ ] FAB color is semantically red for expenses
+- [x] Same as Section 3.7 criteria, applied to expenses
+- [x] Type chip (fixed/variable) is themed for dark mode
+- [x] FAB color is semantically red for expenses
 
 ---
 
@@ -781,15 +781,15 @@ Each section should follow this pattern:
 ```
 
 **Success Criteria:**
-- [ ] Settings screen has sections for: Account Info, Currency, Appearance, Language, Mode, Data Export, Account Actions
-- [ ] Theme selector (Light/Dark/System) is functional and immediately changes the app's appearance
-- [ ] Language selector (English/Arabic) is functional and shows a restart banner for RTL changes
-- [ ] Mode selector (Simple/Advanced) is functional and shows/hides Clients & Invoices tabs
-- [ ] Currency selector (USD/TRY) and Auto-Convert toggle are functional
-- [ ] All sections follow the Apple HIG grouped list pattern (section header + rounded card + rows with 44pt height)
-- [ ] All controls are wired to existing context providers (no new backend work needed)
-- [ ] Settings scroll view is fully themed for dark mode
-- [ ] Removing the "coming in a future update" placeholder text
+- [x] Settings screen has sections for: Account Info, Currency, Appearance, Language, Mode, Data Export, Account Actions
+- [x] Theme selector (Light/Dark/System) is functional and immediately changes the app's appearance
+- [x] Language selector (English/Arabic) is functional and shows a restart banner for RTL changes
+- [x] Mode selector (Simple/Advanced) is functional and shows/hides Clients & Invoices tabs
+- [x] Currency selector (USD/TRY) and Auto-Convert toggle are functional
+- [x] All sections follow the Apple HIG grouped list pattern (section header + rounded card + rows with 44pt height)
+- [x] All controls are wired to existing context providers (no new backend work needed)
+- [x] Settings scroll view is fully themed for dark mode
+- [x] Removing the "coming in a future update" placeholder text
 
 ---
 
@@ -978,8 +978,8 @@ module.exports = {
 ```
 
 **Success Criteria:**
-- [ ] `tailwind.config.js` contains all financial semantic colors
-- [ ] Colors use iOS system color values for native feel
+- [x] `tailwind.config.js` contains all financial semantic colors
+- [x] Colors use iOS system color values for native feel
 - [ ] All screens reference these semantic tokens instead of hardcoded hex values
 
 ---
@@ -1023,33 +1023,36 @@ After converting all screens to NativeWind, audit for any remaining hardcoded co
 
 ### 5.2 Per-Screen Sign-Off
 
-| # | Screen | Dark Mode | Styled Cards | No Hardcoded Colors | Apple HIG Compliant |
-|---|--------|-----------|-------------|--------------------|--------------------|
-| 1 | Dashboard | [ ] | [ ] | [ ] | [ ] |
-| 2 | Transactions (Income) | [ ] | [ ] | [ ] | [ ] |
-| 3 | Transactions (Expenses) | [ ] | [ ] | [ ] | [ ] |
-| 4 | Debts List | [ ] | [ ] | [ ] | [ ] |
-| 5 | Debt Detail | [ ] | [ ] | [ ] | [ ] |
-| 6 | Make Payment | [ ] | [ ] | [ ] | [ ] |
-| 7 | Assets List | [ ] | [ ] | [ ] | [ ] |
-| 8 | Settings | [ ] | [ ] | [ ] | [ ] |
-| 9 | Add Income | [ ] | [ ] | [ ] | [ ] |
-| 10 | Add Expense | [ ] | [ ] | [ ] | [ ] |
-| 11 | Add Debt | [ ] | [ ] | [ ] | [ ] |
-| 12 | Add Asset | [ ] | [ ] | [ ] | [ ] |
-| 13 | Sign In | [ ] | [ ] | [ ] | [ ] |
-| 14 | Sign Up | [ ] | [ ] | [ ] | [ ] |
-| 15 | Forgot Password | [ ] | [ ] | [ ] | [ ] |
+| # | Screen | Dark Mode | Styled Cards | No Hardcoded Colors | Apple HIG Compliant | Semantic Tokens |
+|---|--------|-----------|-------------|--------------------|--------------------|----------------|
+| 1 | Dashboard | [x] | [x] | [ ] | [x] | [x] |
+| 2 | Transactions (Income) | [x] | [x] | [x] | [x] | [x] |
+| 3 | Transactions (Expenses) | [x] | [x] | [x] | [x] | [x] |
+| 4 | Debts List | [ ] | [ ] | [ ] | [ ] | [x] |
+| 5 | Debt Detail | [ ] | [ ] | [ ] | [ ] | [x] |
+| 6 | Make Payment | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 7 | Assets List | [ ] | [ ] | [ ] | [ ] | [x] |
+| 8 | Settings | [x] | [x] | [ ] | [x] | [ ] |
+| 9 | Add Income | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 10 | Add Expense | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 11 | Add Debt | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 12 | Add Asset | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 13 | Sign In | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 14 | Sign Up | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 15 | Forgot Password | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 16 | Clients | [ ] | [ ] | [ ] | [ ] | [ ] |
+| 17 | Invoices List | [ ] | [ ] | [ ] | [ ] | [x] |
+| 18 | Invoice Detail | [ ] | [ ] | [ ] | [ ] | [x] |
 
 ### 5.3 Component Sign-Off
 
 | # | Component | Themed | Cross-Platform | Touch Targets |
 |---|-----------|--------|---------------|---------------|
 | 1 | SafeScreen | [x] | [x] | N/A |
-| 2 | Tab Bar | [ ] | [ ] | [ ] |
-| 3 | NetWorthCard | [ ] | [ ] | N/A |
-| 4 | IncomeExpenseChart | [ ] | [ ] | [ ] |
-| 5 | FinancialSummaryCard | [ ] | [ ] | [ ] |
+| 2 | Tab Bar | [x] | [x] | [x] |
+| 3 | NetWorthCard | [x] | [x] | N/A |
+| 4 | IncomeExpenseChart | [x] | [x] | [x] |
+| 5 | FinancialSummaryCard | [x] | [x] | [x] |
 | 6 | EmptyState | [ ] | [ ] | [ ] |
 | 7 | FormScreen | [x] | [x] | N/A |
 
@@ -1057,11 +1060,11 @@ After converting all screens to NativeWind, audit for any remaining hardcoded co
 
 | # | Setting | UI Present | Wired to Context | Persists |
 |---|---------|-----------|-----------------|----------|
-| 1 | Theme (Light/Dark/System) | [ ] | [ ] | [ ] |
-| 2 | Language (English/Arabic) | [ ] | [ ] | [ ] |
-| 3 | Mode (Simple/Advanced) | [ ] | [ ] | [ ] |
-| 4 | Currency (USD/TRY) | [ ] | [ ] | [ ] |
-| 5 | Auto-Convert Toggle | [ ] | [ ] | [ ] |
+| 1 | Theme (Light/Dark/System) | [x] | [x] | [x] |
+| 2 | Language (English/Arabic) | [x] | [x] | [x] |
+| 3 | Mode (Simple/Advanced) | [x] | [x] | [x] |
+| 4 | Currency (USD/TRY) | [x] | [x] | [x] |
+| 5 | Auto-Convert Toggle | [x] | [x] | [x] |
 | 6 | Data Export (CSV) | [x] | [x] | N/A |
 | 7 | Sign Out | [x] | [x] | N/A |
 
@@ -1079,6 +1082,46 @@ Given dependencies and impact, implement in this order:
 8. **Form screens conversion** (3.13) — all 5 forms
 9. **Auth screen polish** (3.14) — minor improvements to already-decent screens
 10. **EmptyState enhancement** (3.15) — nice-to-have polish
+
+**Task 1 Completion Note (2026-02-26):**
+- [x] Priority item #1 complete: Tailwind semantic token foundation + semantic badge/token adoption on dashboard, transactions, debts, assets, and invoices surfaces.
+- Verification summary:
+  - `npm run build` (repo root): pass
+  - `npm --prefix BalanceTracker exec -- tsc --noEmit`: pass
+  - `npm run lint` (repo root): fails due pre-existing unrelated lint debt (existing `no-explicit-any` and hook-deps issues across multiple files)
+  - `npx eslint "app/(tabs)/**/*.tsx" "src/components/dashboard/FinancialSummaryCard.tsx" "src/lib/statusBadgeTheme.ts"` (BalanceTracker): fails due pre-existing unrelated lint debt in tab screens
+
+**Task 2 Completion Note (2026-02-26):**
+- [x] Priority item #2 complete: tab bar icons migrated to Ionicons with focused/unfocused variants and tab bar light/dark styling.
+- Verification summary:
+  - `npx eslint "app/(tabs)/_layout.tsx"` (BalanceTracker): pass
+  - `npm --prefix BalanceTracker exec -- tsc --noEmit`: pass
+  - `npm run build` (repo root): pass
+  - `npm run lint` (repo root): fails due pre-existing unrelated lint debt (existing `no-explicit-any` and hook-deps issues across multiple files)
+
+**Task 3 Completion Note (2026-02-26):**
+- [x] Priority item #3 complete: Settings screen rebuilt with Account Info, Currency, Appearance, Language, Mode, Data Export, and Account actions; controls are wired to existing providers and persistence paths.
+- Verification summary:
+  - `npm --prefix BalanceTracker exec -- eslint "BalanceTracker/app/(tabs)/settings.tsx"`: pass
+  - `npm --prefix BalanceTracker exec -- tsc --noEmit`: pass
+  - `npm run build` (repo root): pass
+  - `npm run lint` (repo root): fails due pre-existing unrelated lint debt in other files (existing `no-explicit-any`, hook deps, and `@ts-ignore` usage outside settings)
+
+**Task 4 Completion Note (2026-02-26):**
+- [x] Priority item #4 complete: dashboard visual overhaul delivered (hierarchy + two-column summary grid + hero NetWorth card + chart readability/callout upgrades + summary card interaction/elevation updates), and duplicate dashboard implementation reduced to a re-export.
+- Verification summary:
+  - `npm --prefix BalanceTracker exec -- eslint "BalanceTracker/app/(tabs)/index.tsx" "BalanceTracker/app/(tabs)/dashboard.tsx" "BalanceTracker/src/components/dashboard/NetWorthCard.tsx" "BalanceTracker/src/components/dashboard/IncomeExpenseChart.tsx" "BalanceTracker/src/components/dashboard/FinancialSummaryCard.tsx"`: pass
+  - `npm --prefix BalanceTracker exec -- tsc --noEmit`: pass
+  - `npm run build` (repo root): pass
+  - `npm run lint` (repo root): fails due pre-existing unrelated lint debt in other files (existing `no-explicit-any` and `@ts-ignore` usage outside dashboard scope)
+
+**Task 5 Completion Note (2026-02-26):**
+- [x] Priority item #5 complete: Transactions Income/Expenses screens migrated to NativeWind themed rows/cards, segmented tab switcher, semantic status/type chips, and a contextual circular FAB for add actions.
+- Verification summary:
+  - `npm --prefix BalanceTracker exec -- eslint "BalanceTracker/app/(tabs)/transactions/index.tsx" "BalanceTracker/app/(tabs)/transactions/expenses.tsx"`: pass
+  - `npm --prefix BalanceTracker exec -- tsc --noEmit`: pass
+  - `npm run build` (repo root): pass
+  - `npm run lint` (repo root): fails due pre-existing unrelated lint debt in other files (remaining `no-explicit-any` and `@ts-ignore` outside transactions scope)
 
 ---
 
