@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React from 'react';
 import {
   Alert,
@@ -18,6 +19,7 @@ import { SafeScreen } from '@/components/layout/SafeScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useDebts, useDeleteDebt, useUpdateDebt, Debt } from '@/hooks/useDebts';
 import { haptics } from '@/lib/haptics';
+import { COLORS } from '@/lib/tokens';
 
 // ─── DeleteAction ────────────────────────────────────────────────────────────
 function DeleteAction(
@@ -74,6 +76,7 @@ function DebtStatusBadge({ item }: { item: Debt }) {
       style={[styles.badge, isPaid ? styles.badgePaid : styles.badgePending]}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Text style={[styles.badgeText, isPaid ? styles.badgePaidText : styles.badgePendingText]}>
         {isPaid ? 'Paid' : 'Pending'}
@@ -85,6 +88,8 @@ function DebtStatusBadge({ item }: { item: Debt }) {
 // ─── DebtRow ─────────────────────────────────────────────────────────────────
 function DebtRow({ item, onDelete }: { item: Debt; onDelete: () => void }) {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
 
   const formattedDueDate = item.due_date
     ? format(new Date(item.due_date), 'MMM d, yyyy')
@@ -98,7 +103,11 @@ function DebtRow({ item, onDelete }: { item: Debt; onDelete: () => void }) {
     >
       <Pressable
         onPress={() => router.push(`/(tabs)/debts/${item.id}` as any)}
-        style={styles.row}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: rowBg },
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={`View payment history for ${item.title}`}
       >
@@ -183,7 +192,7 @@ export default function DebtsScreen() {
   }
 
   return (
-    <SafeScreen edges={['bottom']}>
+    <SafeScreen edges={['bottom']} grouped>
       <FlatList
         data={debts}
         keyExtractor={(item) => item.id}
@@ -234,7 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   addButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
@@ -245,10 +254,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 6,
+    minHeight: 44,
   },
   rowTopLine: {
     flexDirection: 'row',
@@ -327,9 +336,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   separator: {
-    height: 1,
-    backgroundColor: '#f3f4f6',
-    marginHorizontal: 16,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C6C6C8',
+    marginStart: 16,
   },
   badge: {
     paddingHorizontal: 10,

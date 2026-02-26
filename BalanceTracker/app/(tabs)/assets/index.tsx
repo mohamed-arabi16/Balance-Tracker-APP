@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React, { useRef } from 'react';
 import {
   ActivityIndicator,
@@ -19,6 +20,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { Asset, useAssets, useDeleteAsset } from '@/hooks/useAssets';
 import { AssetPriceSnapshot, AssetPrices, useAssetPrices } from '@/hooks/useAssetPrices';
 import { haptics } from '@/lib/haptics';
+import { COLORS } from '@/lib/tokens';
 
 // ------------------------------------------------------------------
 // DeleteAction — plain function to match ReanimatedSwipeable signature
@@ -60,6 +62,8 @@ interface AssetRowProps {
 
 function AssetRow({ asset, prices, loading, snapshot, onDelete, onPress }: AssetRowProps) {
   const { formatCurrency } = useCurrency();
+  const { colorScheme } = useColorScheme();
+  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
   const swipeableRef = useRef<any>(null);
 
   const livePrice = asset.auto_update
@@ -103,7 +107,11 @@ function AssetRow({ asset, prices, loading, snapshot, onDelete, onPress }: Asset
     >
       <Pressable
         onPress={() => onPress(asset)}
-        style={styles.row}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: rowBg },
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={`${asset.type} asset, ${asset.quantity} ${asset.unit}`}
       >
@@ -162,7 +170,7 @@ export default function AssetScreen() {
   }
 
   return (
-    <SafeScreen edges={['bottom']}>
+    <SafeScreen edges={['bottom']} grouped>
       {/* Add button header bar */}
       <View style={styles.headerBar}>
         <Pressable
@@ -220,7 +228,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e7eb',
   },
   addButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -243,7 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#ffffff',
+    minHeight: 44,
   },
   rowLeft: {
     flex: 1,
@@ -276,8 +284,8 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#e5e7eb',
-    marginLeft: 16,
+    backgroundColor: '#C6C6C8',
+    marginStart: 16,
   },
   deleteAction: {
     justifyContent: 'center',
