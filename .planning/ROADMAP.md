@@ -170,13 +170,14 @@ Plans:
   3. All add/edit form sheets use consistent iOS input styling — rounded rect fields, clear labels above inputs, prominent primary action button, and cancel affordance
   4. Typography follows Apple HIG throughout — title/headline/body/caption size scale is consistent, no raw pixel font sizes, adequate line-height and letter-spacing
   5. Every screen has a polished empty state — SF Symbol icon, short descriptive message, and a CTA where applicable (no blank white screens)
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Dashboard polish: elevated card components, chart container, section headers, color-coded summary cards
-- [ ] 13-02-PLAN.md — List screen polish: Transactions, Debts, Assets — grouped sections, row styling, swipe action design
-- [ ] 13-03-PLAN.md — Form sheet polish: consistent input fields, labels, primary button, cancel button across all add/edit sheets
-- [ ] 13-04-PLAN.md — Global polish pass: typography scale, spacing tokens, empty states, loading states, Settings screen
+- [ ] 13-01-PLAN.md — Create tokens.ts design system (SHADOWS, TYPOGRAPHY, SPACING, COLORS) + polish Dashboard cards with iOS native shadows, ActivityIndicator loading state, section headers (Wave 1)
+- [ ] 13-02-PLAN.md — List screen polish: Transactions/Expenses/Debts/Assets — iOS grouped bg, dark mode rows, 44pt touch targets, press feedback, hairline separators, FAB replaced with nav bar button (Wave 2)
+- [ ] 13-03-PLAN.md — Form sheet polish: dark mode inputs on all 4 add/edit forms, standardize save buttons to #007AFF, Cancel headerLeft affordance (Wave 2)
+- [ ] 13-04-PLAN.md — EmptyState SF Symbol icons, optional CTA props, Settings screen card shadows (Wave 2)
+- [ ] 13-05-PLAN.md — Human verification checkpoint across all 5 POLISH requirements on iOS device (Wave 3)
 
 ## Progress
 
