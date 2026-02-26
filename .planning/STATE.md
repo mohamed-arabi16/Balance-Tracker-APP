@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 13 of 14 (Apple HIG UI Polish)
-Plan: 1 of 5 in Phase 13 (COMPLETE)
-Status: Phase 13 Plan 01 COMPLETE — tokens.ts created; dashboard cards polished with SHADOWS.card; SafeScreen grouped prop added; ActivityIndicator loading state; POLISH-01 and POLISH-04 complete
-Last activity: 2026-02-26 — 13-01 complete: tokens.ts (SHADOWS, TYPOGRAPHY, SPACING, RADIUS, COLORS); NetWorthCard/FinancialSummaryCard/IncomeExpenseChart use SHADOWS.card; SafeScreen grouped prop; ActivityIndicator loading state; section headers added; tsc clean
+Plan: 4 of 5 in Phase 13 (COMPLETE)
+Status: Phase 13 Plan 04 COMPLETE — EmptyState SF Symbol icons (SymbolView, 56pt); symbolName on all 5 list screen empty states; EmptyState ctaLabel/onCta made optional; Settings SettingsCard upgraded to SHADOWS.card; POLISH-05 complete
+Last activity: 2026-02-26 — 13-04 complete: EmptyState with SymbolView/symbolName/optional-CTA; chart.bar (dashboard), arrow.up.circle (income), arrow.down.circle (expenses), creditcard (debts), banknote (assets); Settings SHADOWS.card; tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -50,6 +50,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 11-advanced-mode-pdf-export P05 | 4 | 1 tasks | 4 files |
 | Phase 11-advanced-mode-pdf-export P04 | 5 | 2 tasks | 3 files |
 | Phase 13-apple-hig-ui-polish P01 | 2 | 2 tasks | 6 files |
+| Phase 13-apple-hig-ui-polish P04 | 3 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Key decisions for v2.0:
 - [Phase 13-apple-hig-ui-polish]: SHADOWS.card applied via style prop (not NativeWind className) — shadow-sm does not produce iOS native shadows on physical devices
 - [Phase 13-apple-hig-ui-polish]: style array merge [borderStyle, SHADOWS.card] in FinancialSummaryCard preserves borderLeft while adding iOS shadow
 - [Phase 13-apple-hig-ui-polish]: SafeScreen grouped prop uses inline hex values (#F2F2F7 / #1C1C1E) matching UIKit system grouped colors
+- [Phase 13-apple-hig-ui-polish]: EmptyState symbolName prop uses 'as any' type assertion on SymbolView name prop — expo-symbols name union is extremely long; silently shows nothing for invalid names so tradeoff is acceptable
+- [Phase 13-apple-hig-ui-polish]: SettingsCard shadow: StyleSheet.create({ card: SHADOWS.card }) pattern used — cleaner than inline spread; consistent with Phase 13 shadow token pattern
 
 ### Pending Todos
 
@@ -130,5 +133,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 11-04-PLAN.md — human-verify checkpoint (Task 3) approved; all 12 end-to-end steps verified on device; ADV-04, ADV-06, EXPRT-02 complete; Phase 11 (5/5 plans) fully done. Also: 13-01-PLAN.md complete — tokens.ts, dashboard cards polished with SHADOWS.card, SafeScreen grouped prop, ActivityIndicator loading state; POLISH-01 and POLISH-04 complete; Phase 13 Plan 02 next
+Stopped at: Completed 13-04-PLAN.md — EmptyState SF Symbol icons; symbolName on all list screens; optional ctaLabel/onCta; Settings SHADOWS.card; POLISH-05 complete; Phase 13 Plan 05 next
 Resume file: None
