@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 8: Auth Shell + Navigation
+**Current focus:** v2.0 iOS Native App — Phase 9: Simple Mode Screens
 
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 8 of 12 (Auth Shell + Navigation)
-Plan: 1 of 3 in Phase 8 (COMPLETE)
-Status: In progress — Phase 8 Plan 01 complete
-Last activity: 2026-02-26 — 08-01 complete: Real Supabase AuthContext, auth screens (sign-in, sign-up, forgot-password), expo-symbols
+Phase: 9 of 12 (Simple Mode Screens)
+Plan: 1 of 4 in Phase 9 (COMPLETE)
+Status: In progress — Phase 9 Plan 01 complete
+Last activity: 2026-02-26 — 09-01 complete: Income FlatList with ReanimatedSwipeable, formSheet Stack layout, add/edit income form, datetimepicker+picker installed
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -66,7 +66,11 @@ Key decisions for v2.0:
 - [01-03]: Generated columns (tax_amount, total, amount) excluded from Insert/Update types — same pattern applies to RN port
 - [08-01]: expo-router typed routes: .expo/types/router.d.ts is gitignored — use 'as any' type assertions on Link hrefs for new routes until first expo start regenerates the file
 - [08-01]: queryClient.clear() called only in explicit signOut(), NOT in onAuthStateChange — avoids clearing cache on token auto-refresh
-- [08-01]: resetPassword has no redirectTo — Phase 12 adds deep link redirect for password reset flow
+- [08-01]: resetPassword has no redirectTo — covered in Phase 12 plan 12-01 Task 3 (balancetracker://reset-password deep link + reset-password screen)
+- [09-01]: DeleteAction is a plain function (not React component) to match ReanimatedSwipeable renderRightActions SharedValue signature
+- [09-01]: StatusBadge passes ALL UpdateIncomePayload fields on mutate to prevent Supabase null overwrites
+- [09-01]: date-fns was not pre-installed — auto-installed as blocking dep; now available to Plans 09-02/03/04
+- [09-01]: formSheet Stack layout defines add-expense screen upfront so Plan 09-02 only needs to create the file
 
 ### Pending Todos
 
@@ -81,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 08-01-PLAN.md — Real Supabase AuthContext, auth screens (sign-in, sign-up, forgot-password), expo-symbols
+Stopped at: Completed 09-01-PLAN.md — Income FlatList screen, formSheet layout, add/edit income form
 Resume file: None
