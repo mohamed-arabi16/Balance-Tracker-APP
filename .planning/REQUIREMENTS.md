@@ -25,12 +25,12 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 ### Transactions
 
 - [x] **TXN-01**: User can add income entry with amount, description, category, date, and currency
-- [ ] **TXN-02**: User can add expense entry with amount, description, category, date, and currency
+- [x] **TXN-02**: User can add expense entry with amount, description, category, date, and currency
 - [x] **TXN-03**: User can edit income and expense entries
 - [x] **TXN-04**: User can delete income and expense entries via swipe-to-delete
 - [x] **TXN-05**: User can pull-to-refresh transaction lists
 - [x] **TXN-06**: User can change income status inline via dropdown/toggle without opening edit form
-- [ ] **TXN-07**: User can change expense status inline via dropdown/toggle without opening edit form
+- [x] **TXN-07**: User can change expense status inline via dropdown/toggle without opening edit form
 - [x] **TXN-08**: Income categories include "debt" as an option
 
 ### Debts
@@ -146,12 +146,12 @@ Deferred to v2.x milestones. Not in current roadmap.
 | AUTH-04 | Phase 8 | Complete |
 | AUTH-05 | Phase 8 | Pending |
 | TXN-01 | Phase 9 | Complete |
-| TXN-02 | Phase 9 | Pending |
+| TXN-02 | Phase 9 | Complete |
 | TXN-03 | Phase 9 | Complete |
 | TXN-04 | Phase 9 | Complete |
 | TXN-05 | Phase 9 | Complete |
 | TXN-06 | Phase 9 | Complete |
-| TXN-07 | Phase 9 | Pending |
+| TXN-07 | Phase 9 | Complete |
 | TXN-08 | Phase 9 | Complete |
 | DEBT-01 | Phase 9 | Complete |
 | DEBT-02 | Phase 9 | Complete |

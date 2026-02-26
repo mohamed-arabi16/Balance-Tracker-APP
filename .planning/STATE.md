@@ -40,6 +40,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 - Trend: Fast (UI pages follow established patterns)
 | Phase 09 P04 | 3 | 2 tasks | 3 files |
 | Phase 09 P03 | 4 | 2 tasks | 5 files |
+| Phase 09 P02 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Key decisions for v2.0:
 - [Phase 09]: Stale warning guarded by !loading AND snapshot !== null — prevents spurious warning flash on initial mount (Pitfall 7)
 - [Phase 09]: Debt status toggle passes ALL UpdateDebtPayload fields spread from item to avoid Supabase null overwrites on partial update
 - [Phase 09]: payment.tsx uses note:'Payment' + payment_date to distinguish payment history entries from edit history entries in useUpdateDebt
+- [Phase 09]: ExpenseScreen dual export (named+default) enables inline tab switching in index.tsx without navigation push
+- [Phase 09]: index.tsx tab chip switcher: useState<'income'|'expenses'> drives conditional render of IncomeScreen vs ExpenseScreen
 
 ### Pending Todos
 
