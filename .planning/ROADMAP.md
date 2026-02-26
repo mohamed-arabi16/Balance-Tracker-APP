@@ -138,7 +138,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Install Phase 11 deps (expo-print, expo-sharing, react-hook-form, zod), mount ModeProvider in root layout, wire conditional Clients/Invoices tabs with href: null
+- [x] 11-01-PLAN.md — Install Phase 11 deps (expo-print, expo-sharing, react-hook-form, zod), mount ModeProvider in root layout, wire conditional Clients/Invoices tabs with href: null (completed 2026-02-26)
 - [ ] 11-02-PLAN.md — Clients screens: list (swipe-to-delete), create, detail with linked transactions, edit (react-hook-form + zod)
 - [ ] 11-03-PLAN.md — Invoices screens: list (status badges), create with useFieldArray line items (FIX-01 verified), edit with pre-filled line items
 - [ ] 11-04-PLAN.md — Invoice detail (inline status toggle + PDF export via expo-print/expo-sharing), Advanced Dashboard widgets (revenue per client + outstanding invoices); human verification checkpoint
