@@ -483,6 +483,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_data: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
       update_debt_amount: {
         Args: { in_debt_id: string; in_new_amount: number; in_note?: string }
         Returns: undefined

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { router } from 'expo-router';
 
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,7 @@ import { useAssets } from '@/hooks/useAssets';
 import { exportCsv } from '@/lib/exportCsv';
 import { haptics } from '@/lib/haptics';
 import { SHADOWS } from '@/lib/tokens';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Section header ────────────────────────────────────────────────────────────
 function SectionHeader({ label }: { label: string }) {
@@ -114,6 +116,7 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const { isAdvanced, setMode, isUpdating } = useMode();
   const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: incomeData } = useIncomes();
   const { data: expenseData } = useExpenses();
@@ -165,6 +168,39 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t('settings.deleteAccount.title'),
+      t('settings.deleteAccount.confirm'),
+      [
+        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('settings.deleteAccount.button'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsDeleting(true);
+              haptics.onDelete();
+              const { error } = await supabase.rpc('delete_user_data');
+              if (error) throw error;
+              await supabase.auth.signOut();
+              router.replace('/(auth)/sign-in' as any);
+            } catch (err) {
+              haptics.onError();
+              Alert.alert(
+                t('settings.deleteAccount.title'),
+                err instanceof Error ? err.message : 'An error occurred. Please try again.',
+                [{ text: 'OK' }]
+              );
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeScreen>
       <ScrollView
@@ -182,6 +218,37 @@ export default function SettingsScreen() {
             {user.email}
           </Text>
         ) : null}
+
+        {/* ── BUSINESS (Advanced mode only) ──────────────────────────── */}
+        {isAdvanced && (
+          <>
+            <SectionHeader label="Business" />
+            <SettingsCard>
+              <SettingsRow
+                icon="person.2.fill"
+                iconBg="#007AFF"
+                label="Clients"
+                sublabel="Manage your client list"
+                separator
+                onPress={() => router.push('/(tabs)/clients')}
+                right={
+                  <SymbolView name="chevron.right" tintColor="#C7C7CC" size={14} type="monochrome" />
+                }
+              />
+              <SettingsRow
+                icon="doc.text.fill"
+                iconBg="#5856D6"
+                label="Invoices"
+                sublabel="Create and track invoices"
+                separator={false}
+                onPress={() => router.push('/(tabs)/invoices')}
+                right={
+                  <SymbolView name="chevron.right" tintColor="#C7C7CC" size={14} type="monochrome" />
+                }
+              />
+            </SettingsCard>
+          </>
+        )}
 
         {/* ── MODE ───────────────────────────────────────────────────── */}
         <SectionHeader label="Mode" />
@@ -249,6 +316,20 @@ export default function SettingsScreen() {
         <SectionHeader label="Account" />
         <SettingsCard>
           <SettingsRow
+            icon="lock.shield.fill"
+            iconBg="#636366"
+            label={t('settings.privacyPolicy')}
+            onPress={() => router.push('/privacy-policy' as any)}
+            right={
+              <SymbolView
+                name="chevron.right"
+                tintColor="#C7C7CC"
+                size={14}
+                type="monochrome"
+              />
+            }
+          />
+          <SettingsRow
             icon="rectangle.portrait.and.arrow.right.fill"
             iconBg="#FF3B30"
             label={t('settings.signOut')}
@@ -256,6 +337,38 @@ export default function SettingsScreen() {
             destructive
             onPress={handleSignOut}
           />
+        </SettingsCard>
+
+        {/* ── DANGER ZONE ─────────────────────────────────────────────── */}
+        <SectionHeader label="Danger Zone" />
+        <SettingsCard>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={isDeleting ? undefined : handleDeleteAccount}
+            disabled={isDeleting}
+          >
+            <View className="flex-row items-center px-4 py-3">
+              <View
+                className="w-8 h-8 rounded-lg items-center justify-center mr-3 flex-shrink-0"
+                style={{ backgroundColor: '#FF3B30' }}
+              >
+                <SymbolView name="trash.fill" tintColor="#fff" size={17} type="monochrome" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-medium text-red-600 dark:text-red-400">
+                  {isDeleting
+                    ? t('settings.deleteAccount.deleting')
+                    : t('settings.deleteAccount.button')}
+                </Text>
+                <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Permanently removes your account and all data
+                </Text>
+              </View>
+              {isDeleting ? (
+                <ActivityIndicator size="small" color="#FF3B30" />
+              ) : null}
+            </View>
+          </TouchableOpacity>
         </SettingsCard>
       </ScrollView>
     </SafeScreen>

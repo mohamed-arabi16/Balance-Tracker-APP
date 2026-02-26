@@ -532,7 +532,24 @@ export const resources = {
 
       // Settings screen (Phase 8)
       "settings.signOut": "Sign Out",
-      "settings.signedInAs": "Signed in as"
+      "settings.signedInAs": "Signed in as",
+
+      // Settings screen (Phase 12 — account deletion + privacy policy)
+      "settings.deleteAccount.title": "Delete Account",
+      "settings.deleteAccount.confirm": "This will permanently delete your account and all your financial data. This action cannot be undone.",
+      "settings.deleteAccount.button": "Delete Account",
+      "settings.deleteAccount.deleting": "Deleting...",
+      "settings.privacyPolicy": "Privacy Policy",
+
+      // Privacy policy screen (Phase 12)
+      "privacyPolicy.title": "Privacy Policy",
+
+      // Auth — password reset screen (Phase 12)
+      "auth.newPassword": "New Password",
+      "auth.confirmPassword": "Confirm Password",
+      "auth.updatePassword": "Update Password",
+      "auth.passwordMismatch": "Passwords do not match",
+      "auth.passwordUpdated": "Password updated. Please sign in."
     }
   },
   ar: {
@@ -1055,7 +1072,24 @@ export const resources = {
 
       // Settings screen (Phase 8)
       "settings.signOut": "تسجيل الخروج",
-      "settings.signedInAs": "مسجل الدخول بـ"
+      "settings.signedInAs": "مسجل الدخول بـ",
+
+      // Settings screen (Phase 12 — account deletion + privacy policy)
+      "settings.deleteAccount.title": "حذف الحساب",
+      "settings.deleteAccount.confirm": "سيؤدي هذا إلى حذف حسابك وجميع بياناتك المالية بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+      "settings.deleteAccount.button": "حذف الحساب",
+      "settings.deleteAccount.deleting": "جارٍ الحذف...",
+      "settings.privacyPolicy": "سياسة الخصوصية",
+
+      // Privacy policy screen (Phase 12)
+      "privacyPolicy.title": "سياسة الخصوصية",
+
+      // Auth — password reset screen (Phase 12)
+      "auth.newPassword": "كلمة المرور الجديدة",
+      "auth.confirmPassword": "تأكيد كلمة المرور",
+      "auth.updatePassword": "تحديث كلمة المرور",
+      "auth.passwordMismatch": "كلمتا المرور غير متطابقتين",
+      "auth.passwordUpdated": "تم تحديث كلمة المرور. يرجى تسجيل الدخول."
     }
   }
 };
