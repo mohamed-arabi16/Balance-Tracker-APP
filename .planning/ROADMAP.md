@@ -67,12 +67,12 @@ Plans:
   3. The app renders correctly in both English and Arabic — Arabic mode activates RTL layout and a "restart required" prompt appears when the language is changed
   4. All screens respect the safe area (notch, Dynamic Island, home indicator) — no content is clipped on iPhone 14 Pro or newer
   5. When the app is backgrounded, the iOS app switcher shows a blurred privacy overlay instead of the last screen content
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: Expo project init, Metro config, polyfills, Supabase RN client, React Query AppState/NetInfo wiring
-- [ ] 07-02: Portable layer copy (hooks, types, lib, i18n strings) with import path adjustments
-- [ ] 07-03: ThemeContext (NativeWind + Appearance API), i18n init with RTL startup, locale-aware formatting, privacy screen
+- [ ] 07-01-PLAN.md — Scaffold Expo SDK 52 project, configure NativeWind/ESLint/Metro, copy portable layer (hooks, types, lib, i18n strings, contexts)
+- [ ] 07-02-PLAN.md — Build Supabase RN client with expo-sqlite session persistence, React Query with AppState focus manager, root layout providers
+- [ ] 07-03-PLAN.md — i18n init with RTL startup, ThemeContext with system sync + manual override, SafeScreen, FormScreen, PrivacyOverlay, haptics, EmptyState
 
 ### Phase 8: Auth Shell + Navigation
 **Goal**: Users can sign up, log in, and stay logged in — and all five tab sections are navigable with an authenticated shell in place, unblocking every feature screen in Phases 9–11
