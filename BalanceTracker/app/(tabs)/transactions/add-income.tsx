@@ -1,6 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,8 @@ export default function AddIncomeScreen() {
   const { data: clients = [] } = useClients();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   // Fetch existing incomes to get the one we're editing
   const { data: incomes } = useIncomes();
@@ -64,6 +67,31 @@ export default function AddIncomeScreen() {
   const updateIncomeMutation = useUpdateIncome();
 
   const isPending = addIncomeMutation.isPending || updateIncomeMutation.isPending;
+
+  const dynamicStyles = {
+    input: {
+      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+      borderColor: isDark ? '#38383A' : '#D1D5DB',
+      color: isDark ? '#FFFFFF' : '#111827',
+    },
+    pickerWrapper: {
+      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+      borderColor: isDark ? '#38383A' : '#D1D5DB',
+    },
+    picker: {
+      color: isDark ? '#FFFFFF' : '#111827',
+    },
+    dateButton: {
+      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+      borderColor: isDark ? '#38383A' : '#D1D5DB',
+    },
+    dateButtonText: {
+      color: isDark ? '#FFFFFF' : '#111827',
+    },
+    label: {
+      color: isDark ? '#EBEBF5' : '#374151',
+    },
+  };
 
   async function handleSubmit() {
     if (!title.trim()) {
@@ -129,188 +157,204 @@ export default function AddIncomeScreen() {
   });
 
   return (
-    <FormScreen>
-      <View style={styles.container}>
-
-        {/* Title */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.title')}</Text>
-          <TextInput
-            style={styles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder={t('income.form.placeholder.title')}
-            placeholderTextColor="#9ca3af"
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-        </View>
-
-        {/* Amount */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.amount')}</Text>
-          <TextInput
-            style={styles.input}
-            value={amount}
-            onChangeText={setAmount}
-            placeholder={t('income.form.placeholder.amount')}
-            placeholderTextColor="#9ca3af"
-            keyboardType="decimal-pad"
-            returnKeyType="done"
-          />
-        </View>
-
-        {/* Currency */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.currency')}</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={currency}
-              onValueChange={(val) => setCurrency(val as IncomeCurrency)}
-              style={styles.picker}
-            >
-              {CURRENCIES.map((cur) => (
-                <Picker.Item key={cur} label={cur} value={cur} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-
-        {/* Category */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.category')}</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={category}
-              onValueChange={(val) => setCategory(val as IncomeCategory)}
-              style={styles.picker}
-            >
-              {CATEGORIES.map((cat) => (
-                <Picker.Item
-                  key={cat}
-                  label={t(`income.form.category.${cat}`)}
-                  value={cat}
-                />
-              ))}
-            </Picker>
-          </View>
-        </View>
-
-        {/* Status */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.status')}</Text>
-          <View style={styles.statusRow}>
-            {STATUSES.map((s) => (
-              <Pressable
-                key={s}
-                onPress={() => setStatus(s)}
-                style={[
-                  styles.statusButton,
-                  status === s && styles.statusButtonActive,
-                ]}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: status === s }}
-              >
-                <Text
-                  style={[
-                    styles.statusButtonText,
-                    status === s && styles.statusButtonTextActive,
-                  ]}
-                >
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        {/* Client Picker — visible only in Advanced mode */}
-        {isAdvanced && (
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{t('transactions.form.client', 'Client (Optional)')}</Text>
+    <>
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
             <TouchableOpacity
-              onPress={() => setClientModalVisible(true)}
-              style={styles.clientButton}
+              onPress={() => router.back()}
+              style={{ paddingHorizontal: 8 }}
               accessibilityRole="button"
-              accessibilityLabel="Select client"
+              accessibilityLabel="Cancel"
             >
-              <Text style={styles.clientButtonText}>
-                {selectedClientId
-                  ? (clients.find((c) => c.id === selectedClientId)?.name ?? 'Select Client')
-                  : t('transactions.form.noClient', 'No Client')}
-              </Text>
+              <Text style={{ color: '#007AFF', fontSize: 17 }}>Cancel</Text>
             </TouchableOpacity>
-            <Modal visible={clientModalVisible} transparent animationType="slide">
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <FlatList
-                    data={[{ id: null as string | null, name: t('transactions.form.noClient', 'No Client') }, ...clients]}
-                    keyExtractor={(item) => item.id ?? 'none'}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSelectedClientId(item.id);
-                          setClientModalVisible(false);
-                        }}
-                        style={[
-                          styles.modalItem,
-                          item.id === selectedClientId && styles.modalItemSelected,
-                        ]}
-                      >
-                        <Text
+          ),
+        }}
+      />
+      <FormScreen>
+        <View style={styles.container}>
+
+          {/* Title */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.title')}</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={title}
+              onChangeText={setTitle}
+              placeholder={t('income.form.placeholder.title')}
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="words"
+              returnKeyType="next"
+            />
+          </View>
+
+          {/* Amount */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.amount')}</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={amount}
+              onChangeText={setAmount}
+              placeholder={t('income.form.placeholder.amount')}
+              placeholderTextColor="#9ca3af"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+            />
+          </View>
+
+          {/* Currency */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.currency')}</Text>
+            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+              <Picker
+                selectedValue={currency}
+                onValueChange={(val) => setCurrency(val as IncomeCurrency)}
+                style={[styles.picker, dynamicStyles.picker]}
+              >
+                {CURRENCIES.map((cur) => (
+                  <Picker.Item key={cur} label={cur} value={cur} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          {/* Category */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.category')}</Text>
+            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+              <Picker
+                selectedValue={category}
+                onValueChange={(val) => setCategory(val as IncomeCategory)}
+                style={[styles.picker, dynamicStyles.picker]}
+              >
+                {CATEGORIES.map((cat) => (
+                  <Picker.Item
+                    key={cat}
+                    label={t(`income.form.category.${cat}`)}
+                    value={cat}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          {/* Status */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.status')}</Text>
+            <View style={styles.statusRow}>
+              {STATUSES.map((s) => (
+                <Pressable
+                  key={s}
+                  onPress={() => setStatus(s)}
+                  style={[
+                    styles.statusButton,
+                    status === s && styles.statusButtonActive,
+                  ]}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: status === s }}
+                >
+                  <Text
+                    style={[
+                      styles.statusButtonText,
+                      status === s && styles.statusButtonTextActive,
+                    ]}
+                  >
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* Client Picker — visible only in Advanced mode */}
+          {isAdvanced && (
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.label, dynamicStyles.label]}>{t('transactions.form.client', 'Client (Optional)')}</Text>
+              <TouchableOpacity
+                onPress={() => setClientModalVisible(true)}
+                style={styles.clientButton}
+                accessibilityRole="button"
+                accessibilityLabel="Select client"
+              >
+                <Text style={styles.clientButtonText}>
+                  {selectedClientId
+                    ? (clients.find((c) => c.id === selectedClientId)?.name ?? 'Select Client')
+                    : t('transactions.form.noClient', 'No Client')}
+                </Text>
+              </TouchableOpacity>
+              <Modal visible={clientModalVisible} transparent animationType="slide">
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <FlatList
+                      data={[{ id: null as string | null, name: t('transactions.form.noClient', 'No Client') }, ...clients]}
+                      keyExtractor={(item) => item.id ?? 'none'}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedClientId(item.id);
+                            setClientModalVisible(false);
+                          }}
                           style={[
-                            styles.modalItemText,
-                            item.id === selectedClientId && styles.modalItemTextSelected,
+                            styles.modalItem,
+                            item.id === selectedClientId && styles.modalItemSelected,
                           ]}
                         >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  />
+                          <Text
+                            style={[
+                              styles.modalItemText,
+                              item.id === selectedClientId && styles.modalItemTextSelected,
+                            ]}
+                          >
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
                 </View>
-              </View>
-            </Modal>
-          </View>
-        )}
-
-        {/* Date */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>{t('income.form.date')}</Text>
-          <Pressable
-            onPress={() => setShowDatePicker(true)}
-            style={styles.dateButton}
-            accessibilityRole="button"
-            accessibilityLabel={`Date: ${formattedDate}. Tap to change.`}
-          >
-            <Text style={styles.dateButtonText}>{formattedDate}</Text>
-          </Pressable>
-          {showDatePicker && (
-            <DateTimePicker
-              value={dateValue}
-              mode="date"
-              display="spinner"
-              onChange={handleDateChange}
-              maximumDate={new Date(2100, 11, 31)}
-            />
+              </Modal>
+            </View>
           )}
+
+          {/* Date */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.date')}</Text>
+            <Pressable
+              onPress={() => setShowDatePicker(true)}
+              style={[styles.dateButton, dynamicStyles.dateButton]}
+              accessibilityRole="button"
+              accessibilityLabel={`Date: ${formattedDate}. Tap to change.`}
+            >
+              <Text style={[styles.dateButtonText, dynamicStyles.dateButtonText]}>{formattedDate}</Text>
+            </Pressable>
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateValue}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+                maximumDate={new Date(2100, 11, 31)}
+              />
+            )}
+          </View>
+
+          {/* Save button */}
+          <Pressable
+            onPress={handleSubmit}
+            style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
+            disabled={isPending}
+            accessibilityRole="button"
+            accessibilityLabel={isEditMode ? 'Save changes' : 'Add income'}
+          >
+            <Text style={styles.saveButtonText}>
+              {isPending ? 'Saving…' : isEditMode ? 'Save Changes' : 'Add Income'}
+            </Text>
+          </Pressable>
+
         </View>
-
-        {/* Save button */}
-        <Pressable
-          onPress={handleSubmit}
-          style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
-          disabled={isPending}
-          accessibilityRole="button"
-          accessibilityLabel={isEditMode ? 'Save changes' : 'Add income'}
-        >
-          <Text style={styles.saveButtonText}>
-            {isPending ? 'Saving…' : isEditMode ? 'Save Changes' : 'Add Income'}
-          </Text>
-        </Pressable>
-
-      </View>
-    </FormScreen>
+      </FormScreen>
+    </>
   );
 }
 
@@ -325,28 +369,21 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#ffffff',
   },
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#ffffff',
   },
   picker: {
     height: 44,
-    color: '#111827',
   },
   statusRow: {
     flexDirection: 'row',
@@ -376,25 +413,22 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
   },
   dateButtonText: {
     fontSize: 15,
-    color: '#111827',
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
   },
   saveButtonDisabled: {
-    backgroundColor: '#93c5fd',
+    backgroundColor: '#93C5FD',
   },
   saveButtonText: {
     color: '#ffffff',
