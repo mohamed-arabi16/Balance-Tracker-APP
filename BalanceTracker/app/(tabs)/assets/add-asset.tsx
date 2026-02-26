@@ -1,7 +1,8 @@
 import { Picker } from '@react-native-picker/picker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { FormScreen } from '@/components/layout/FormScreen';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +17,8 @@ export default function AddAssetScreen() {
   const { user } = useAuth();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   // Find the existing asset from cache when editing
   const { data: assets } = useAssets();
@@ -46,6 +49,24 @@ export default function AddAssetScreen() {
   const updateAssetMutation = useUpdateAsset();
 
   const isPending = addAssetMutation.isPending || updateAssetMutation.isPending;
+
+  const dynamicStyles = {
+    input: {
+      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+      borderColor: isDark ? '#38383A' : '#D1D5DB',
+      color: isDark ? '#FFFFFF' : '#111827',
+    },
+    pickerWrapper: {
+      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+      borderColor: isDark ? '#38383A' : '#D1D5DB',
+    },
+    picker: {
+      color: isDark ? '#FFFFFF' : '#111827',
+    },
+    label: {
+      color: isDark ? '#EBEBF5' : '#374151',
+    },
+  };
 
   async function handleSubmit() {
     setErrorMessage(null);
@@ -106,127 +127,143 @@ export default function AddAssetScreen() {
   }
 
   return (
-    <FormScreen>
-      <View style={styles.container}>
-
-        {/* Asset Type */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Asset Type</Text>
-          <TextInput
-            style={styles.input}
-            value={type}
-            onChangeText={setType}
-            placeholder="e.g., Bitcoin, Gold, USD"
-            placeholderTextColor="#9ca3af"
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-        </View>
-
-        {/* Quantity */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Quantity</Text>
-          <TextInput
-            style={styles.input}
-            value={quantity}
-            onChangeText={setQuantity}
-            placeholder="e.g., 0.5, 2, 100"
-            placeholderTextColor="#9ca3af"
-            keyboardType="decimal-pad"
-            returnKeyType="next"
-          />
-        </View>
-
-        {/* Unit */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Unit</Text>
-          <TextInput
-            style={styles.input}
-            value={unit}
-            onChangeText={setUnit}
-            placeholder="e.g., BTC, oz, shares"
-            placeholderTextColor="#9ca3af"
-            autoCapitalize="none"
-            returnKeyType="next"
-          />
-        </View>
-
-        {/* Price Per Unit */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Price Per Unit</Text>
-          <TextInput
-            style={styles.input}
-            value={pricePerUnit}
-            onChangeText={setPricePerUnit}
-            placeholder="e.g., 45000"
-            placeholderTextColor="#9ca3af"
-            keyboardType="decimal-pad"
-            returnKeyType="done"
-          />
-        </View>
-
-        {/* Currency */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Currency</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={currency}
-              onValueChange={(val) => setCurrency(val as AssetCurrency)}
-              style={styles.picker}
+    <>
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ paddingHorizontal: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
-              {CURRENCIES.map((cur) => (
-                <Picker.Item key={cur} label={cur} value={cur} />
-              ))}
-            </Picker>
-          </View>
-        </View>
+              <Text style={{ color: '#007AFF', fontSize: 17 }}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <FormScreen>
+        <View style={styles.container}>
 
-        {/* Auto Update */}
-        <View style={styles.fieldGroup}>
-          <View style={styles.switchRow}>
-            <View style={styles.switchLabel}>
-              <Text style={styles.label}>Auto Update Price</Text>
-              <Text style={styles.switchNote}>
-                When on, price updates automatically from market data
-              </Text>
-            </View>
-            <Switch
-              value={autoUpdate}
-              onValueChange={(val) => {
-                haptics.onToggle();
-                setAutoUpdate(val);
-              }}
-              trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
-              thumbColor="#ffffff"
-              accessibilityRole="switch"
-              accessibilityLabel="Auto update price toggle"
-              accessibilityState={{ checked: autoUpdate }}
+          {/* Asset Type */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>Asset Type</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={type}
+              onChangeText={setType}
+              placeholder="e.g., Bitcoin, Gold, USD"
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="words"
+              returnKeyType="next"
             />
           </View>
-        </View>
 
-        {/* Inline error */}
-        {errorMessage && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{errorMessage}</Text>
+          {/* Quantity */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>Quantity</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={quantity}
+              onChangeText={setQuantity}
+              placeholder="e.g., 0.5, 2, 100"
+              placeholderTextColor="#9ca3af"
+              keyboardType="decimal-pad"
+              returnKeyType="next"
+            />
           </View>
-        )}
 
-        {/* Save Button */}
-        <Pressable
-          onPress={handleSubmit}
-          style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
-          disabled={isPending}
-          accessibilityRole="button"
-          accessibilityLabel={isEditMode ? 'Save changes' : 'Add asset'}
-        >
-          <Text style={styles.saveButtonText}>
-            {isPending ? 'Saving…' : isEditMode ? 'Save Changes' : 'Add Asset'}
-          </Text>
-        </Pressable>
+          {/* Unit */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>Unit</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={unit}
+              onChangeText={setUnit}
+              placeholder="e.g., BTC, oz, shares"
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="none"
+              returnKeyType="next"
+            />
+          </View>
 
-      </View>
-    </FormScreen>
+          {/* Price Per Unit */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>Price Per Unit</Text>
+            <TextInput
+              style={[styles.input, dynamicStyles.input]}
+              value={pricePerUnit}
+              onChangeText={setPricePerUnit}
+              placeholder="e.g., 45000"
+              placeholderTextColor="#9ca3af"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+            />
+          </View>
+
+          {/* Currency */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, dynamicStyles.label]}>Currency</Text>
+            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+              <Picker
+                selectedValue={currency}
+                onValueChange={(val) => setCurrency(val as AssetCurrency)}
+                style={[styles.picker, dynamicStyles.picker]}
+              >
+                {CURRENCIES.map((cur) => (
+                  <Picker.Item key={cur} label={cur} value={cur} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          {/* Auto Update */}
+          <View style={styles.fieldGroup}>
+            <View style={styles.switchRow}>
+              <View style={styles.switchLabel}>
+                <Text style={[styles.label, dynamicStyles.label]}>Auto Update Price</Text>
+                <Text style={styles.switchNote}>
+                  When on, price updates automatically from market data
+                </Text>
+              </View>
+              <Switch
+                value={autoUpdate}
+                onValueChange={(val) => {
+                  haptics.onToggle();
+                  setAutoUpdate(val);
+                }}
+                trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
+                thumbColor="#ffffff"
+                accessibilityRole="switch"
+                accessibilityLabel="Auto update price toggle"
+                accessibilityState={{ checked: autoUpdate }}
+              />
+            </View>
+          </View>
+
+          {/* Inline error */}
+          {errorMessage && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          )}
+
+          {/* Save Button */}
+          <Pressable
+            onPress={handleSubmit}
+            style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
+            disabled={isPending}
+            accessibilityRole="button"
+            accessibilityLabel={isEditMode ? 'Save changes' : 'Add asset'}
+          >
+            <Text style={styles.saveButtonText}>
+              {isPending ? 'Saving…' : isEditMode ? 'Save Changes' : 'Add Asset'}
+            </Text>
+          </Pressable>
+
+        </View>
+      </FormScreen>
+    </>
   );
 }
 
@@ -241,28 +278,21 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#ffffff',
   },
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#ffffff',
   },
   picker: {
     height: 44,
-    color: '#111827',
   },
   switchRow: {
     flexDirection: 'row',
@@ -290,14 +320,14 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
   },
   saveButtonDisabled: {
-    backgroundColor: '#93c5fd',
+    backgroundColor: '#93C5FD',
   },
   saveButtonText: {
     color: '#ffffff',
