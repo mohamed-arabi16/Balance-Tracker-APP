@@ -1,530 +1,431 @@
-# Advanced Mode Stack Research
+# Stack Research: Balance Tracker iOS (React Native Port)
 
-**Research Date:** 2026-02-23
-**Authored for:** Advanced Mode feature additions (client management, invoicing, PDF export, P&L, mode-switching)
-**Audience:** Downstream planning and implementation agents
-
----
-
-## Executive Summary
-
-The existing stack (React 18 + TypeScript + Supabase + TanStack React Query + Shadcn/ui) requires **one new runtime dependency** to deliver the Advanced Mode: a PDF generation library. Everything else — mode state management, data fetching, form handling, schema validation, UI components — is already covered by existing packages. The database needs three new tables and one new enum type, following patterns already established in the codebase.
+**Domain:** React Native (Expo) iOS app — personal finance + freelancer invoicing
+**Researched:** 2026-02-26
+**Confidence:** HIGH (core stack), MEDIUM (PDF strategy), HIGH (Supabase integration)
 
 ---
 
-## 1. PDF Generation
+## Context: What This Replaces
 
-### 1.1 Candidates Evaluated
-
-#### `@react-pdf/renderer` (recommended)
-- **Current version:** 4.x (4.3.0 as of late 2025)
-- **Bundle size impact:** ~180KB gzipped added to the bundle when imported. This is a dedicated rendering engine that converts a React-like component tree into a PDF byte stream in the browser. It does not depend on any DOM or canvas API; it ships its own layout and font engine.
-- **Install:** `npm install @react-pdf/renderer`
-- **Approach:** You define invoice layout as JSX using `<Document>`, `<Page>`, `<View>`, `<Text>`, `<Image>` primitives, then call `pdf(<Invoice />).toBlob()` to get a `Blob`, which you trigger as a file download with a generated object URL.
-- **Pros:**
-  - React-native mental model: invoice layout is just a component. TypeScript types are first-class.
-  - Produces fully vector PDF output (text is selectable, not rasterized).
-  - Supports RTL text rendering — critical since the app already supports Arabic.
-  - Supports custom fonts via `Font.register()`, enabling brand consistency.
-  - No browser canvas or DOM screenshotting — does not depend on any external canvas state.
-  - `pdf().toBlob()` API allows async generation without blocking the main thread in a Web Worker if needed.
-  - Active maintenance, 14k+ GitHub stars as of research date.
-- **Cons:**
-  - ~180KB gzipped is the largest bundle cost of any option. Must be placed in its own lazy-loaded chunk (see Section 1.3).
-  - Layout model uses an approximation of flexbox, not CSS. Complex multi-column layouts require learning the PDF layout primitives.
-  - No inline HTML-to-PDF — invoice templates must be re-implemented using PDF primitives, not HTML.
-  - Custom fonts must be pre-registered and fetched; system fonts are not automatically available.
-
-**Confidence: HIGH**
+The web app shipped on React 18 + Vite + Shadcn/ui + TanStack React Query + Supabase. The iOS port reuses the **same Supabase backend, same DB schema, same RLS policies, same hooks/query logic** — only the rendering layer changes. This stack document covers exclusively the React Native layer.
 
 ---
 
-#### `jsPDF` (not recommended for this use case)
-- **Current version:** 2.5.2
-- **Bundle size impact:** ~110KB gzipped
-- **Approach:** Imperative drawing API (`doc.text(...)`, `doc.rect(...)`, `doc.addPage()`). You manually position every text string and shape using X/Y coordinates and font size calls.
-- **Pros:** Small-ish bundle, very mature library (10+ years old), browser and Node compatible.
-- **Cons:**
-  - Imperative coordinate-based layout is extremely fragile for dynamic invoice content. Invoice line items of variable length, multi-line descriptions, and per-client addresses require manual pagination logic.
-  - No React integration — JSX invoice template approach is impossible without html2canvas bridge (see below), which re-introduces canvas rasterization.
-  - RTL text support is poor without additional plugins (`jspdf-autotable` does not natively support RTL).
-  - jsPDF with `html2canvas` as a bridge (the common workaround for React components) produces rasterized PDF — text is not selectable and file sizes are large (typically 1–5MB per invoice page).
-  - Maintenance activity has slowed; many open issues.
+## Recommended Stack
 
-**Confidence: HIGH (confident it is the wrong choice)**
+### Core Framework
 
----
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Expo (managed workflow) | SDK 52 | Project scaffolding, build system, native module access | SDK 52 is the last stable SDK with clean Supabase compatibility (no metro ES module workaround needed). SDK 53+ introduces a `ws/stream` resolution error with `@supabase/supabase-js` — tracked in supabase-js issues [#1400](https://github.com/supabase/supabase-js/issues/1400) and [#1403](https://github.com/supabase/supabase-js/issues/1403). Use SDK 52 until supabase-js resolves this upstream. |
+| React Native | 0.76 (via Expo SDK 52) | Native iOS rendering | Ships with SDK 52. First RN version with New Architecture enabled by default — JSI, concurrent rendering, faster bridge. iOS 15.1 minimum deployment target. |
+| TypeScript | 5.x | Type safety | Same TS already used across 16,650 LOC of web app. Types for Supabase generated tables, shared hooks, and query return shapes can be reused directly. |
+| Expo Router | 3.x (included with SDK 52) | File-based navigation | Superset of React Navigation v7. File-based routing mirrors the web app's pages structure. Handles tabs, stacks, modals, and deep links natively. iOS swipe-back gesture is automatic. |
 
-#### `pdfmake` (not recommended)
-- **Current version:** 0.2.x
-- **Bundle size impact:** ~250KB gzipped when fonts are included (the embedded Roboto font alone is ~150KB).
-- **Approach:** JSON-based document definition object passed to `pdfMake.createPdf(docDefinition)`. Renders client-side or server-side.
-- **Pros:** Handles tables natively with column widths, good for financial tables.
-- **Cons:**
-  - No React integration — document definition is a plain JS object, not JSX. Combining dynamic React state into the definition object is verbose.
-  - Bundle is the largest of all options even before app code due to bundled fonts.
-  - RTL is experimentally supported but underdocumented.
-  - Less actively maintained than `@react-pdf/renderer`.
-
-**Confidence: HIGH (confident it is the wrong choice)**
+**Confidence: HIGH** — Verified via [Expo SDK 52 changelog](https://expo.dev/changelog/2024-11-12-sdk-52), [supabase-js issues #1400/#1403](https://github.com/supabase/supabase-js/issues/1400).
 
 ---
 
-#### `html2canvas` (not recommended standalone)
-- **Current version:** 1.4.1
-- **Bundle size impact:** ~45KB gzipped (small by itself, but always paired with jsPDF or similar, adding 155KB+ total)
-- **Approach:** Screenshots a DOM element into a `<canvas>`, then embeds the canvas image in a PDF via jsPDF.
-- **Pros:** Easiest to integrate if you already have a rendered HTML invoice component.
-- **Cons:**
-  - Output is rasterized — text is not selectable or searchable in the PDF. This is a significant quality problem for invoices.
-  - Canvas screenshot is affected by cross-origin images, browser rendering differences, and custom fonts (requires all fonts to be loaded in DOM before screenshot).
-  - RTL layout depends entirely on the browser's CSS rendering at the moment of screenshot — unreliable across environments.
-  - File sizes are 5–20x larger than vector PDF for equivalent content.
-  - Cannot reliably handle content that overflows a viewport (multi-page invoices require hacks).
+### Supabase Integration
 
-**Confidence: HIGH (confident it is the wrong choice)**
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @supabase/supabase-js | 2.x (latest 2.x compatible with SDK 52) | Database, auth, RPC calls | Same client the web app uses. RLS policies, Edge Functions, RPC functions (`invoice_number` atomic increment) all work identically. Zero new backend services needed. |
+| expo-sqlite (localStorage polyfill) | included with Expo SDK 52 | Session persistence for Supabase auth | Official Supabase + Expo recommended approach as of 2025. Uses `expo-sqlite/localStorage/install` polyfill — replaces the browser `localStorage` API transparently. Handles token refresh automatically. |
+| react-native-url-polyfill | 2.x | URL API polyfill required by supabase-js | React Native's JS engine lacks the standard URL API; supabase-js requires it. One import at app entry (`import 'react-native-url-polyfill/auto'`) fixes this. |
 
----
-
-### 1.2 Recommendation
-
-**Use `@react-pdf/renderer` version 4.x.**
-
-The invoice feature requires: dynamic line items of variable count, per-client contact addresses, Arabic RTL layout compatibility, and selectable text in the output PDF. Only `@react-pdf/renderer` satisfies all four requirements cleanly within the existing React + TypeScript architecture.
-
-Define a standalone `InvoicePDF` component in `src/components/invoices/InvoicePDF.tsx` using `@react-pdf/renderer` primitives. Keep this component completely separate from the Shadcn/ui component tree — it renders entirely within the PDF renderer's virtual environment, not the DOM.
-
----
-
-### 1.3 Bundle Size Mitigation
-
-The app's entry chunk budget is 350KB gzipped (`BUNDLE_GZIP_BUDGET_KB` in `check-bundle-budget.mjs`). Adding `@react-pdf/renderer` (~180KB gzipped) to the main bundle would blow this budget.
-
-**Required mitigation: lazy-load the PDF library only when the user triggers invoice export.**
-
-Pattern (to be implemented in the invoices page or hook):
-
+**Supabase client initialization pattern:**
 ```typescript
-// Only imported when user clicks "Export PDF"
-const generateInvoicePDF = async (invoice: Invoice) => {
-  const { pdf } = await import('@react-pdf/renderer');
-  const { InvoicePDF } = await import('@/components/invoices/InvoicePDF');
-  const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `invoice-${invoice.number}.pdf`;
-  link.click();
-  URL.revokeObjectURL(url);
-};
+// lib/supabase.ts
+import 'react-native-url-polyfill/auto'
+import { createClient } from '@supabase/supabase-js'
+import 'expo-sqlite/localStorage/install'
+
+export const supabase = createClient(
+  process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+  {
+    auth: {
+      storage: localStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,   // no URL-based OAuth in mobile
+    },
+  }
+)
 ```
 
-Vite's code splitting will automatically place `@react-pdf/renderer` and `InvoicePDF` into a separate chunk that is only fetched when the function is first called. This keeps the main entry chunk within budget and does not slow down the initial app load for Simple Mode users who will never use invoicing.
+**Confidence: HIGH** — Verified via [official Supabase Expo quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/expo-react-native).
 
-Add `@react-pdf/renderer` to a dedicated chunk hint in `vite.config.ts`:
+---
 
+### Navigation
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Expo Router | 3.x | All navigation — tabs, stack, modals | Built on React Navigation v7. File-based structure maps cleanly to the web app's page architecture. Typed routes, automatic deep linking, platform-native gesture support (iOS swipe-back). |
+| React Native Gesture Handler | ~2.22.0 | Native gesture recognition | Required peer dep for Expo Router / React Navigation. Provides iOS-native pan, swipe, and tap gesture recognizers via the New Architecture JSI. |
+| React Native Reanimated | ~3.16.7 | Declarative animations | Required for bottom sheets, transition animations, swipeable list items. Specified version is SDK 52 compatible (3.16.1 does not support RN 0.77; 3.16.7+ does). |
+
+**Navigation architecture for this app:**
+```
+app/
+  _layout.tsx          — root Stack (wraps auth gate)
+  (auth)/
+    login.tsx
+    signup.tsx
+  (tabs)/
+    _layout.tsx        — Bottom tab navigator (Dashboard, Transactions, Clients, Settings)
+    index.tsx          — Dashboard
+    transactions/
+      _layout.tsx      — Stack inside Transactions tab
+      index.tsx
+      add.tsx          — Add income/expense (modal presentation)
+      [id].tsx         — Edit entry
+    clients/           — Advanced mode only
+      _layout.tsx
+      index.tsx
+      [id]/
+        index.tsx
+        invoices.tsx
+    settings.tsx
+  invoice/
+    [id].tsx           — Full-screen invoice detail (modal over tabs)
+```
+
+**Confidence: HIGH** — Verified via [Expo Router introduction](https://docs.expo.dev/router/introduction/) and [common navigation patterns](https://docs.expo.dev/router/basics/common-navigation-patterns/).
+
+---
+
+### UI Components and Styling
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| NativeWind | v4.x | Tailwind-syntax utility styling for React Native | Tailwind syntax is already used for all Shadcn components on the web. NativeWind v4 (Dec 2025) added CSS variables, dark mode via `useColorScheme`, container queries, and improved style merging. Developers already know this syntax — minimal learning curve. |
+| React Native built-in components | (RN 0.76) | Base layer: View, Text, ScrollView, FlatList, TextInput, TouchableOpacity | Use native primitives as the actual rendered components. NativeWind styles are applied via `className` prop — identical mental model to Shadcn/ui on web. |
+| @gorhom/bottom-sheet | ~5.x | Bottom sheet modals for add/edit forms | iOS-native bottom sheet gesture (drag to dismiss). Required for HIG-compliant form entry. Works with Expo managed workflow via prebuild. |
+| expo-haptics | SDK 52 | Haptic feedback on actions | HIG compliance: iOS users expect haptic feedback on destructive actions, confirmations, and toggles. `impactAsync`, `notificationAsync` APIs. |
+| expo-status-bar | SDK 52 | Status bar control | Manages light/dark status bar appearance per-screen. Required with dark mode support. |
+
+**On UI library choice — NativeWind over Tamagui or Gluestack:**
+
+Tamagui is a valid alternative but requires learning a new component abstraction and has a steeper setup curve. Gluestack UI v3 (2025) is excellent for accessibility but adds a significant component layer over primitives. Since the web app already uses Tailwind-syntax utilities and the team knows this pattern, NativeWind v4 delivers the best ratio of native feel to onboarding speed. NativeWindUI (nativewindui.com) provides 30+ pre-built iOS-idiomatic components built on NativeWind — useful reference implementations even if not used directly.
+
+**Dark/light theming:**
 ```typescript
-// In manualChunks:
-if (id.includes('@react-pdf')) {
-  return 'vendor-pdf';
+// NativeWind v4 pattern — reads system preference
+import { useColorScheme } from 'nativewind'
+
+const { colorScheme, setColorScheme } = useColorScheme()
+// Toggle: setColorScheme('dark' | 'light' | 'system')
+```
+
+Requires `"userInterfaceStyle": "automatic"` in `app.json`.
+
+**Confidence: HIGH (NativeWind)** — Verified via [NativeWind dark mode docs](https://www.nativewind.dev/docs/core-concepts/dark-mode), [Expo color themes](https://docs.expo.dev/develop/user-interface/color-themes/).
+
+---
+
+### State Management
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| TanStack React Query | v5.x | All server state — fetching, caching, mutation, optimistic updates | Already used throughout the web app. React Native is a first-class platform for TanStack Query. The existing hooks (`useIncomes`, `useExpenses`, `useClients`, `useInvoices`, `useUserSettings`) can be ported with near-zero changes — replace `@/lib/supabase` import paths and remove any DOM-specific side effects. |
+| React Context | (React 19) | Lightweight global UI state — auth session, app mode | Auth session context and app mode context (`isAdvancedMode`) remain React Context, identical to the web app. No Zustand or Redux needed — the app has no complex derived global state. |
+
+**What NOT to use for state:**
+- Zustand/Redux/Jotai — all overkill. The existing pattern of React Query (server state) + Context (UI prefs) is sufficient and already battle-tested in this codebase.
+- AsyncStorage for query cache persistence — not needed for this app; in-memory query cache rehydrates from Supabase fast enough on network.
+
+**Confidence: HIGH** — Verified via [TanStack Query React Native docs](https://tanstack.com/query/latest/docs/framework/react/react-native).
+
+---
+
+### Forms
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| react-hook-form | 7.x | Form state management | Already used across all web app forms. Works identically in React Native — `Controller` wraps each `TextInput`. Same `useForm`, `zodResolver`, `handleSubmit` API. |
+| zod | 3.x | Schema validation | Already used for all web app validation schemas (`incomeSchema`, `clientSchema`, `invoiceSchema`). Zero changes needed to schema definitions — they're pure TypeScript with no DOM dependencies. |
+| @hookform/resolvers | 3.x | zod-to-react-hook-form bridge | Same resolver package used on web. |
+
+**Confidence: HIGH** — Verified via community sources: [Expo + React Hook Form + Zod](https://dev.to/birolaydin/expo-react-hook-form-typescript-zod-4oac).
+
+---
+
+### Internationalisation and RTL
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| i18next + react-i18next | latest 2.x / 14.x | Translation keys, language switching | Same i18n stack used on the web app. The existing `en` and `ar` translation objects in `src/i18n/index.ts` can be ported directly. `useTranslation` hook is identical. |
+| expo-localization | SDK 52 | Detect device locale on app start | Provides `getLocales()` to read the device's preferred language. Used to set default language on first launch. |
+| React Native I18nManager | (built-in RN 0.76) | RTL layout direction enforcement | `I18nManager.forceRTL(true)` flips all layout directions (flexbox start/end, text alignment). Called when switching to Arabic. **Requires app reload** (`Updates.reloadAsync()` or `RNRestart`) to take effect — this is a known iOS constraint, not a library limitation. |
+
+**RTL switching pattern:**
+```typescript
+import { I18nManager } from 'react-native'
+import * as Updates from 'expo-updates'
+
+const switchToArabic = async () => {
+  i18n.changeLanguage('ar')
+  if (!I18nManager.isRTL) {
+    I18nManager.forceRTL(true)
+    await Updates.reloadAsync()  // reloads the JS bundle to apply RTL
+  }
 }
 ```
 
----
+**Styling convention:** Use `marginStart`/`marginEnd` and `paddingStart`/`paddingEnd` (logical properties) instead of `marginLeft`/`marginRight` throughout — these flip automatically with RTL direction.
 
-## 2. Mode State Management
-
-### 2.1 Options Evaluated
-
-#### Option A: `user_settings` table — ADD A COLUMN (recommended)
-- **Approach:** Add a column `mode text NOT NULL DEFAULT 'simple'` (values: `'simple'` | `'advanced'`) to the existing `user_settings` table via a new migration.
-- **Read path:** `useUserSettings()` already fetches the full settings row on app load. The `mode` field is available immediately in any component that calls `useUserSettings()` or reads from the context.
-- **Write path:** `updateSettings({ mode: 'advanced' })` — same call used by currency, theme, and net_worth_calculation preferences today. Optimistic update pattern in `useUserSettings` mutation covers instant UI response with rollback on error.
-- **Pros:**
-  - Zero new infrastructure — the fetch, cache, and update path already exist.
-  - Mode preference survives device changes, browser data clears, and re-logins. Settings are tied to the Supabase user, not the browser.
-  - Consistent with every other user preference in the app (currency, theme, language, net_worth_calculation, auto_convert, include_long_term, auto_price_update — all live in this table).
-  - `DEFAULT 'simple'` ensures all existing users get Simple Mode automatically on migration — no data migration needed.
-  - The TypeScript type in `src/integrations/supabase/types.ts` will be updated by the migration, giving full type safety.
-- **Cons:**
-  - Requires a new migration file and a Supabase type regeneration step.
-  - The `DEFAULT_USER_SETTINGS` object in `useUserSettings.ts` must be updated to include `mode: 'simple'`.
-
-**Confidence: HIGH**
+**Confidence: HIGH** — Verified via [React Native I18nManager docs](https://reactnative.dev/docs/i18nmanager), [GeekyAnts RTL guide](https://geekyants.com/blog/implementing-rtl-right-to-left-in-react-native-expo---a-step-by-step-guide).
 
 ---
 
-#### Option B: `localStorage` only
-- **Approach:** Read/write `localStorage.getItem('appMode')` directly, similar to how `ThemeContext` uses `localStorage.getItem('theme')` as an initial value before the DB setting loads.
-- **Pros:** No migration, no network round-trip on toggle.
-- **Cons:**
-  - Mode preference is lost when the user clears browser data or switches to a new device.
-  - ThemeContext uses localStorage as a *bootstrap cache* to avoid flash-of-wrong-theme, but always syncs to DB as the source of truth. Using localStorage as the *only* persistence for mode is a downgrade compared to all other preferences.
-  - If a freelancer switches from desktop to mobile, they have to re-enable Advanced Mode manually. This is a friction point for the core Advanced Mode use case.
+### PDF Generation
 
-**Not recommended as sole storage. Acceptable as a fast-read cache (see implementation note below).**
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| expo-print | ~13.x (SDK 52) | Generate PDF from HTML string | Official Expo module. `Print.printToFileAsync({ html })` renders an HTML string through iOS's WKWebView print pipeline and writes a PDF to the app cache directory. No native module compilation required — works in Expo managed workflow. |
+| expo-sharing | ~12.x (SDK 52) | Share/save generated PDF | `shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' })` opens iOS share sheet — allows user to save to Files, send via Mail, AirDrop, etc. This is the HIG-compliant way to "download" a file on iOS. |
+| expo-file-system | ~17.x (SDK 52) | Temporary file management | Used in conjunction with expo-print for cache cleanup after sharing. `deleteAsync()` removes the cached PDF after the share action completes. |
 
----
+**Why expo-print over @react-pdf/renderer:**
 
-#### Option C: New `ModeContext` with its own state
-- **Approach:** Create `src/contexts/ModeContext.tsx` with `ModeProvider` and `useMode()`, backed by `user_settings` column.
-- **Pros:** Clean separation of concerns; follows existing context patterns exactly.
-- **Cons:** Not strictly necessary — mode is a single boolean-equivalent preference, not a complex state machine requiring its own context. `CurrencyContext` and `ThemeContext` already wrap `useUserSettings` for their specific column; mode can follow the same pattern without adding a new top-level context.
+The web app uses `@react-pdf/renderer` (a browser/Node PDF rendering engine). That library does **not** work in React Native — it depends on browser APIs unavailable in the RN JS runtime.
 
-**Recommended only if mode state needs derived values or side effects** (e.g., disabling certain queries when in Simple Mode). If the implementation is `isAdvancedMode = settings?.mode === 'advanced'`, a context adds indirection without value. A simple hook export from `useUserSettings` suffices:
+`expo-print` uses iOS's native WKWebView print rendering pipeline, which produces vector PDF with selectable text from HTML input. The trade-off is that the template is written in HTML/CSS string (not JSX), but this is manageable for an invoice layout and is the only approach that:
+1. Works in Expo managed workflow (no custom native modules)
+2. Produces vector PDF (selectable text)
+3. Supports full CSS layout including RTL via `direction: rtl`
+4. Handles pagination natively via `@page` CSS
 
+**iOS limitation:** Local asset URLs (`file://`) are not supported in the HTML source due to WKWebView restrictions. Images (e.g., a logo) must be base64-encoded and inlined.
+
+**Invoice PDF pattern:**
 ```typescript
-// In useUserSettings.ts or a new useAppMode.ts
-export const useAppMode = () => {
-  const { settings, updateSettings } = useUserSettings();
-  return {
-    isAdvancedMode: settings?.mode === 'advanced',
-    setMode: (mode: 'simple' | 'advanced') => updateSettings({ mode }),
-  };
-};
+import * as Print from 'expo-print'
+import { shareAsync } from 'expo-sharing'
+
+const generateInvoicePDF = async (invoice: Invoice) => {
+  const html = buildInvoiceHTML(invoice)   // returns HTML string with inline CSS
+  const { uri } = await Print.printToFileAsync({ html })
+  await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' })
+}
 ```
 
-**Confidence: HIGH**
+**RTL support in HTML template:**
+```html
+<html dir="rtl">
+  <body style="direction: rtl; font-family: ...">
+    <!-- Arabic invoice content here -->
+  </body>
+</html>
+```
+
+**Confidence: MEDIUM** — expo-print is well-documented and active (last published 3 months ago per npm). The HTML template approach is the recommended managed-workflow pattern per [Expo docs](https://docs.expo.dev/versions/latest/sdk/print/) and [Jan 2026 guide](https://anytechie.medium.com/how-to-use-expo-print-complete-guide-to-printing-in-react-native-apps-173fa435dadf). Rated MEDIUM only because the final PDF quality of the invoice template depends on HTML/CSS implementation quality, which needs validation during build.
 
 ---
 
-### 2.2 Recommendation
+### App Distribution
 
-**Add `mode text NOT NULL DEFAULT 'simple'` column to `user_settings` table.** Do not create a new context. Expose mode state via a `useAppMode()` hook (a thin wrapper around `useUserSettings`) placed in `src/hooks/useAppMode.ts`. Components and page layouts check `isAdvancedMode` from this hook to conditionally render Advanced Mode sections.
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| EAS Build | latest CLI | Compile iOS .ipa binary | Expo's managed cloud build service. No local Xcode environment required to produce an App Store binary. Handles code signing, provisioning profiles, and entitlements. `eas build --platform ios --profile production` |
+| EAS Submit | latest CLI | Upload to App Store Connect | `eas submit --platform ios` uploads the .ipa to TestFlight automatically. Removes the macOS-only requirement for App Store uploads. |
+| EAS Update | latest | OTA JavaScript updates | Post-launch JS/asset fixes without App Store resubmission. Only non-native changes (JS, images, assets). Native code changes require a new EAS Build. |
 
-**Implementation note on flash prevention:** Mirror the ThemeContext pattern. Read an `appMode` localStorage key as the initial state to prevent a flash of Simple Mode on page load for Advanced Mode users, then reconcile with the DB value when settings load:
+**Apple Developer Requirements:**
+- Apple Developer Program membership ($99/year)
+- Bundle identifier registered in App Store Connect (e.g., `com.mohamedkhair.balancetracker`)
+- App Store Connect API Key (for automated CI submissions) or Apple ID + App-specific password
 
-```typescript
-const [mode, setModeState] = useState<'simple' | 'advanced'>(() => {
-  return (localStorage.getItem('appMode') as 'simple' | 'advanced') || 'simple';
-});
-
-useEffect(() => {
-  if (settings?.mode) {
-    setModeState(settings.mode as 'simple' | 'advanced');
-    localStorage.setItem('appMode', settings.mode);
+**eas.json profile:**
+```json
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "production": {
+      "ios": {
+        "simulator": false
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID"
+      }
+    }
   }
-}, [settings?.mode]);
+}
 ```
 
----
-
-## 3. Database Schema Additions
-
-All new tables follow the established patterns from `20260220111031_*.sql`:
-- `uuid PRIMARY KEY DEFAULT gen_random_uuid()`
-- `user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE`
-- Index on `user_id` for all tables
-- `ENABLE ROW LEVEL SECURITY` immediately after `CREATE TABLE`
-- Single `FOR ALL` policy using `USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid())`
+**Confidence: HIGH** — Verified via [EAS Submit iOS docs](https://docs.expo.dev/submit/ios/) and [EAS Build docs](https://docs.expo.dev/build/introduction/).
 
 ---
 
-### 3.1 Migration: `user_settings` mode column
+## Supporting Libraries
 
-```sql
--- Migration: add_advanced_mode_to_user_settings.sql
-ALTER TABLE public.user_settings
-  ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'simple';
-
--- Ensure existing rows have valid value
-UPDATE public.user_settings SET mode = 'simple' WHERE mode IS NULL;
-```
-
-No RLS change needed — the existing policy on `user_settings` already covers all columns for the row owner.
-
----
-
-### 3.2 New Enum: `invoice_status`
-
-```sql
-CREATE TYPE invoice_status AS ENUM ('draft', 'sent', 'paid', 'overdue', 'cancelled');
-```
-
-- `draft` — created but not yet sent to client
-- `sent` — exported/shared with client, awaiting payment
-- `paid` — payment confirmed by user
-- `overdue` — past due_date and not paid (can be computed or manually set)
-- `cancelled` — voided
-
-This matches the pattern of `debt_status`, `expense_status`, and `income_status` enums already in the schema.
-
-**Confidence: HIGH**
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| expo-haptics | SDK 52 | Haptic feedback | Every destructive action (delete confirm), form submit success, toggle switches |
+| expo-status-bar | SDK 52 | Status bar light/dark control | Per-screen status bar appearance (light text on dark screens) |
+| expo-updates | SDK 52 | OTA update management | After App Store launch — push JS fixes without resubmission |
+| expo-constants | SDK 52 | Access `app.json` values at runtime | App version number, build number for Settings → About screen |
+| expo-localization | SDK 52 | Device locale detection | Set default language on first launch |
+| react-native-safe-area-context | 4.x | Insets for notch/Dynamic Island | Wrap root layout — all screens need safe area insets for iPhone with notch |
+| @react-native-async-storage/async-storage | 2.x | Lightweight key-value store | Fast-read cache for theme/language preference (flash prevention before DB loads). Do NOT use for Supabase session — use expo-sqlite localStorage polyfill instead. |
 
 ---
 
-### 3.3 `clients` Table
+## Development Tools
 
-```sql
-CREATE TABLE clients (
-    id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    name       text        NOT NULL,
-    email      text,
-    phone      text,
-    company    text,
-    address    text,
-    notes      text,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE INDEX clients_user_idx ON clients(user_id);
-
-ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "user can manage own clients"
-ON clients FOR ALL
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
-```
-
-**Column rationale:**
-- `name` NOT NULL — minimum required to identify a client
-- `email`, `phone`, `company`, `address`, `notes` — all nullable; not all clients need all fields
-- `updated_at` — useful for sorting "recently active" clients; set via application or a DB trigger
-- No `currency` column — invoices carry their own currency; clients may be billed in different currencies
-
-**No additional indexes needed** beyond `user_idx` unless the P&L views are implemented as DB-level functions or views, in which case a `(user_id, name)` index on clients might be beneficial for name lookups. Start without it.
-
-**Confidence: HIGH**
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Expo Go | Development testing on physical device | Limited — some native modules (e.g., @gorhom/bottom-sheet) require a dev build. Use for initial scaffolding only. |
+| Expo Dev Build (`expo-dev-client`) | Full-featured development build with custom native modules | Required once @gorhom/bottom-sheet is added. `eas build --profile development` or `npx expo run:ios` locally. |
+| Expo EAS CLI | Build and submit | `npm install -g eas-cli` |
+| Reactotron or TanStack Query Devtools (Expo plugin) | Debug query state on device | TanStack Query Devtools plugin is now available for Expo — useful for inspecting cache during development |
+| TypeScript | 5.x | Same tsconfig as web app (strict mode) | Extend the web tsconfig or create a sibling tsconfig — paths need updating since it's a new repo |
 
 ---
 
-### 3.4 `invoices` Table
+## Installation
 
-```sql
-CREATE TABLE invoices (
-    id            uuid           PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id       uuid           NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    client_id     uuid           NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
-    invoice_number text          NOT NULL,
-    status        invoice_status NOT NULL DEFAULT 'draft',
-    currency      currency_code  NOT NULL DEFAULT 'USD',
-    issue_date    date           NOT NULL,
-    due_date      date,
-    subtotal      numeric        NOT NULL DEFAULT 0,
-    tax_rate      numeric        NOT NULL DEFAULT 0,
-    tax_amount    numeric        GENERATED ALWAYS AS (subtotal * tax_rate / 100) STORED,
-    total         numeric        GENERATED ALWAYS AS (subtotal + (subtotal * tax_rate / 100)) STORED,
-    notes         text,
-    created_at    timestamptz    NOT NULL DEFAULT now(),
-    updated_at    timestamptz    NOT NULL DEFAULT now()
-);
-
-CREATE INDEX invoices_user_idx ON invoices(user_id);
-CREATE INDEX invoices_client_idx ON invoices(client_id);
-CREATE INDEX invoices_status_idx ON invoices(user_id, status);
-
-ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "user can manage own invoices"
-ON invoices FOR ALL
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
-```
-
-**Column rationale:**
-- `client_id` FK is `ON DELETE RESTRICT` — prevents accidental deletion of a client that has invoices; user must delete invoices first or reassign them. This is intentionally stricter than the `ON DELETE CASCADE` used for user-owned data, because losing an invoice history due to a client deletion would be a bad user experience.
-- `invoice_number` is `text NOT NULL` — allows user-defined formats ("INV-001", "2026-03", etc.) rather than forcing a sequence. User is responsible for uniqueness within their own context; enforce at application layer or add `UNIQUE(user_id, invoice_number)`.
-- `currency_code` reuses the existing `currency_code` enum (`USD | TRY`). If multi-currency invoices beyond these two are needed in future, the enum would be extended then.
-- `subtotal` is managed by the application (sum of line items). `tax_amount` and `total` are generated columns — same pattern as `assets.total_value`.
-- `tax_rate` stored on invoice (not a global setting) because different invoices may have different rates or zero tax.
-- `due_date` nullable — some invoices are due on receipt.
-
-**Note on line items:** Invoice line items (description, quantity, unit price) should be stored in a separate `invoice_items` table, not as a JSONB column. This allows proper querying for P&L breakdowns per service type and avoids parsing JSONB in the application layer.
-
-```sql
-CREATE TABLE invoice_items (
-    id          uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
-    invoice_id  uuid    NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
-    user_id     uuid    NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    description text    NOT NULL,
-    quantity    numeric NOT NULL DEFAULT 1,
-    unit_price  numeric NOT NULL,
-    amount      numeric GENERATED ALWAYS AS (quantity * unit_price) STORED,
-    sort_order  integer NOT NULL DEFAULT 0
-);
-
-CREATE INDEX invoice_items_invoice_idx ON invoice_items(invoice_id);
-
-ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "user can manage own invoice items"
-ON invoice_items FOR ALL
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
-```
-
-`user_id` on `invoice_items` is a denormalization (it could be derived via `invoice_id → invoices.user_id`) but is required for direct RLS policy application without a join — consistent with how `debt_amount_history` and `income_amount_history` carry `user_id` directly.
-
-**Confidence: HIGH**
-
----
-
-### 3.5 Transaction-to-Client Linking
-
-**Decision: nullable FK on existing tables (not a junction table)**
-
-Two options were considered:
-
-**Option A — Nullable FK on `incomes` and `expenses`:**
-```sql
-ALTER TABLE incomes  ADD COLUMN IF NOT EXISTS client_id uuid REFERENCES clients(id) ON DELETE SET NULL;
-ALTER TABLE expenses ADD COLUMN IF NOT EXISTS client_id uuid REFERENCES clients(id) ON DELETE SET NULL;
-
-CREATE INDEX incomes_client_idx  ON incomes(client_id) WHERE client_id IS NOT NULL;
-CREATE INDEX expenses_client_idx ON expenses(client_id) WHERE client_id IS NOT NULL;
-```
-
-**Option B — Junction table `transaction_clients`:**
-```sql
-CREATE TABLE transaction_clients (
-    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id        uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    transaction_id uuid NOT NULL,  -- polymorphic, requires application-level dispatch
-    table_name     text NOT NULL,  -- 'incomes' or 'expenses'
-    client_id      uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE
-);
-```
-
-**Recommendation: Option A — nullable FK on each table.**
-
-Rationale:
-- Option B's polymorphic design (storing `table_name` text to reference either `incomes` or `expenses`) cannot have a proper FK constraint in PostgreSQL and would require application-level enforcement. This introduces a category of data integrity bug that doesn't exist in the current schema.
-- Option A is consistent with how the schema already handles optional relationships (e.g., `debts.due_date` is nullable; `assets.conversion_rate` is nullable).
-- `ON DELETE SET NULL` means deleting a client does not delete the income/expense records — only the association is removed. This is the correct behavior: a freelancer's earnings history must not disappear because they removed an old client.
-- Partial indexes (`WHERE client_id IS NOT NULL`) keep index size small — the majority of existing records have no client and the index only covers linked records.
-- The Supabase query in `useIncomes` can be extended with `select('*, income_amount_history(*)')` → `select('*, income_amount_history(*), clients(*)')` to join client data in a single query.
-- No RLS change needed on `incomes` or `expenses` — the existing policies already cover all columns in those rows.
-
-**Confidence: HIGH**
-
----
-
-### 3.6 RLS Policy Summary
-
-All new tables follow the single-policy pattern used universally in this codebase:
-
-```sql
-ALTER TABLE <table_name> ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "user can manage own <entity>"
-ON <table_name> FOR ALL
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
-```
-
-The `FOR ALL` pattern (covers SELECT, INSERT, UPDATE, DELETE in one policy) is used on every existing table. Do not introduce per-operation policies unless a specific access control requirement demands it (e.g., if a client portal feature is ever added). Staying consistent with `FOR ALL` keeps the migration readable and the policy set small.
-
-**The one exception:** `debt_amount_history` has both a `FOR ALL` policy and a duplicate `FOR SELECT` policy in the initial migration — this appears to be a redundancy from generation, not an intentional pattern. Do not replicate this in new migrations.
-
-**Confidence: HIGH**
-
----
-
-## 4. No New Dependencies Needed
-
-The following Advanced Mode requirements are already covered by existing packages:
-
-| Requirement | Existing Package | Notes |
-|---|---|---|
-| Client/invoice forms | `react-hook-form` 7.53.0 + `zod` 3.23.8 | Same form stack used for all existing add/edit forms |
-| Form field validation schemas | `zod` 3.23.8 | Define `clientSchema`, `invoiceSchema` following `incomeSchema` pattern |
-| Invoice status select dropdown | `@radix-ui/react-select` (via Shadcn) | Already in use across app |
-| Invoice date picker | `react-day-picker` 8.10.1 (already used) + `date-fns` 3.6.0 | The existing date picker component in Settings/Income |
-| P&L data calculations | `date-fns` 3.6.0 | Month/date range filtering already done with date-fns |
-| Revenue-per-client charts | `recharts` 2.12.7 | Bar/line charts already rendered in Dashboard |
-| Currency formatting on invoices | `CurrencyContext.formatCurrency()` | Already handles USD/TRY with locale formatting |
-| Mode toggle UI | `@radix-ui/react-switch` (Shadcn Switch component) | Switch already in `src/components/ui/switch.tsx` |
-| Toast notifications for actions | `sonner` 1.5.0 | Used universally across mutations |
-| Activity logging for client/invoice events | `useLogActivity()` hook | Plug in the same hook used by incomes/expenses |
-| Analytics events | `trackEvent()` in `src/lib/analytics.ts` | Same pattern as `income_created`, `expense_deleted` |
-| i18n keys for new UI strings | `i18next` + `react-i18next` | Add keys to `src/i18n/index.ts` for both `en` and `ar` |
-| RTL layout for new components | Existing Tailwind RTL utilities + i18n config | RTL already works; no new config needed |
-| TypeScript types for new tables | Regenerate `src/integrations/supabase/types.ts` | Run `supabase gen types typescript` after migrations |
-| Optimistic updates for client/invoice mutations | TanStack React Query `onMutate` / `onError` | Pattern established in `useUserSettings.ts` |
-
----
-
-## 5. What NOT to Use
-
-### PDF Generation — Avoid These
-
-**`html2canvas` + `jsPDF` combo**
-- Reason: Produces rasterized PDF. Text is not selectable. Files are 5–20x larger than necessary. RTL layout is unreliable. Do not use this for invoices.
-
-**`jsPDF` alone (without canvas)**
-- Reason: Requires manually positioning every text element with pixel coordinates. Any change to invoice content (added line items, long client names, multi-line addresses) requires recalculating layout by hand. Not maintainable.
-
-**`pdfmake`**
-- Reason: Larger bundle than `@react-pdf/renderer` due to bundled fonts, no React integration, weaker RTL support. Does not offer meaningful advantages over the recommended option.
-
-**Server-side PDF (Supabase Edge Functions + Puppeteer/WeasyPrint)**
-- Reason: Explicitly out of scope per PROJECT.md constraints: "Client-side PDF export only (no server-side rendering)" and "no new backend services." Additionally, Supabase Edge Functions run on Deno and cannot host a Chromium instance.
-
-### State Management — Avoid These
-
-**Redux / Zustand / Jotai for mode state**
-- Reason: Massive overkill. Mode is a single `'simple' | 'advanced'` string that already fits in the `user_settings` table row fetched by `useUserSettings`. Adding a third-party state manager for this would contradict the existing architecture where all global preferences live in React Context + React Query.
-
-**A new Supabase table `app_modes` or `mode_preferences`**
-- Reason: `user_settings` already exists, has the correct RLS, and is fetched on every app load. A separate table adds a network request with no benefit.
-
-### Schema — Avoid These
-
-**JSONB columns for invoice line items**
-- Reason: Prevents proper querying for P&L breakdowns. Cannot use PostgreSQL aggregate functions (SUM, GROUP BY) on JSONB arrays without unnesting. Harder to index. Use a normalized `invoice_items` table instead.
-
-**Polymorphic `transaction_clients` junction table**
-- Reason: Cannot enforce FK integrity across two tables from one column in PostgreSQL. Application-level integrity is fragile. Nullable FK directly on `incomes` and `expenses` is simpler and correct.
-
-**New `currency_code` enum values for invoices**
-- Reason: Do not expand the enum at this stage. The app supports USD and TRY. Invoice currency should use the same enum. Expanding currency support is a separate, larger feature.
-
----
-
-## 6. Confidence Level Summary
-
-| Decision | Recommendation | Confidence |
-|---|---|---|
-| PDF library | `@react-pdf/renderer` 4.x | HIGH |
-| PDF lazy-loading strategy | Dynamic `import()` on user action | HIGH |
-| Mode storage | `user_settings.mode` column | HIGH |
-| Mode access pattern | `useAppMode()` hook, no new Context | HIGH |
-| Flash prevention | localStorage bootstrap cache (ThemeContext pattern) | HIGH |
-| `clients` table schema | As specified in Section 3.3 | HIGH |
-| `invoices` table schema | As specified in Section 3.4 | HIGH |
-| `invoice_items` table | Separate normalized table (not JSONB) | HIGH |
-| Transaction-client link | Nullable FK on `incomes`/`expenses` | HIGH |
-| RLS policy pattern | `FOR ALL` with `user_id = auth.uid()` | HIGH |
-| `invoice_status` enum values | `draft/sent/paid/overdue/cancelled` | MEDIUM — `overdue` may be computed at query time rather than stored, depending on P&L implementation. Both approaches are valid. |
-| `invoice_number` uniqueness | Application-enforced, optional DB constraint | MEDIUM — whether to add `UNIQUE(user_id, invoice_number)` depends on whether users want free-form numbering. Start without it; add if users need duplicate prevention. |
-| i18n translation approach | Add keys to existing `src/i18n/index.ts` | HIGH — but note that the single-file i18n is already flagged as fragile in CONCERNS.md. Consider splitting by domain if the file exceeds ~1000 lines after Advanced Mode strings are added. |
-| Vite chunk for PDF | `vendor-pdf` manual chunk in `vite.config.ts` | HIGH |
-| Bundle budget | `@react-pdf/renderer` must be lazy-loaded to stay within 350KB gzip budget | HIGH |
-
----
-
-## 7. Migration Execution Order
-
-When implementing, apply migrations in this order to respect FK dependencies:
-
-1. `user_settings` mode column (no FK dependencies)
-2. `invoice_status` enum type (no FK dependencies)
-3. `clients` table (FK to `auth.users` only)
-4. `invoices` table (FK to `clients` — must exist first)
-5. `invoice_items` table (FK to `invoices` — must exist first)
-6. `ALTER TABLE incomes ADD COLUMN client_id` (FK to `clients` — must exist first)
-7. `ALTER TABLE expenses ADD COLUMN client_id` (FK to `clients` — must exist first)
-
-After all migrations are applied, regenerate TypeScript types:
 ```bash
-supabase gen types typescript --local > src/integrations/supabase/types.ts
-```
+# Bootstrap new Expo project with SDK 52
+npx create-expo-app@latest balance-tracker-ios --template blank-typescript
 
-Update `DEFAULT_USER_SETTINGS` in `src/hooks/useUserSettings.ts` to include `mode: 'simple'`.
+# Supabase
+npx expo install @supabase/supabase-js react-native-url-polyfill expo-sqlite
+
+# Navigation
+npx expo install expo-router react-native-safe-area-context react-native-screens
+npx expo install react-native-gesture-handler@~2.22.0 react-native-reanimated@~3.16.7
+
+# Supabase storage (already included in expo-sqlite)
+
+# UI and styling
+npm install nativewind
+npx expo install tailwindcss
+
+# Forms
+npm install react-hook-form zod @hookform/resolvers
+
+# Server state
+npm install @tanstack/react-query
+
+# i18n
+npm install i18next react-i18next
+npx expo install expo-localization
+
+# PDF and file handling
+npx expo install expo-print expo-sharing expo-file-system
+
+# Haptics and system
+npx expo install expo-haptics expo-status-bar expo-constants expo-updates
+
+# Bottom sheet
+npm install @gorhom/bottom-sheet
+
+# Dev
+npm install -D @types/react @types/react-native
+npx expo install expo-dev-client
+```
 
 ---
 
-*Research completed: 2026-02-23*
+## Alternatives Considered
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Expo SDK 52 | Expo SDK 53/54/55 | Use SDK 53+ once `@supabase/supabase-js` resolves the Metro ES module `ws/stream` issue upstream. Monitor [supabase-js #1400](https://github.com/supabase/supabase-js/issues/1400). Upgrade path is straightforward. |
+| expo-print (HTML→PDF) | @react-pdf/renderer | @react-pdf/renderer does not work in React Native (it requires browser APIs). Only viable if you move PDF generation to a server (Edge Function), which is out of scope per PROJECT.md. |
+| expo-sqlite localStorage polyfill | @react-native-async-storage/async-storage | AsyncStorage works and is simpler to reason about. The risk: Supabase sessions exceed 2048 bytes, which will cause failures if expo-secure-store is used for session storage. The expo-sqlite polyfill approach is what Supabase officially recommends as of 2025 — no size limit. |
+| expo-sqlite localStorage polyfill | expo-secure-store + MMKV hybrid | More secure (keychain-backed encryption), but complex setup. Use this only if you later add biometric auth or need keychain-backed session security. For v2.0, the simpler expo-sqlite approach is sufficient. |
+| NativeWind v4 | Tamagui | Tamagui is slightly more performant but requires learning a new component abstraction. NativeWind shares syntax with Tailwind CSS already used in the web app — this is the deciding factor. |
+| NativeWind v4 | Gluestack UI v3 | Gluestack adds better accessibility primitives. Viable alternative — use if accessibility is a primary concern from the start. Adds more package surface area. |
+| Expo Router | React Navigation (standalone) | React Navigation standalone gives more granular control but loses file-based routing. Expo Router is built on React Navigation v7 — you can use any React Navigation API within it. No reason to drop Expo Router. |
+| react-hook-form + zod | Formik + yup | Formik is older and slower. The codebase already uses react-hook-form + zod on the web; porting is near-trivial. |
+
+---
+
+## What NOT to Use
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `@react-pdf/renderer` in React Native | Requires browser APIs (`window`, `document`, Canvas). Will error at runtime in React Native's JS environment. | `expo-print` with HTML string template |
+| `html2canvas` + jsPDF in React Native | Same problem as above — both libraries require DOM access. Not installable in RN. | `expo-print` |
+| `expo-secure-store` alone for Supabase session | 2048-byte size limit; Supabase sessions are larger. Will throw in SDK 35+. | `expo-sqlite/localStorage/install` polyfill |
+| `@react-native-async-storage/async-storage` for Supabase session | Not cryptographically secure; also not the official 2025 recommended approach. Fine for non-sensitive preference caching. | `expo-sqlite/localStorage/install` polyfill for session; AsyncStorage only for UI preferences (theme, language bootstrap) |
+| Expo SDK 53+ (as of February 2026) | Known Supabase compatibility regression — `ws/stream` Node module error on Metro with default ES module resolution. Workaround exists (disable `unstable_enablePackageExports` in metro.config.js) but is fragile for a fresh project. | Expo SDK 52 until the upstream issue is resolved |
+| Zustand / Redux / Jotai | All overkill. This app's global state is: auth session + user settings. Both fit in React Context + React Query. Adding a dedicated state manager adds complexity with no benefit. | React Context for auth/settings, TanStack Query for all server state |
+| Expo Go for development of this app | @gorhom/bottom-sheet and other modules with native code cannot run in Expo Go. | `expo-dev-client` development build |
+| Class-based React components | Not used anywhere in the web app. Not the RN 2025 standard. | Functional components + hooks throughout |
+
+---
+
+## Version Compatibility Matrix
+
+| Package | SDK 52 Compatible Version | Notes |
+|---------|--------------------------|-------|
+| expo | ~52.0.0 | Ships RN 0.76, iOS 15.1 min |
+| react-native | 0.76.x | New Architecture by default |
+| @supabase/supabase-js | 2.x | SDK 52 confirmed compatible. SDK 53+ needs metro workaround. |
+| react-native-reanimated | ~3.16.7 | 3.16.1 does not support RN 0.77; 3.16.7+ required for SDK 52 with RN 0.77 patch |
+| react-native-gesture-handler | ~2.22.0 | Tested with SDK 52 + RN 0.76/0.77 |
+| expo-router | ~4.0.0 | Uses React Navigation v7 |
+| nativewind | 4.x | v4.1 (Dec 2025) — CSS variables, dark mode, container queries |
+| @gorhom/bottom-sheet | ~5.x | v5 required for New Architecture (RN 0.76+) |
+| @tanstack/react-query | 5.x | React Native first-class support confirmed |
+| expo-print | ~13.x | Active maintenance confirmed (last published 3 months ago as of research date) |
+
+---
+
+## Stack Patterns by Variant
+
+**If Arabic is the active language:**
+- `I18nManager.forceRTL(true)` must be set before app renders
+- Use `Start`/`End` logical properties in all StyleSheet objects
+- Expo Router's Stack header automatically mirrors for RTL
+- expo-print HTML template: set `<html dir="rtl">` and `direction: rtl` in body CSS
+
+**If Advanced Mode is inactive:**
+- Clients tab and Invoices screens are not shown (conditional tab rendering)
+- All hooks for clients/invoices are never mounted — no unnecessary Supabase queries
+- Mode state comes from `user_settings.mode` column, same DB column as web app
+
+**If building a development build (required for @gorhom/bottom-sheet):**
+```bash
+npx expo run:ios        # local Xcode build (requires macOS + Xcode 15+)
+# OR
+eas build --profile development --platform ios   # cloud build, no local Xcode needed
+```
+
+---
+
+## Sources
+
+- [Expo SDK 52 Changelog](https://expo.dev/changelog/2024-11-12-sdk-52) — RN version, iOS min, New Architecture default — HIGH confidence
+- [Expo SDK 53 Changelog](https://expo.dev/changelog/sdk-53) — Supabase ES module incompatibility documented — HIGH confidence
+- [supabase-js issue #1400](https://github.com/supabase/supabase-js/issues/1400) — `ws/stream` error on SDK 53 — HIGH confidence (active GitHub issue)
+- [supabase-js issue #1403](https://github.com/supabase/supabase-js/issues/1403) — same issue confirmed — HIGH confidence
+- [Supabase Expo quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/expo-react-native) — expo-sqlite localStorage polyfill, install commands — HIGH confidence
+- [Expo print docs](https://docs.expo.dev/versions/latest/sdk/print/) — printToFileAsync API, iOS WKWebView limitation — HIGH confidence
+- [Expo Submit iOS docs](https://docs.expo.dev/submit/ios/) — EAS Submit workflow, App Store requirements — HIGH confidence
+- [React Native I18nManager docs](https://reactnative.dev/docs/i18nmanager) — forceRTL, requires restart — HIGH confidence
+- [NativeWind dark mode docs](https://www.nativewind.dev/docs/core-concepts/dark-mode) — colorScheme API, Expo app.json config — HIGH confidence
+- [TanStack Query React Native docs](https://tanstack.com/query/latest/docs/framework/react/react-native) — first-class support confirmed — HIGH confidence
+- [react-native-reanimated SDK 52 version](https://expo.dev/changelog/2025-01-21-react-native-0.77) — ~3.16.7 required — HIGH confidence
+- [Expo Router introduction](https://docs.expo.dev/router/introduction/) — navigation patterns — HIGH confidence
+- [GeekyAnts RTL + Expo guide](https://geekyants.com/blog/implementing-rtl-right-to-left-in-react-native-expo---a-step-by-step-guide) — I18nManager + Updates.reloadAsync pattern — MEDIUM confidence (community source, consistent with official docs)
+- [expo-print invoice guide (Jan 2026)](https://anytechie.medium.com/how-to-use-expo-print-complete-guide-to-printing-in-react-native-apps-173fa435dadf) — confirms expo-print remains the current recommendation — MEDIUM confidence (community)
+
+---
+
+*Stack research for: Balance Tracker iOS (React Native port of existing Supabase PWA)*
+*Researched: 2026-02-26*

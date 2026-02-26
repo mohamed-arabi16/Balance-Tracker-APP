@@ -1,648 +1,691 @@
-# Architecture Research: Dual-Mode UI Extension
+# Architecture Research: React Native (Expo) iOS Port
 
-**Research Date:** 2026-02-23
-**Scope:** Adding Advanced Mode (freelancer features) to the existing React 18 + TypeScript + Supabase SPA
+**Domain:** Mobile personal finance app — React Native port from existing React web app
+**Researched:** 2026-02-26
+**Confidence:** HIGH (verified via Expo official docs, Supabase official docs, React Native official docs, TanStack Query docs)
 
 ---
 
-## 1. ModeContext Design
+## Standard Architecture
 
-### Where Mode State Lives
+### System Overview
 
-The mode toggle follows the exact same pattern as `ThemeContext` and `CurrencyContext`: a new `ModeContext` at `src/contexts/ModeContext.tsx`. This is the correct placement because:
-
-- Mode is a global UI concern that gate-keeps entire pages and navigation sections — it needs the same global scope as theme or currency.
-- The existing provider chain in `App.tsx` wraps: `AuthProvider` → `ThemeProvider` → `CurrencyProvider` → `DateProvider`. `ModeProvider` slots in after `ThemeProvider` and before `CurrencyProvider`, since mode does not depend on currency but advanced mode components may want currency access.
-
-The updated provider chain in `App.tsx`:
-
-```tsx
-<AuthProvider>
-  <ThemeProvider>
-    <ModeProvider>          {/* NEW — inserted here */}
-      <CurrencyProvider>
-        <DateProvider>
-          ...
-        </DateProvider>
-      </CurrencyProvider>
-    </ModeProvider>
-  </ThemeProvider>
-</AuthProvider>
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    React Native (Expo) App                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Expo Router (File-Based)                                         │
+│  ┌────────────┐  ┌─────────────┐  ┌──────────────────────────┐   │
+│  │ (auth)/    │  │ (tabs)/     │  │ (advanced)/              │   │
+│  │ sign-in    │  │ dashboard   │  │ clients/[id]             │   │
+│  │ sign-up    │  │ income      │  │ invoices/[id]            │   │
+│  │            │  │ expenses    │  │ invoices/new             │   │
+│  │            │  │ debts       │  └──────────────────────────┘   │
+│  │            │  │ assets      │                                  │
+│  │            │  │ settings    │                                  │
+│  └────────────┘  └─────────────┘                                  │
+├──────────────────────────────────────────────────────────────────┤
+│  Provider Layer (Context — PORTED from web, thin adapters)        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ ┌────────┐   │
+│  │ Auth     │ │ Theme    │ │ Mode     │ │Currency│ │Date    │   │
+│  │ Context  │ │ Context  │ │ Context  │ │Context │ │Context │   │
+│  └──────────┘ └──────────┘ └──────────┘ └────────┘ └────────┘   │
+├──────────────────────────────────────────────────────────────────┤
+│  Business Logic Layer (REUSED — hooks + lib functions)            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ ┌────────┐   │
+│  │useIncomes│ │useExpense│ │useClients│ │useDebt │ │useAsset│   │
+│  │useInvoi- │ │useUser-  │ │useFilter-│ │useExch-│ │        │   │
+│  │  ces     │ │ Settings │ │  edData  │ │ ange   │ │        │   │
+│  └──────────┘ └──────────┘ └──────────┘ └────────┘ └────────┘   │
+│  TanStack React Query (same API, RN-specific config only)         │
+├──────────────────────────────────────────────────────────────────┤
+│  Data Layer                                                        │
+│  ┌──────────────────────────────┐  ┌───────────────────────────┐  │
+│  │ Supabase Client (RN adapter) │  │ AsyncStorage + SecureStore│  │
+│  │ - expo-secure-store for auth │  │ (no localStorage)         │  │
+│  │ - AppState for token refresh │  └───────────────────────────┘  │
+│  │ - react-native-url-polyfill  │                                  │
+│  └──────────────────────────────┘                                  │
+├──────────────────────────────────────────────────────────────────┤
+│  External Backend (UNCHANGED — same Supabase project)             │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
+│  │ PostgreSQL DB│  │  Supabase    │  │  Edge Functions        │  │
+│  │ (same schema)│  │  Auth (JWT)  │  │  (metal-prices, etc.)  │  │
+│  └──────────────┘  └──────────────┘  └────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-### ModeContext Interface
+### Component Responsibilities
 
-```tsx
-// src/contexts/ModeContext.tsx
+| Component | Responsibility | Typical Implementation |
+|-----------|----------------|------------------------|
+| Expo Router file tree | Navigation and deep linking | Files in `src/app/` define screens; `_layout.tsx` configures navigators |
+| `(auth)` route group | Auth screens outside the tab bar | Stack navigator, no tab bar, redirects on auth success |
+| `(tabs)` route group | Main app screens with bottom tab bar | Bottom tab navigator, each tab is its own stack |
+| Stack.Protected | Auth guard — RN equivalent of ProtectedRoute | Expo Router built-in guard based on session state |
+| Context providers | Global state (auth, theme, mode, currency, date) | Thin adapters over the ported web contexts |
+| Custom hooks (useIncomes, etc.) | All server state and mutations | PORTED from web — same logic, same React Query |
+| Supabase RN client | Auth, DB reads/writes, Edge Functions | `@supabase/supabase-js` with `expo-secure-store` adapter |
+| expo-print + expo-sharing | PDF generation + native share sheet | Replaces `@react-pdf/renderer` from the web |
+| i18next + react-i18next | Multilingual text and RTL switching | PORTED from web; `I18nManager.allowRTL()` for native layout |
+| AsyncStorage | Non-sensitive local state (theme, currency cache) | `@react-native-async-storage/async-storage` |
+| expo-secure-store | Sensitive storage (Supabase session tokens) | iOS Keychain-backed secure storage |
 
-type AppMode = 'simple' | 'advanced';
+---
 
-interface ModeContextType {
-  mode: AppMode;
-  setMode: (mode: AppMode) => void;
-  isAdvanced: boolean;        // derived: mode === 'advanced'
-  isUpdating: boolean;        // true while DB persist is in-flight
-}
+## Reuse vs. Rebuild Decision Map
+
+This is the most important architectural decision for the port.
+
+### REUSE: Port directly with minimal changes
+
+| Layer | What | Change Required |
+|-------|------|-----------------|
+| TypeScript types | `Income`, `Expense`, `Debt`, `Asset`, `Client`, `Invoice`, all DB types from `integrations/supabase/types.ts` | None — copy unchanged |
+| Query keys | `queryKeys.ts` | None — copy unchanged |
+| Business logic lib | `lib/currency.ts`, `lib/finance.ts`, `lib/debt.ts`, `lib/insights.ts`, `lib/netWorth.ts`, `lib/locale.ts` | None — pure functions, no DOM/CSS |
+| All custom hooks | `useIncomes`, `useExpenses`, `useDebts`, `useAssets`, `useClients`, `useInvoices`, `useUserSettings`, `useExchangeRate`, `useAssetPrices`, `useFilteredData`, `useRecentActivity`, `useLogActivity` | Minor: remove web-only imports (e.g., `trackEvent` from `lib/analytics.ts` if analytics not ported); swap `useAuth` to consume RN-compatible AuthContext |
+| Context logic | `ModeContext`, `CurrencyContext`, `DateContext` — the state logic and interfaces | Minor: persistence via AsyncStorage instead of localStorage for CurrencyContext's cached rate |
+| i18n translation strings | The entire `resources` object in `src/i18n/index.ts` (all `en` and `ar` translation keys) | None — copy the translation object wholesale |
+| Supabase DB types | `src/integrations/supabase/types.ts` | None — same Supabase project |
+
+### REBUILD: Must be written fresh for native
+
+| Layer | What | Why | Native Replacement |
+|-------|------|-----|--------------------|
+| UI components | Everything in `src/components/ui/` (Shadcn), `src/components/layout/`, `src/components/invoice/`, `src/components/advanced/` | All use DOM elements and Tailwind CSS | React Native core components + NativeWind v4 for styling |
+| All page/screen files | Every file in `src/pages/` | Use HTML, `<div>`, DOM events, `useNavigate()` from react-router-dom | Expo Router screen files with `View`, `Text`, `Pressable`, `ScrollView` |
+| Navigation | `react-router-dom` with `BrowserRouter`, `Routes`, `Route`, `AdvancedRoute` guard | DOM-based routing | Expo Router file-based routing with `Stack.Protected` |
+| Supabase client init | `src/integrations/supabase/client.ts` — uses `localStorage` as auth storage | `localStorage` does not exist in React Native | Re-create with `expo-secure-store` adapter + `AppState` refresh |
+| Auth context | `AuthContext.tsx` — session logic is compatible but web-specific details differ | `AppState` handling, no URL-based auth callback on mobile | Re-create with same interface; add `AppState` listener for token auto-refresh |
+| Theme context | `ThemeContext.tsx` — uses `document.documentElement.classList` for dark mode | No DOM in React Native | Re-create; use Appearance API + NativeWind dark mode class |
+| PDF export | `@react-pdf/renderer` with `dynamic import()` | Does not run in React Native JS environment | `expo-print` (HTML → PDF) + `expo-sharing` (native share sheet) |
+| i18n setup | `i18next` init in `src/i18n/index.ts` — the setup glue (not the string resources) | RTL requires `I18nManager.allowRTL()` call on native | Re-create init file; add `I18nManager.allowRTL(true)` in Arabic branch |
+| CSS/Tailwind classes | All className strings | No CSS engine in React Native | NativeWind `className` props (compile-time transform to StyleSheet) |
+| Toast notifications | `sonner` / Shadcn Sonner | DOM-based | `react-native-toast-message` or similar |
+
+---
+
+## Recommended Project Structure
+
+```
+balance-tracker-mobile/          # New standalone Expo project
+├── app.json                     # Expo app config
+├── eas.json                     # EAS Build profiles (development/preview/production)
+├── tsconfig.json
+├── babel.config.js              # Required for NativeWind v4
+├── metro.config.js              # Required for NativeWind v4
+│
+└── src/
+    ├── app/                     # Expo Router — file = route
+    │   ├── _layout.tsx          # Root layout: providers + Stack.Protected auth guard
+    │   ├── (auth)/
+    │   │   ├── _layout.tsx      # Stack navigator, no tab bar
+    │   │   ├── sign-in.tsx
+    │   │   └── sign-up.tsx
+    │   └── (tabs)/
+    │       ├── _layout.tsx      # Bottom tab navigator (iOS tab bar)
+    │       ├── index.tsx        # Dashboard tab
+    │       ├── income.tsx
+    │       ├── expenses.tsx
+    │       ├── debts.tsx
+    │       ├── assets.tsx
+    │       ├── settings.tsx
+    │       └── advanced/        # Advanced mode screens (stack within tabs)
+    │           ├── index.tsx    # Advanced Dashboard
+    │           ├── clients/
+    │           │   ├── index.tsx
+    │           │   ├── new.tsx
+    │           │   ├── [id].tsx
+    │           │   └── [id]/edit.tsx
+    │           └── invoices/
+    │               ├── index.tsx
+    │               ├── new.tsx
+    │               ├── [id].tsx
+    │               └── [id]/edit.tsx
+    │
+    ├── components/              # REBUILT: native UI components
+    │   ├── ui/                  # Design system primitives (Button, Card, Input, etc.)
+    │   ├── layout/              # Tab bar, header, safe area wrappers
+    │   ├── forms/               # Income form, Expense form, etc.
+    │   ├── advanced/            # Client/Invoice-specific components
+    │   └── shared/              # DateFilterSelector, modals, badges
+    │
+    ├── hooks/                   # PORTED: same logic as web
+    │   ├── useIncomes.ts        # Port directly — same React Query shape
+    │   ├── useExpenses.ts
+    │   ├── useDebts.ts
+    │   ├── useAssets.ts
+    │   ├── useClients.ts
+    │   ├── useInvoices.ts
+    │   ├── useUserSettings.ts
+    │   ├── useExchangeRate.ts
+    │   ├── useAssetPrices.ts
+    │   ├── useFilteredData.ts
+    │   ├── useRecentActivity.ts
+    │   └── useLogActivity.ts
+    │
+    ├── contexts/                # PARTIALLY PORTED (logic) + REBUILT (adapters)
+    │   ├── AuthContext.tsx      # Re-built: AppState + SecureStore
+    │   ├── ThemeContext.tsx     # Re-built: Appearance API + NativeWind
+    │   ├── ModeContext.tsx      # Port: same logic; persistence via user_settings
+    │   ├── CurrencyContext.tsx  # Port: swap localStorage cache for AsyncStorage
+    │   └── DateContext.tsx      # Port: same, no changes needed
+    │
+    ├── lib/                     # PORTED: pure functions, zero changes
+    │   ├── currency.ts
+    │   ├── finance.ts
+    │   ├── debt.ts
+    │   ├── insights.ts
+    │   ├── netWorth.ts
+    │   ├── locale.ts
+    │   ├── queryKeys.ts
+    │   └── supabaseClient.ts    # Re-built: RN-specific init
+    │
+    ├── i18n/
+    │   └── index.ts             # REBUILT init; translation resources PORTED
+    │
+    ├── integrations/
+    │   └── supabase/
+    │       ├── client.ts        # REBUILT for RN
+    │       └── types.ts         # PORTED — identical copy from web
+    │
+    └── assets/                  # App icons, splash screens
 ```
 
-The `isAdvanced` boolean shorthand eliminates repeated `mode === 'advanced'` checks across components. This mirrors how `ThemeContext` exposes `actualTheme` as a derived value alongside `theme`.
+### Structure Rationale
 
-### How Mode Preference Is Persisted
+- **`src/app/`:** Expo Router convention — every file is a route. Groups `(auth)` and `(tabs)` use parentheses to prevent their names from appearing in URL paths. Advanced mode screens nest inside `(tabs)/advanced/` rather than a separate group because they use the same tab bar chrome.
+- **`src/hooks/`:** Direct port of web hooks. No path aliases needed — Expo supports `tsconfig.json` path aliases identically.
+- **`src/lib/`:** Pure TypeScript functions — no DOM, no React Native APIs. Copied unchanged.
+- **`src/integrations/supabase/types.ts`:** The generated Supabase types file is identical between web and mobile because both target the same Supabase project. Copy it verbatim.
+- **Standalone repo (not monorepo):** See Monorepo Decision below.
 
-Mode preference is stored as a new column `app_mode` on the existing `user_settings` table — not a separate table. This follows the established pattern: every other user preference (theme, default_currency, language, auto_convert, include_long_term, auto_price_update, net_worth_calculation) lives in `user_settings`.
+---
 
-**Required DB change:**
+## Monorepo vs. Separate Repo Decision
 
-```sql
-ALTER TABLE user_settings
-ADD COLUMN app_mode TEXT NOT NULL DEFAULT 'simple'
-CHECK (app_mode IN ('simple', 'advanced'));
-```
+**Decision: Separate repo (new standalone Expo project).**
 
-**Persistence mechanism in ModeContext** mirrors ThemeContext exactly:
+**Rationale:**
 
-1. On mount: read `settings?.app_mode` from `useUserSettings()`. Initialize local state to `'simple'` (the safe default, matching the `DEFAULT_USER_SETTINGS` constant in `useUserSettings.ts`).
-2. When `settings` loads and contains a non-null `app_mode`, sync the local state via `useEffect` (same pattern as `ThemeContext`'s sync on `settings?.theme`).
-3. `setMode()` calls `updateSettings({ app_mode: nextMode })` asynchronously via the existing optimistic-update mutation in `useUserSettings`. If the DB write fails, the optimistic update reverts automatically — the same error recovery ThemeContext benefits from.
-4. The `DEFAULT_USER_SETTINGS` object in `useUserSettings.ts` gets `app_mode: 'simple'` added so that new users always start in Simple mode.
+Monorepos for React + React Native code sharing work when you use a universal renderer like react-native-web. This project is not doing that — it is building two separate UI layers (Shadcn web UI and native React Native UI). The only shared code is hooks, types, and lib functions — which are simple file copies, not packages that need live synchronization.
 
-**No localStorage fallback needed.** ThemeContext uses localStorage as a pre-auth bootstrap (to avoid flash of wrong theme before settings load), but mode does not need this — there is no visual flash risk from starting in Simple mode briefly. If a returning user briefly sees Simple mode before their settings load, it is acceptable. Do not add localStorage for mode.
+The costs of a monorepo (Turborepo/Yarn Workspaces setup complexity, Metro bundler configuration for workspace packages, potential duplicate React instance issues) outweigh the benefit for a two-person or solo project where the shared layer is stable and not changing frequently.
 
-### How Components Conditionally Render Based on Mode
+**When to reconsider monorepo:** If you need to ship bug fixes to shared business logic simultaneously to both web and mobile (e.g., a currency conversion bug), a monorepo makes that atomic. At this project's scale, manual copy-paste of the `hooks/` and `lib/` changes to both repos is manageable.
 
-Components access mode via the `useMode()` hook:
+**Practical setup:** Start the React Native project with `npx create-expo-app --template` and immediately copy in the portable layers (hooks, lib, types, translation resources) before writing any UI.
 
-```tsx
-const { isAdvanced } = useMode();
-```
+---
 
-Three conditional rendering patterns are used, chosen by scope:
+## Architectural Patterns
 
-**Pattern A — Sidebar navigation sections (coarse-grained, in Sidebar.tsx):**
-The `sidebarItems` array is currently a static constant. It must be refactored to a function or computed inside the component so it can read `isAdvanced`:
+### Pattern 1: Expo Router Stack.Protected for Auth Guard
 
-```tsx
-// Inside Sidebar component
-const { isAdvanced } = useMode();
+**What:** Expo Router v3+ provides `Stack.Protected` which conditionally shows or hides an entire route group based on a boolean guard. It is the native equivalent of the web's `<ProtectedRoute>` component.
 
-const advancedItems = [
-  { titleKey: "nav.advanced.dashboard", href: "/advanced", icon: BarChart3 },
-  { titleKey: "nav.clients",            href: "/clients",  icon: Users },
-  { titleKey: "nav.invoices",           href: "/invoices", icon: FileText },
-];
+**When to use:** Replace the web's `ProtectedRoute` component and `AdvancedRoute` component entirely with this pattern.
 
-// Render a section divider + advanced items when isAdvanced is true
-```
+**Example:**
 
-Simple mode nav items always render. Advanced mode nav items are appended beneath a visual divider when `isAdvanced` is true.
+```typescript
+// src/app/_layout.tsx
+import { Stack } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMode } from '@/contexts/ModeContext';
 
-**Pattern B — Dashboard widget slots (medium-grained, in Dashboard.tsx):**
-The existing `Dashboard.tsx` is not replaced. A section is added at the bottom that conditionally renders the `AdvancedDashboardSection` component:
-
-```tsx
-// Bottom of Dashboard.tsx JSX
-{isAdvanced && <AdvancedDashboardSection />}
-```
-
-This keeps Simple mode dashboard untouched and Advanced mode additions purely additive.
-
-**Pattern C — Form fields (fine-grained, inside form components):**
-Income and Expense forms get an optional client selector that only renders in Advanced mode:
-
-```tsx
-{isAdvanced && (
-  <FormField name="client_id" label="Client (optional)" .../>
-)}
-```
-
-### Route Structure
-
-**Decision: Advanced mode gets dedicated new routes, not conditional content on existing routes.**
-
-Rationale: Client management and Invoice builder are full CRUD pages with their own data, their own hooks, and their own navigation breadcrumbs. Forcing them into conditional content on `/income` or `/` would create deep conditional branching and break the clean page-per-concern convention the app already follows. New routes are cleaner, lazy-loadable individually, and easier to guard.
-
-The route additions to `App.tsx`:
-
-```tsx
-// Inside the ProtectedRoute > AppLayout > Routes block
-{/* Advanced Mode Routes — only accessible when mode is 'advanced' */}
-<Route path="/advanced"              element={<AdvancedRoute><AdvancedDashboard /></AdvancedRoute>} />
-<Route path="/clients"               element={<AdvancedRoute><Clients /></AdvancedRoute>} />
-<Route path="/clients/:clientId"     element={<AdvancedRoute><ClientDetail /></AdvancedRoute>} />
-<Route path="/invoices"              element={<AdvancedRoute><Invoices /></AdvancedRoute>} />
-<Route path="/invoices/new"          element={<AdvancedRoute><InvoiceBuilder /></AdvancedRoute>} />
-<Route path="/invoices/:invoiceId"   element={<AdvancedRoute><InvoiceDetail /></AdvancedRoute>} />
-```
-
-`AdvancedRoute` is a thin guard component analogous to `ProtectedRoute`:
-
-```tsx
-// src/components/AdvancedRoute.tsx
-export function AdvancedRoute({ children }: { children: React.ReactNode }) {
+export default function RootLayout() {
+  const { session, loading } = useAuth();
   const { isAdvanced } = useMode();
-  if (!isAdvanced) return <Navigate to="/" replace />;
-  return <>{children}</>;
+
+  if (loading) return <SplashScreen />;
+
+  return (
+    <Stack>
+      {/* Always accessible */}
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+
+      {/* Protected — only visible when authenticated */}
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      {/* Advanced mode guard */}
+      <Stack.Protected guard={!!session && isAdvanced}>
+        <Stack.Screen name="(tabs)/advanced" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
 }
 ```
 
-All advanced page components are lazy-loaded like existing pages:
+**Trade-offs:** Expo Router automatically handles redirect to `(auth)` when `guard` is false. No manual `<Navigate>` calls needed. The downside is that route groups must be structured to match guard boundaries.
 
-```tsx
-const AdvancedDashboard = lazy(() => import("./pages/advanced/AdvancedDashboard"));
-const Clients           = lazy(() => import("./pages/advanced/Clients"));
-const ClientDetail      = lazy(() => import("./pages/advanced/ClientDetail"));
-const Invoices          = lazy(() => import("./pages/advanced/Invoices"));
-const InvoiceBuilder    = lazy(() => import("./pages/advanced/InvoiceBuilder"));
-const InvoiceDetail     = lazy(() => import("./pages/advanced/InvoiceDetail"));
-```
+### Pattern 2: Supabase Client with SecureStore + AppState
 
-The existing Simple mode routes (`/`, `/income`, `/expenses`, `/debts`, `/assets`, `/settings`) are untouched and remain accessible in both modes. Advanced mode is additive.
+**What:** The web Supabase client uses `localStorage` for session persistence. React Native has no `localStorage`. Use `expo-secure-store` as the storage adapter and `AppState` to pause/resume token auto-refresh when the app backgrounds.
 
----
+**When to use:** The only place this pattern applies is `src/integrations/supabase/client.ts`. All hooks continue to import `supabase` from this file — they are unaware of the storage change.
 
-## 2. Database Schema Additions
+**Example:**
 
-### clients Table
+```typescript
+// src/integrations/supabase/client.ts
+import 'react-native-url-polyfill/auto';
+import { createClient } from '@supabase/supabase-js';
+import * as SecureStore from 'expo-secure-store';
+import { AppState } from 'react-native';
+import type { Database } from './types';
 
-```sql
-CREATE TABLE clients (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
-  email       TEXT,
-  phone       TEXT,
-  company     TEXT,
-  notes       TEXT,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+const ExpoSecureStoreAdapter = {
+  getItem:    (key: string) => SecureStore.getItemAsync(key),
+  setItem:    (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
+
+export const supabase = createClient<Database>(
+  process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      storage: ExpoSecureStoreAdapter,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,   // false for native; no URL-based auth callbacks
+    },
+  }
 );
 
--- Auto-update updated_at on row change
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER clients_updated_at
-  BEFORE UPDATE ON clients
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+// Pause token refresh when app is in background
+AppState.addEventListener('change', (state) => {
+  if (state === 'active') {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
+});
 ```
 
-Only `name` is required; all contact fields are nullable to minimize friction when creating a new client quickly.
+**Trade-offs:** SecureStore on iOS uses the Keychain (encrypted, sandboxed per-app). This is more secure than `localStorage` on web. The tradeoff is that SecureStore has a 2KB value size limit per item on some iOS versions — Supabase session tokens are within this limit, but large JWT payloads would not be.
 
-### invoices Table
+### Pattern 3: TanStack React Query with RN Focus/Online Managers
 
-```sql
-CREATE TYPE invoice_status AS ENUM ('draft', 'sent', 'paid', 'overdue');
+**What:** React Query on web uses window focus events to trigger refetches. React Native has no `window` — it uses `AppState` for focus and `NetInfo` for connectivity. Two one-time configurations wire these up at app startup.
 
-CREATE TABLE invoices (
-  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id        UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  client_id      UUID NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
-  invoice_number TEXT NOT NULL,
-  status         invoice_status NOT NULL DEFAULT 'draft',
-  issue_date     DATE NOT NULL DEFAULT CURRENT_DATE,
-  due_date       DATE,
-  items          JSONB NOT NULL DEFAULT '[]'::jsonb,
-  subtotal       NUMERIC(14, 2) NOT NULL DEFAULT 0,
-  total          NUMERIC(14, 2) NOT NULL DEFAULT 0,
-  currency       TEXT NOT NULL DEFAULT 'USD',
-  notes          TEXT,
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-```
+**When to use:** Configure once in `src/app/_layout.tsx` or a dedicated `QueryClientProvider` setup file. All hooks (`useQuery`, `useMutation`) then work identically to web.
 
-**`items` JSONB structure** — each element in the array:
-
-```json
-{
-  "description": "Website design",
-  "quantity": 1,
-  "unit_price": 1500.00,
-  "amount": 1500.00
-}
-```
-
-`subtotal` and `total` are redundant computed fields stored for fast querying (e.g., summing outstanding invoice totals without parsing JSONB). They are computed and set by the client before insert/update, not by a DB trigger, keeping the pattern consistent with how `total_value` is computed and stored on the `assets` table.
-
-`client_id` on invoices uses `ON DELETE RESTRICT` — an invoice must not be silently orphaned if a client is deleted. The user must either reassign or delete the invoices first. This is explicit UX behavior, not silent cascade.
-
-`invoice_number` is a user-visible identifier (e.g., "INV-001"). It is a plain TEXT column, not auto-generated by the DB, because invoice numbering conventions vary by user/business. The client generates the number (e.g., sequential counter stored client-side or fetched via a `COUNT(*)` query on the user's invoices).
-
-### Linking Existing Transactions to Clients: Nullable FK Approach
-
-**Recommendation: Add nullable `client_id` FK columns directly on the `incomes` and `expenses` tables. Do not use a junction table.**
-
-```sql
--- Migration
-ALTER TABLE incomes
-ADD COLUMN client_id UUID REFERENCES clients(id) ON DELETE SET NULL;
-
-ALTER TABLE expenses
-ADD COLUMN client_id UUID REFERENCES clients(id) ON DELETE SET NULL;
-```
-
-**Rationale against junction table:**
-
-A junction table (`income_clients`) would introduce a third table join for every income query that needs client context. The existing `useIncomes` hook already joins `income_amount_history` in a single Supabase select (`'*, income_amount_history(*)'`). Adding another join table inflates query complexity without any benefit, since the requirement is one-to-one: each income or expense belongs to at most one client. Junction tables are appropriate for M:N relationships; this is M:1 (many transactions to one client). A nullable FK is the correct relational model for an optional M:1.
-
-**`ON DELETE SET NULL` behavior:** If a client is deleted, their linked transactions are not deleted — only the `client_id` pointer is nulled. The transactions remain in the user's income/expense history but become unlinked. This is the correct financial behavior: a transaction's historical fact is preserved even if the client relationship ends.
-
-**TypeScript type update:** After the migration, the `Income` interface in `useIncomes.ts` gains an optional field:
+**Example:**
 
 ```typescript
-export interface Income {
-  // ... existing fields ...
-  client_id?: string | null;
+// src/lib/queryClient.ts
+import { QueryClient, focusManager, onlineManager } from '@tanstack/react-query';
+import { AppState, Platform } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+
+// Wire up focus management
+if (Platform.OS !== 'web') {
+  focusManager.setEventListener((handleFocus) => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      handleFocus(state === 'active');
+    });
+    return () => subscription.remove();
+  });
 }
+
+// Wire up online/offline detection
+onlineManager.setEventListener((setOnline) => {
+  return NetInfo.addEventListener((state) => {
+    setOnline(!!state.isConnected);
+  });
+});
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes — same as web
+    },
+  },
+});
 ```
 
-Same for the `Expense` interface in `useExpenses.ts`.
+**Trade-offs:** Without this, React Query won't refetch on app foreground (returning from background) and won't pause queries when offline. These are critical for a finance app where data freshness matters.
 
-### RLS Policies
+### Pattern 4: expo-print for Invoice PDF Generation
 
-All new tables follow the existing pattern: `user_id = auth.uid()`. The existing tables all use this pattern (visible in the types file — every table has a `user_id` column). No exceptions.
+**What:** The web app uses `@react-pdf/renderer` which is a virtual DOM-based PDF renderer — it does not run in React Native. On iOS, `expo-print` generates a PDF from an HTML string (rendered by WKWebView headlessly) and saves to the cache directory. `expo-sharing` then presents the native iOS share sheet (save to Files, AirDrop, email attachment, etc.).
 
-```sql
--- clients RLS
-ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+**When to use:** Replace the web's `InvoiceDetail.tsx` PDF export button with this native equivalent.
 
-CREATE POLICY "clients: users manage their own"
-  ON clients FOR ALL
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
-
--- invoices RLS
-ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "invoices: users manage their own"
-  ON invoices FOR ALL
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
-```
-
-The `FOR ALL` single-policy pattern (covering SELECT, INSERT, UPDATE, DELETE) matches the style used on existing tables. No per-verb splitting is needed; the user_id check is sufficient for both `USING` (read/delete gate) and `WITH CHECK` (insert/update gate).
-
-No new RLS policies are needed on `incomes` or `expenses` — the `client_id` column additions do not affect the existing row-level ownership check. The existing policies already restrict reads/writes to the owning user.
-
----
-
-## 3. Component Architecture
-
-### Directory Structure for Advanced Mode
-
-Advanced mode pages and components live in a dedicated subdirectory. This is the correct approach over co-location because:
-
-- Advanced mode contains multiple pages that reference each other (e.g., the invoice builder navigates to client detail). A dedicated directory makes the dependency graph obvious.
-- It prevents the `src/pages/` root from becoming a flat mix of Simple and Advanced concerns.
-- It mirrors the convention already present in `src/components/layout/` — related components are grouped by feature/concern.
-
-```
-src/
-  pages/
-    advanced/                         # All Advanced Mode pages
-      AdvancedDashboard.tsx
-      Clients.tsx                     # Client list + add
-      ClientDetail.tsx                # Client detail + transactions
-      Invoices.tsx                    # Invoice list
-      InvoiceBuilder.tsx              # Create/edit invoice
-      InvoiceDetail.tsx               # View invoice + PDF export
-  components/
-    advanced/                         # Reusable Advanced Mode sub-components
-      RevenuePerClientWidget.tsx
-      OutstandingInvoicesWidget.tsx
-      MonthlyProfitTrendWidget.tsx
-      ClientSelector.tsx              # Dropdown for picking a client (used in forms)
-      InvoiceLineItems.tsx            # Line item editor used in InvoiceBuilder
-      InvoiceStatusBadge.tsx          # Status pill component
-    AdvancedRoute.tsx                 # Mode guard (analogous to ProtectedRoute)
-  hooks/
-    useClients.ts                     # CRUD hooks for clients table
-    useInvoices.ts                    # CRUD hooks for invoices table
-    useClientTransactions.ts          # Fetch incomes+expenses filtered by client_id
-    useLinkTransactionToClient.ts     # Mutation: set client_id on income/expense row
-```
-
-### Advanced Dashboard Component Structure
-
-`AdvancedDashboard.tsx` at `/advanced` is a separate page — it does not replace the existing `Dashboard.tsx`. Users in Advanced mode see both: the Simple Dashboard at `/` still exists with all its existing widgets, and the Advanced Dashboard at `/advanced` adds the freelancer-specific widgets.
-
-The sidebar in Advanced mode shows the Advanced Dashboard link first in its advanced section, making it the natural landing point for Advanced mode users.
-
-**Three widgets in AdvancedDashboard:**
-
-**Widget 1: RevenuePerClientWidget**
-- Location: `src/components/advanced/RevenuePerClientWidget.tsx`
-- Data source: `useIncomes()` data (already cached by React Query), grouped by `client_id`, then joined client name from `useClients()`.
-- No new Supabase query needed — the grouping is done client-side in the component using the existing React Query cache. This avoids N+1 fetches.
-- Renders as a ranked list or bar chart (Shadcn + Recharts if chart; plain list if no chart library).
-- Shows: client name, total received income, percentage of total revenue.
-- Unlinked income rows (null `client_id`) are grouped under "Unassigned" or excluded from the chart.
-
-**Widget 2: OutstandingInvoicesWidget**
-- Location: `src/components/advanced/OutstandingInvoicesWidget.tsx`
-- Data source: `useInvoices()` filtered to `status IN ('sent', 'overdue')`.
-- Renders as a list of invoice cards: client name, invoice number, amount, due date, status badge.
-- Overdue invoices (past due_date with status 'sent') are highlighted. Auto-detection of overdue state happens client-side at render time by comparing `due_date` with today's date. The `status` field in the DB is not auto-updated to 'overdue' by a trigger — it is controlled by the user marking it, but the UI visually flags past-due 'sent' invoices.
-
-**Widget 3: MonthlyProfitTrendWidget**
-- Location: `src/components/advanced/MonthlyProfitTrendWidget.tsx`
-- Data source: `useIncomes()` and `useExpenses()` (both already cached). Profit = received income - paid expenses, grouped by month.
-- Renders as a line or bar chart showing last 6 months.
-- Uses existing `DateContext` month range logic or computes its own 6-month window independently.
-- This widget always shows all income/expenses (not filtered to only client-linked ones) so the P&L is complete.
-
-### Client Management CRUD Pages
-
-**`Clients.tsx` (`/clients`):**
-- Lists all clients from `useClients()`.
-- Each row: client name, company, email, total revenue (computed from `useIncomes()` filtered by client_id — client-side join), total outstanding invoices (from `useInvoices()`).
-- "Add Client" button opens a `Dialog` (Shadcn) containing `ClientForm` — same modal pattern used in Dashboard quick actions.
-- Click on a client row navigates to `/clients/:clientId`.
-
-**`ClientDetail.tsx` (`/clients/:clientId`):**
-- Fetches single client via `useClients()` filtered by id, or a dedicated `useClient(id)` hook.
-- Shows client info card with edit-in-place or an Edit button opening a Dialog with `ClientForm`.
-- Transaction history section: `useClientTransactions(clientId)` — fetches incomes and expenses where `client_id = clientId`. Displayed as a unified chronological list.
-- Outstanding invoices section: `useInvoices()` filtered by `client_id`.
-- P&L summary: total received income vs. total expenses for this client.
-- Delete client button: triggers a confirmation dialog. Checks if client has invoices with `ON DELETE RESTRICT` — catches the Supabase FK violation error and surfaces it as a toast message.
-
-**`ClientForm` component (reusable, not a page):**
-
-```tsx
-// src/components/advanced/ClientForm.tsx
-// Props: client?: Client (for edit mode), onSuccess: () => void
-// Fields: name (required), email, phone, company, notes
-// Validation: Zod schema, same pattern as incomeSchema / expenseSchema
-// Mutation: useAddClient() or useUpdateClient() depending on whether client prop is present
-```
-
-### Invoice Builder Component
-
-**`InvoiceBuilder.tsx` (`/invoices/new` and `/invoices/:invoiceId/edit`):**
-
-This is the most complex new component. Structure:
-
-```
-InvoiceBuilder
-├── Header section
-│   ├── InvoiceNumberField (text input, auto-suggested)
-│   ├── ClientSelector (dropdown using useClients())
-│   ├── StatusSelect (draft/sent/paid/overdue)
-│   ├── IssueDatePicker
-│   └── DueDatePicker
-├── InvoiceLineItems
-│   ├── Line item rows (description, qty, unit_price, computed amount)
-│   ├── Add Line Item button
-│   └── Remove row buttons
-├── Totals section
-│   ├── Subtotal (sum of line item amounts)
-│   └── Total (same as subtotal for v1 — no tax)
-├── Notes field (textarea)
-└── Action buttons
-    ├── Save as Draft
-    ├── Mark as Sent
-    └── Cancel
-```
-
-`InvoiceLineItems` (`src/components/advanced/InvoiceLineItems.tsx`) manages the JSONB array state locally using React `useState`. The parent `InvoiceBuilder` collects the final items array on submit and passes it into the insert/update mutation. This keeps the complex line item editing logic isolated.
-
-**`InvoiceDetail.tsx` (`/invoices/:invoiceId`):**
-- Read-only view of a saved invoice.
-- Status-change buttons: "Mark as Sent", "Mark as Paid" (simple update mutations).
-- "Export PDF" button: triggers client-side PDF generation (implementation deferred to a dedicated research doc on PDF generation options).
-- "Edit" button navigates to `/invoices/:invoiceId/edit`.
-
-**`InvoiceDetail` renders a print-formatted layout** (fixed-width, styled for PDF export) that is hidden from normal view via CSS class toggling, then triggered to capture via the PDF library. The print layout contains: user name (from AuthContext), client info, line items table, total, invoice number, dates.
-
----
-
-## 4. Build Order
-
-The dependency chain is strict. Each phase must be complete before the next begins because later phases read database tables and TypeScript types introduced by earlier phases.
-
-### Phase 0: Foundation (no UI, no routes)
-
-Must be built first because everything else depends on these.
-
-1. **DB migration: `user_settings.app_mode` column** — required before ModeContext can read/write mode preference.
-2. **DB migration: `clients` table + RLS policy** — required before useClients hooks or any client-related UI.
-3. **DB migration: `invoices` table + RLS policy** — required before useInvoices hooks.
-4. **DB migration: `incomes.client_id` + `expenses.client_id` nullable FKs** — required before any transaction-to-client linking UI.
-5. **Update `src/integrations/supabase/types.ts`** — add the new tables, columns, and enum to the TypeScript type definitions. This is required before any hook or component can access new tables with type safety.
-6. **Update `DEFAULT_USER_SETTINGS` in `useUserSettings.ts`** — add `app_mode: 'simple'` to the constant.
-
-### Phase 1: Mode Infrastructure
-
-Must come before any Advanced mode UI.
-
-1. **`src/contexts/ModeContext.tsx`** — implement ModeProvider, useMode hook, AppMode type.
-2. **Add ModeProvider to `App.tsx`** provider chain.
-3. **`src/components/AdvancedRoute.tsx`** — mode guard component.
-4. **Update `Sidebar.tsx`** — consume `useMode()`, conditionally render Advanced nav items (links to routes that don't exist yet — `<Link>` components render fine even without the target Route defined).
-5. **Mode toggle control in `Settings.tsx`** — a new Card section with a toggle Switch that calls `setMode()`. This lets developers test mode switching immediately.
-
-### Phase 2: Client Management
-
-Depends on Phase 0 (DB + types) and Phase 1 (mode infrastructure).
-
-1. **`src/hooks/useClients.ts`** — `useClients()`, `useAddClient()`, `useUpdateClient()`, `useDeleteClient()` following the pattern in `useIncomes.ts`.
-2. **`src/components/advanced/ClientForm.tsx`** — reusable form with Zod schema.
-3. **`src/pages/advanced/Clients.tsx`** — list page.
-4. **`src/pages/advanced/ClientDetail.tsx`** — detail page (requires `useClientTransactions` hook).
-5. **`src/hooks/useClientTransactions.ts`** — fetch incomes + expenses by `client_id`.
-6. **Add client routes to `App.tsx`**.
-7. **`src/components/advanced/ClientSelector.tsx`** — reusable dropdown (needed by income/expense forms and InvoiceBuilder).
-
-### Phase 3: Transaction-to-Client Linking
-
-Depends on Phase 2 (`ClientSelector` component must exist).
-
-1. **`src/hooks/useLinkTransactionToClient.ts`** — mutation that updates `client_id` on an income or expense row. Uses the existing `useUpdateIncome` / `useUpdateExpense` pattern but targets only the `client_id` field.
-2. **Update Income form** (`Income.tsx`) — add optional `ClientSelector` field, rendered only when `isAdvanced` is true.
-3. **Update Expense form** (`Expenses.tsx`) — same as above.
-4. **Retroactive linking UI** — an action in the income/expense row menu (the "Edit" flow) that allows setting `client_id` on an existing row. This reuses the existing edit dialog with the `ClientSelector` added.
-
-### Phase 4: Invoices
-
-Depends on Phase 2 (clients must exist to create invoices).
-
-1. **`src/hooks/useInvoices.ts`** — `useInvoices()`, `useAddInvoice()`, `useUpdateInvoice()`, `useDeleteInvoice()`.
-2. **`src/components/advanced/InvoiceLineItems.tsx`** — line item CRUD state component.
-3. **`src/components/advanced/InvoiceStatusBadge.tsx`** — status pill.
-4. **`src/pages/advanced/InvoiceBuilder.tsx`** — create/edit form.
-5. **`src/pages/advanced/Invoices.tsx`** — list page.
-6. **`src/pages/advanced/InvoiceDetail.tsx`** — view page with status controls.
-7. **Add invoice routes to `App.tsx`**.
-8. **PDF export** — add client-side PDF generation inside `InvoiceDetail.tsx`. Recommended library: `@react-pdf/renderer` (pure client-side, produces actual PDF blobs, no canvas rasterization). This is a contained addition to InvoiceDetail and does not affect other phases.
-
-### Phase 5: Advanced Dashboard
-
-Depends on Phase 2 (clients), Phase 3 (linked transactions), and Phase 4 (invoices). All three data sources must be available before the dashboard widgets are meaningful.
-
-1. **`src/components/advanced/RevenuePerClientWidget.tsx`**.
-2. **`src/components/advanced/OutstandingInvoicesWidget.tsx`**.
-3. **`src/components/advanced/MonthlyProfitTrendWidget.tsx`**.
-4. **`src/pages/advanced/AdvancedDashboard.tsx`** — composes the three widgets.
-5. **Add `/advanced` route to `App.tsx`**.
-6. **Optionally: embed `AdvancedDashboardSection` into the existing `Dashboard.tsx`** as a preview panel when `isAdvanced` is true, linking to `/advanced` for the full view.
-
----
-
-## 5. Data Flow for Key Scenarios
-
-### Scenario A: Tag Existing Transaction to Client (Retroactive Linking)
-
-1. User is in Advanced mode. They open the Income page (`/income`).
-2. On each income row, the existing action menu (edit/delete pattern) gains a "Link to Client" option — only rendered when `isAdvanced` is true.
-3. Clicking "Link to Client" opens a Dialog containing a `ClientSelector` dropdown populated by `useClients()` data.
-4. User selects a client and confirms. The `useLinkTransactionToClient` mutation fires:
+**Example:**
 
 ```typescript
-// Mutation internals
-await supabase
-  .from('incomes')
-  .update({ client_id: selectedClientId })
-  .eq('id', incomeId)
-  .eq('user_id', user.id);  // belt-and-suspenders; RLS also enforces this
+// Inside InvoiceDetailScreen.tsx
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+
+const exportInvoicePDF = async (invoice: Invoice, client: Client) => {
+  const html = generateInvoiceHTML(invoice, client); // Pure function → HTML string
+
+  const { uri } = await Print.printToFileAsync({
+    html,
+    base64: false,
+  });
+
+  await Sharing.shareAsync(uri, {
+    mimeType: 'application/pdf',
+    dialogTitle: `Invoice ${invoice.invoice_number}`,
+    UTI: 'com.adobe.pdf',           // iOS-specific UTI
+  });
+};
 ```
 
-5. On success: `queryClient.invalidateQueries(['incomes', user.id])` causes the income list to re-fetch with the updated `client_id`. The `ClientDetail` page for that client (if open in another tab) would also stale its cache on next focus via React Query's `staleTime` defaults.
-6. Activity log: `useLogActivity()` fires with `type: 'income', action: 'link_client', description: 'Linked income X to client Y'`.
-7. The `RevenuePerClientWidget` on the Advanced Dashboard reflects the new link on next render, since it reads from the React Query cache for incomes which was just invalidated.
+**Trade-offs:** `expo-print` renders HTML via WKWebView, so it supports CSS (including RTL layout for Arabic invoices). However, it cannot load local file assets (images) via file paths — images must be base64-encoded and inlined into the HTML string. This is relevant if the invoice ever includes a user logo. The web's approach used React component rendering; the native approach uses string-based HTML templating, which is less type-safe but simpler.
 
-### Scenario B: Create Transaction Linked to Client from the Start
+### Pattern 5: NativeWind v4 for Styling
 
-1. User is in Advanced mode. They open the Income page and click "Add Income".
-2. The `AddIncomeForm` component (currently at `src/pages/Income.tsx`, exported as a named export) renders with an additional field at the bottom: a `ClientSelector` dropdown, conditionally rendered via `{isAdvanced && <ClientSelector ... />}`.
-3. The Zod schema for the income form gains an optional field: `client_id: z.string().uuid().optional()`.
-4. On form submit, the `useAddIncome` mutation's input payload includes `client_id` if selected.
-5. The `addIncome` function in `useIncomes.ts` passes `client_id` through to the Supabase `insert` call. The DB column is nullable, so omitting it (Simple mode) is also valid.
-6. No other change to the mutation flow — the existing success path (cache invalidation, activity log, analytics, toast) handles it unchanged.
-7. The new income row immediately appears in `RevenuePerClientWidget` grouped under the selected client.
+**What:** NativeWind v4 compiles Tailwind utility class strings (`className="text-lg font-bold"`) into React Native `StyleSheet` objects at build time. This lets you use Tailwind syntax in React Native components without writing `StyleSheet.create()` by hand.
 
-### Scenario C: How Invoice Total Relates to Tracked Income
+**When to use:** The primary styling approach for all UI components. Enables dark mode via `className="dark:bg-gray-900"` with Expo's `Appearance` API integration.
 
-This is a **deliberate loose coupling** — invoices and income transactions are related conceptually but are not automatically synchronized. The reasons:
-
-- An invoice going from "sent" to "paid" does not auto-create an income record. The user manually records income when payment is received, following the existing workflow they already know.
-- Forcing an auto-create would break the existing income history pattern (the `income_amount_history` table gets an initial entry on every income insert — automating this from an invoice status change would require either a DB trigger or a complex mutation chain, both of which add fragility).
-
-**The recommended linking pattern:**
-
-When a user marks an invoice as "paid", the UI shows an optional prompt:
-
-> "Record this payment as income? This will create a new income entry linked to this client."
-
-If the user confirms, the app calls `useAddIncome` with pre-populated fields:
-- `title`: "Invoice #INV-001 Payment" (auto-generated from invoice number)
-- `amount`: invoice total
-- `currency`: invoice currency
-- `category`: "Freelance" or a default category
-- `client_id`: the invoice's client_id
-- `status`: "received"
-- `date`: today
-
-The resulting income record is linked to the client via `client_id`, making it visible in `RevenuePerClientWidget` and `ClientDetail` transaction history.
-
-**No FK relationship between `invoices` and `incomes` is created.** The link is semantic (same client, same amount, same date) but not enforced by the DB. This is intentional: it preserves flexibility (user may record income in a different amount, currency, or date than the invoice), avoids cascade complexity, and keeps the income table's structure unchanged for Simple mode users.
-
-For the Advanced Dashboard P&L calculation: profit uses income and expenses data directly (already present), not invoice data. Invoice data is used only for outstanding/unpaid reporting in `OutstandingInvoicesWidget`.
-
----
-
-## Appendix: TypeScript Types Summary
-
-The following additions are needed in `src/integrations/supabase/types.ts` after running DB migrations:
+**Example:**
 
 ```typescript
-// New enum
-invoice_status: "draft" | "sent" | "paid" | "overdue"
+// NativeWind component
+import { View, Text, Pressable } from 'react-native';
 
-// clients table Row/Insert/Update (mirrors existing table type structure)
-clients: {
-  Row: {
-    id: string
-    user_id: string
-    name: string
-    email: string | null
-    phone: string | null
-    company: string | null
-    notes: string | null
-    created_at: string
-    updated_at: string
-  }
-  Insert: { ... }   // id, created_at, updated_at optional; user_id, name required
-  Update: { ... }   // all optional
-  Relationships: []
+function IncomeCard({ income }: { income: Income }) {
+  return (
+    <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 shadow-sm">
+      <Text className="text-base font-semibold text-gray-900 dark:text-white">
+        {income.title}
+      </Text>
+      <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        {formatCurrency(income.amount, income.currency)}
+      </Text>
+    </View>
+  );
 }
+```
 
-// invoices table Row/Insert/Update
-invoices: {
-  Row: {
-    id: string
-    user_id: string
-    client_id: string
-    invoice_number: string
-    status: Database["public"]["Enums"]["invoice_status"]
-    issue_date: string
-    due_date: string | null
-    items: Json          // array of line item objects
-    subtotal: number
-    total: number
-    currency: string
-    notes: string | null
-    created_at: string
-  }
-  Insert: { ... }
-  Update: { ... }
-  Relationships: [
-    {
-      foreignKeyName: "invoices_client_id_fkey"
-      columns: ["client_id"]
-      isOneToOne: false
-      referencedRelation: "clients"
-      referencedColumns: ["id"]
-    }
-  ]
-}
+**Trade-offs:** NativeWind v4 is a significant improvement over v2/v3 but requires Babel and Metro configuration. It does not support all Tailwind classes (e.g., `grid`, `flex-wrap` behaves differently). Some web Shadcn component patterns won't translate directly — each UI primitive must be hand-built for native.
 
-// user_settings additions
-user_settings: {
-  Row: {
-    // ... existing fields ...
-    app_mode: string    // 'simple' | 'advanced'
-  }
-  Insert: {
-    app_mode?: string
-  }
-  Update: {
-    app_mode?: string
-  }
-}
+### Pattern 6: i18next with RTL Layout Switching
 
-// incomes and expenses additions
-incomes: {
-  Row: {
-    // ... existing fields ...
-    client_id: string | null
-  }
-  // ... Insert/Update gain optional client_id?: string | null
-}
+**What:** The web app's i18n setup uses the same `i18next` library. The translation resources (all `en` and `ar` key-value pairs) can be ported verbatim. The difference on native is that RTL layout requires calling `I18nManager.allowRTL(true)` at app startup and applying it based on selected language.
 
-expenses: {
-  Row: {
-    // ... existing fields ...
-    client_id: string | null
-  }
-  // ... Insert/Update gain optional client_id?: string | null
-}
+**When to use:** During app initialization and whenever the user switches language in Settings.
+
+**Important constraint:** `I18nManager.allowRTL()` changes take effect on next app restart. On iOS, you cannot flip RTL at runtime without restarting the app. The UX pattern is: change language → show "Restart required" alert → user taps OK → app restarts. This is a known React Native limitation, verified in official docs.
+
+**Example:**
+
+```typescript
+// src/i18n/index.ts
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { I18nManager } from 'react-native';
+import * as Localization from 'expo-localization';
+
+// PORTED: translation resources copied verbatim from web
+import { resources } from './resources'; // en + ar strings
+
+const savedLanguage = await AsyncStorage.getItem('app_language');
+const deviceLocale = Localization.getLocales()[0].languageCode;
+const language = savedLanguage ?? deviceLocale ?? 'en';
+
+// Apply RTL at startup
+I18nManager.allowRTL(language === 'ar');
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: language,
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+});
+
+export default i18n;
 ```
 
 ---
 
-*Research complete. This document is the authoritative architecture reference for the Advanced Mode implementation. Phase planning documents should treat all decisions here as resolved unless a phase-specific constraint requires revisiting.*
+## Data Flow
+
+### Request Flow
+
+```
+User Action (Pressable tap)
+    ↓
+Screen Component (e.g., income.tsx)
+    ↓
+Custom Hook (e.g., useAddIncome) → useMutation()
+    ↓
+fetchFn → supabase.from('incomes').insert(...)
+    ↓
+Supabase JS Client → HTTPS → Supabase API (unchanged backend)
+    ↓
+RLS validates user_id = auth.uid()
+    ↓
+Response ← PostgreSQL DB
+    ↓
+React Query cache updated → queryClient.invalidateQueries(['incomes', userId])
+    ↓
+All screens subscribed to that query re-render automatically
+```
+
+### Auth Flow (Mobile-Specific Difference)
+
+```
+App Launch
+    ↓
+_layout.tsx mounts → AuthContext checks SecureStore for cached session
+    ↓
+supabase.auth.getSession() → validates JWT against Supabase
+    ↓
+  session valid?
+  YES: Stack.Protected guard = true → show (tabs)
+  NO:  Stack.Protected guard = false → show (auth) screens
+    ↓
+AppState listener active → foreground → supabase.auth.startAutoRefresh()
+AppState listener active → background → supabase.auth.stopAutoRefresh()
+```
+
+### State Management Strategy
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ Server State: TanStack React Query                         │
+│   All Supabase data (incomes, expenses, etc.)             │
+│   Cached in QueryClient, invalidated on mutation          │
+├───────────────────────────────────────────────────────────┤
+│ Global UI State: React Context                            │
+│   Auth (session), Theme, Mode, Currency, Date             │
+│   Same pattern as web — no Zustand needed                 │
+├───────────────────────────────────────────────────────────┤
+│ Local Screen State: useState / useReducer                 │
+│   Form fields, modal open/closed, selected items          │
+│   Never lifted above the screen that owns it              │
+├───────────────────────────────────────────────────────────┤
+│ Persistent Local State: AsyncStorage                      │
+│   Language preference, currency exchange rate cache       │
+│   Non-sensitive only                                      │
+├───────────────────────────────────────────────────────────┤
+│ Secure Persistent State: expo-secure-store                │
+│   Supabase session tokens (JWT)                           │
+│   Managed entirely by Supabase JS client                  │
+└───────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Build Order
+
+Dependencies between components determine the correct build sequence. Each phase must complete before work blocked on it can begin.
+
+### Phase 0: Project Bootstrap (no features)
+
+Must happen first — establishes the foundation everything else builds on.
+
+1. `npx create-expo-app balance-tracker-mobile --template` with TypeScript
+2. Install core dependencies: Expo Router, NativeWind v4, TanStack Query, Supabase JS, expo-secure-store, AsyncStorage, react-native-url-polyfill, expo-localization, i18next, react-i18next, @react-native-community/netinfo
+3. Configure NativeWind (babel.config.js + metro.config.js + global.css)
+4. Configure EAS Build (`eas.json` with development/preview/production profiles)
+5. Copy portable layers from web project: `hooks/`, `lib/` (pure functions), `integrations/supabase/types.ts`, `i18n/resources` (translation strings)
+6. Write `src/integrations/supabase/client.ts` — the RN-specific Supabase init
+7. Configure React Query: `queryClient.ts` with AppState focus manager + NetInfo online manager
+8. Set up i18n init with RTL support
+
+### Phase 1: Auth Shell
+
+Must come before any screen that checks authentication.
+
+1. `AuthContext.tsx` — wraps Supabase auth, exposes session + loading state, handles AppState token refresh
+2. Root `_layout.tsx` — assembles all providers, implements `Stack.Protected` auth guard
+3. `(auth)/_layout.tsx` + `sign-in.tsx` + `sign-up.tsx` screens — native UI equivalents of web SignIn/SignUp pages
+4. Verify: launching the app with no session lands on sign-in; signing in lands on (tabs); signing out returns to (auth)
+
+### Phase 2: Navigation Shell + Tab Bar
+
+Must come after Phase 1 (auth context required) and before any feature screens.
+
+1. `(tabs)/_layout.tsx` — bottom tab bar with correct iOS HIG patterns (icons, labels, colors)
+2. ThemeContext — Appearance API integration, NativeWind dark mode
+3. ModeContext — port from web, persists to `user_settings.app_mode` via useUserSettings hook
+4. Stub screens for each tab (Dashboard, Income, Expenses, Debts, Assets, Settings) — empty Views that prove navigation works
+5. Verify: all tabs reachable, tab bar renders correctly on iOS, dark mode switches properly
+
+### Phase 3: Simple Mode Screens
+
+Must come after Phase 2 (navigation shell). Build in this order (most critical first):
+
+1. **Dashboard screen** — net worth calculation, income/expense summary cards; depends on useIncomes, useExpenses, useDebts, useAssets
+2. **Income screen** — list + add/edit/delete modal; depends on useIncomes
+3. **Expenses screen** — list + add/edit/delete modal; depends on useExpenses
+4. **Debts screen** — list + debt history modal; depends on useDebts
+5. **Assets screen** + **EditAssetScreen** — list + edit; depends on useAssets, useAssetPrices
+6. **Settings screen** — theme toggle, currency selector, language selector, mode toggle
+
+Each screen requires: a native UI component tree, NativeWind styling, form components (TextInput, Picker, DateTimePicker), and connection to the ported hook.
+
+### Phase 4: Advanced Mode Screens
+
+Must come after Phase 3 (hooks already proven, QueryClient configured). The `Stack.Protected guard={isAdvanced}` in `_layout.tsx` prevents access until enabled in Settings.
+
+1. Advanced Dashboard screen — compose RevenuePerClientWidget, OutstandingInvoicesWidget using cached hook data
+2. Clients list + new/edit screens — useClients hook already ported; build native UI
+3. Client detail screen — transaction history, linked invoices
+4. Invoices list + new/edit screens — useInvoices hook already ported; line item editor
+5. Invoice detail screen — view, status updates
+
+### Phase 5: PDF Export + App Store Polish
+
+Must come after Phase 4 (invoice UI complete). No functional dependencies — this is additive.
+
+1. Implement `exportInvoicePDF()` using expo-print + expo-sharing on InvoiceDetail screen
+2. RTL layout verification for Arabic — test all screens with language set to Arabic
+3. App icon + splash screen setup in `app.json`
+4. EAS Build configuration for App Store submission
+5. Privacy manifest (required by Apple as of 2024 for apps using certain APIs)
+6. `eas submit` workflow to TestFlight, then App Store
+
+---
+
+## Integration Points
+
+### External Services
+
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| Supabase Auth | `supabase.auth.*` — same API as web | Storage adapter changes to SecureStore; same JWT, same RLS |
+| Supabase DB | `supabase.from('table').*` — identical to web hooks | No changes to queries or mutations once client is initialized correctly |
+| Supabase Edge Functions | `supabase.functions.invoke('metal-prices')` — identical to web | Works in RN without any changes |
+| expo-print | `Print.printToFileAsync({ html })` | Replaces @react-pdf/renderer; HTML template in pure TS |
+| expo-sharing | `Sharing.shareAsync(uri)` | iOS share sheet — user saves to Files, AirDrop, email, etc. |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| Screens ↔ Hooks | Direct import + React Query cache | Hooks are isolated from UI — portable pattern works |
+| Hooks ↔ Supabase client | Import from `@/integrations/supabase/client` | Single client instance per app, same pattern as web |
+| Contexts ↔ Screens | React Context + custom `use*` hooks | Same pattern as web; no prop drilling |
+| i18n ↔ Screens | `useTranslation()` hook from react-i18next | Same API as web — translation keys unchanged |
+| NativeWind ↔ Components | `className` prop | Compiled at build time; no runtime CSS parsing |
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Importing Web UI Components into React Native
+
+**What people do:** Try to import Shadcn components or HTML-dependent components into the RN codebase, hoping they will work.
+
+**Why it's wrong:** Shadcn components render HTML elements (`<div>`, `<button>`, etc.) which do not exist in React Native. The build will fail with "Cannot read properties of undefined (reading 'createElement')".
+
+**Do this instead:** Accept that all UI is a rebuild. The hooks and lib functions are the reusable layer. UI is always native-specific.
+
+### Anti-Pattern 2: Using localStorage in the Supabase Client
+
+**What people do:** Copy the web's `client.ts` directly, keep `storage: localStorage`.
+
+**Why it's wrong:** `localStorage` is a browser API. React Native's JS environment does not have it. The app will crash immediately on launch with "localStorage is not defined".
+
+**Do this instead:** Use the `ExpoSecureStoreAdapter` pattern shown in Pattern 2 above. This is a one-line change at initialization — all hooks remain identical.
+
+### Anti-Pattern 3: Calling I18nManager.forceRTL() in Production
+
+**What people do:** Call `I18nManager.forceRTL(true)` when the user switches language to Arabic, expecting RTL to flip immediately.
+
+**Why it's wrong:** `forceRTL()` is documented as a development/testing tool. It requires a full app restart to take effect. In production, calling it without restarting creates partially RTL layouts that are visually broken.
+
+**Do this instead:** Call `I18nManager.allowRTL(true)` at app startup (before the first render) based on the persisted language preference, then prompt for restart when the user changes language at runtime.
+
+### Anti-Pattern 4: Separate QueryClient Instances for Auth and Feature Queries
+
+**What people do:** Create a second QueryClient for authenticated queries to "isolate" them.
+
+**Why it's wrong:** React Query's cache invalidation relies on a single QueryClient. Multiple instances cannot invalidate each other's caches, leading to stale data after mutations.
+
+**Do this instead:** One QueryClient for the entire app, initialized once in `_layout.tsx`. Clear the cache on sign-out by calling `queryClient.clear()`.
+
+### Anti-Pattern 5: Monorepo with Metro + Webpack Shared Packages Without Proper Config
+
+**What people do:** Set up a monorepo with a `packages/shared` folder, reference it from both the web (Vite) and mobile (Expo/Metro) apps, without configuring Metro's `watchFolders`.
+
+**Why it's wrong:** Metro bundler (used by Expo) does not watch files outside its project root by default. Shared packages in a monorepo are silently not watched, causing stale builds or "module not found" errors.
+
+**Do this instead:** For this project, use a separate repo with manual file synchronization. If a monorepo becomes necessary later, configure `watchFolders` and `extraNodeModules` in `metro.config.js`, and ensure there is only one `react` and `react-native` installation across the workspace.
+
+---
+
+## Scalability Considerations
+
+| Scale | Architecture Adjustments |
+|-------|--------------------------|
+| 0–1k users | Single Supabase project, no changes needed. RN app talks directly to same DB as web users. |
+| 1k–10k users | No architecture changes needed. Supabase handles this tier with default connection pooling (PgBouncer). React Query caching reduces DB reads. |
+| 10k+ users | Supabase compute upgrade; consider read replicas for the asset price Edge Function. RN client is unaffected — all scaling is backend-side. |
+
+**First bottleneck at scale:** The `metal-prices` Edge Function (called by `useAssetPrices`) makes external API calls to a metals price provider. Under high concurrency, this may hit rate limits. Solution: cache at the Edge Function level with a TTL, not in the client.
+
+---
+
+## Sources
+
+- Expo Router authentication docs: https://docs.expo.dev/router/advanced/authentication/ (HIGH confidence — official docs)
+- Expo Router core concepts: https://docs.expo.dev/router/basics/core-concepts/ (HIGH confidence — official docs)
+- Expo Router tab navigation: https://docs.expo.dev/router/advanced/tabs/ (HIGH confidence — official docs)
+- Supabase Auth with React Native: https://supabase.com/docs/guides/auth/quickstarts/react-native (HIGH confidence — official docs)
+- Using Supabase with Expo: https://docs.expo.dev/guides/using-supabase/ (HIGH confidence — official docs)
+- React Native I18nManager (RTL): https://reactnative.dev/docs/i18nmanager (HIGH confidence — official docs)
+- expo-print documentation: https://docs.expo.dev/versions/latest/sdk/print/ (HIGH confidence — official docs)
+- Expo New Architecture (SDK 55 mandatory): https://docs.expo.dev/guides/new-architecture/ (HIGH confidence — official docs)
+- TanStack Query React Native docs: https://tanstack.com/query/latest/docs/framework/react/react-native (HIGH confidence — official docs, verified via search)
+- NativeWind v4: https://www.nativewind.dev/docs/getting-started/installation (MEDIUM confidence — official site, version details verified)
+- expo-print HTML-to-PDF pattern: https://anytechie.medium.com/how-to-use-expo-print-complete-guide-to-printing-in-react-native-apps-173fa435dadf (MEDIUM confidence — aligns with official expo-print docs)
+- Monorepo code sharing patterns: Multiple sources including https://nx.dev/blog/share-code-between-react-web-react-native-mobile-with-nx (MEDIUM confidence — confirmed by multiple independent sources)
+
+---
+
+*Architecture research for: React Native (Expo) iOS port of Balance Tracker web app*
+*Researched: 2026-02-26*
