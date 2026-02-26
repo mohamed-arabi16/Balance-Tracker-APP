@@ -35,17 +35,17 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Debts
 
-- [ ] **DEBT-01**: User can add, edit, and delete debts with payment tracking
-- [ ] **DEBT-02**: User can view debt payment history
-- [ ] **DEBT-03**: User can swipe-to-delete debts from list
-- [ ] **DEBT-04**: User can pull-to-refresh debt list
+- [x] **DEBT-01**: User can add, edit, and delete debts with payment tracking
+- [x] **DEBT-02**: User can view debt payment history
+- [x] **DEBT-03**: User can swipe-to-delete debts from list
+- [x] **DEBT-04**: User can pull-to-refresh debt list
 
 ### Assets
 
-- [ ] **ASST-01**: User can add, edit, and delete assets
-- [ ] **ASST-02**: Asset prices auto-update via exchange rates / metal prices
-- [ ] **ASST-03**: User can swipe-to-delete assets from list
-- [ ] **ASST-04**: User can pull-to-refresh asset list
+- [x] **ASST-01**: User can add, edit, and delete assets
+- [x] **ASST-02**: Asset prices auto-update via exchange rates / metal prices
+- [x] **ASST-03**: User can swipe-to-delete assets from list
+- [x] **ASST-04**: User can pull-to-refresh asset list
 
 ### Dashboard
 
@@ -153,14 +153,14 @@ Deferred to v2.x milestones. Not in current roadmap.
 | TXN-06 | Phase 9 | Complete |
 | TXN-07 | Phase 9 | Pending |
 | TXN-08 | Phase 9 | Complete |
-| DEBT-01 | Phase 9 | Pending |
-| DEBT-02 | Phase 9 | Pending |
-| DEBT-03 | Phase 9 | Pending |
-| DEBT-04 | Phase 9 | Pending |
-| ASST-01 | Phase 9 | Pending |
-| ASST-02 | Phase 9 | Pending |
-| ASST-03 | Phase 9 | Pending |
-| ASST-04 | Phase 9 | Pending |
+| DEBT-01 | Phase 9 | Complete |
+| DEBT-02 | Phase 9 | Complete |
+| DEBT-03 | Phase 9 | Complete |
+| DEBT-04 | Phase 9 | Complete |
+| ASST-01 | Phase 9 | Complete |
+| ASST-02 | Phase 9 | Complete |
+| ASST-03 | Phase 9 | Complete |
+| ASST-04 | Phase 9 | Complete |
 | DASH-01 | Phase 10 | Pending |
 | DASH-02 | Phase 10 | Pending |
 | DASH-03 | Phase 10 | Pending |
