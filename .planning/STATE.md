@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 9 of 12 (Simple Mode Screens)
-Plan: 1 of 4 in Phase 9 (COMPLETE)
-Status: In progress — Phase 9 Plan 01 complete
-Last activity: 2026-02-26 — 09-01 complete: Income FlatList with ReanimatedSwipeable, formSheet Stack layout, add/edit income form, datetimepicker+picker installed
+Plan: 4 of 4 in Phase 9 (COMPLETE)
+Status: In progress — Phase 9 Plans 01, 03, 04 complete (02 pending)
+Last activity: 2026-02-26 — 09-04 complete: Assets FlatList with live prices, ReanimatedSwipeable, add/edit formSheet with auto_update Switch
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -38,6 +38,8 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 **Recent Trend:**
 - Last 5 plans: 05-04 (2 min), 05-05 (2 min), 05-06 (3 min), 06-01 (2 min), 06-02 (human-gated)
 - Trend: Fast (UI pages follow established patterns)
+| Phase 09 P04 | 3 | 2 tasks | 3 files |
+| Phase 09 P03 | 4 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +73,10 @@ Key decisions for v2.0:
 - [09-01]: StatusBadge passes ALL UpdateIncomePayload fields on mutate to prevent Supabase null overwrites
 - [09-01]: date-fns was not pre-installed — auto-installed as blocking dep; now available to Plans 09-02/03/04
 - [09-01]: formSheet Stack layout defines add-expense screen upfront so Plan 09-02 only needs to create the file
+- [Phase 09]: useAssetPrices called once at AssetScreen level and passed as props to AssetRow to avoid N separate hook subscriptions
+- [Phase 09]: Stale warning guarded by !loading AND snapshot !== null — prevents spurious warning flash on initial mount (Pitfall 7)
+- [Phase 09]: Debt status toggle passes ALL UpdateDebtPayload fields spread from item to avoid Supabase null overwrites on partial update
+- [Phase 09]: payment.tsx uses note:'Payment' + payment_date to distinguish payment history entries from edit history entries in useUpdateDebt
 
 ### Pending Todos
 
@@ -85,5 +91,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 09-01-PLAN.md — Income FlatList screen, formSheet layout, add/edit income form
+Stopped at: Completed 09-04-PLAN.md — Assets FlatList screen, formSheet layout, add/edit asset form with auto_update Switch
 Resume file: None
