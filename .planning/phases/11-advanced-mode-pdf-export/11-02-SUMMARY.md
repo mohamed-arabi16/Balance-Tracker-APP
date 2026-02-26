@@ -131,6 +131,18 @@ None - no external service configuration required.
 - Plan 11-03 (Invoices screen) can proceed — client picker will use the ClientsListScreen's data via useClients() hook
 - Client swipe-to-delete and react-hook-form+zod patterns are established for invoices forms in Plan 11-03
 
+## Self-Check: PASSED
+
+- FOUND: BalanceTracker/app/(tabs)/clients/index.tsx
+- FOUND: BalanceTracker/app/(tabs)/clients/new.tsx
+- FOUND: BalanceTracker/app/(tabs)/clients/[id]/index.tsx
+- FOUND: BalanceTracker/app/(tabs)/clients/[id]/edit.tsx
+- FOUND: BalanceTracker/app/(tabs)/clients/_layout.tsx
+- FOUND: .planning/phases/11-advanced-mode-pdf-export/11-02-SUMMARY.md
+- FOUND: commit 15d228e (code files)
+- FOUND: commit 6408c1d (metadata)
+- TypeScript: 0 errors (npx tsc --noEmit)
+
 ---
 *Phase: 11-advanced-mode-pdf-export*
 *Completed: 2026-02-26*
