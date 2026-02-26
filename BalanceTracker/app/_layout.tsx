@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PrivacyOverlay } from '@/components/layout/PrivacyOverlay';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ModeProvider } from '@/contexts/ModeContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { initI18n } from '@/i18n';
 import { queryClient } from '@/lib/queryClient';
@@ -74,7 +75,10 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <AuthProvider>
-              <RootNavigator />
+              {/* ModeProvider is inside AuthProvider because useUserSettings calls useAuth */}
+              <ModeProvider>
+                <RootNavigator />
+              </ModeProvider>
             </AuthProvider>
           </ThemeProvider>
         </QueryClientProvider>

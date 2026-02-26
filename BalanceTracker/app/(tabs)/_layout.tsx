@@ -4,9 +4,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { useMode } from '@/contexts/ModeContext';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { isAdvanced } = useMode();
 
   return (
     <CurrencyProvider>
@@ -63,6 +65,27 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen name="dashboard" options={{ href: null }} />
+      {/* Advanced mode tabs — hidden via href: null when not in advanced mode */}
+      <Tabs.Screen
+        name="clients"
+        options={{
+          title: t('nav.clients', 'Clients'),
+          href: isAdvanced ? undefined : null,
+          tabBarIcon: ({ color }) => (
+            <SymbolView name="person.2.fill" tintColor={color} size={24} type="monochrome" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="invoices"
+        options={{
+          title: t('nav.invoices', 'Invoices'),
+          href: isAdvanced ? undefined : null,
+          tabBarIcon: ({ color }) => (
+            <SymbolView name="doc.text.fill" tintColor={color} size={24} type="monochrome" />
+          ),
+        }}
+      />
     </Tabs>
     </CurrencyProvider>
   );
