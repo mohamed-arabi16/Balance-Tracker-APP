@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { router } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,8 +72,7 @@ function SettingsRow({
     <View className="flex-row items-center px-4 py-3">
       {/* Icon badge */}
       <View
-        className="w-8 h-8 rounded-lg items-center justify-center mr-3 flex-shrink-0"
-        style={{ backgroundColor: iconBg }}
+        style={{ width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 12, flexShrink: 0, backgroundColor: iconBg }}
       >
         <SymbolView name={icon} tintColor="#fff" size={17} type="monochrome" />
       </View>
@@ -113,6 +113,8 @@ function SettingsRow({
 // ─── Main screen ───────────────────────────────────────────────────────────────
 export default function SettingsScreen() {
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
+  const pageBg = colorScheme === 'dark' ? '#1C1C1E' : '#F2F2F7';
   const { user, signOut } = useAuth();
   const { isAdvanced, setMode, isUpdating } = useMode();
   const [isExporting, setIsExporting] = useState(false);
@@ -202,9 +204,9 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeScreen>
+    <SafeScreen style={{ backgroundColor: pageBg }}>
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40, backgroundColor: pageBg }}
         showsVerticalScrollIndicator={false}
       >
         {/* Title */}
@@ -349,8 +351,7 @@ export default function SettingsScreen() {
           >
             <View className="flex-row items-center px-4 py-3">
               <View
-                className="w-8 h-8 rounded-lg items-center justify-center mr-3 flex-shrink-0"
-                style={{ backgroundColor: '#FF3B30' }}
+                style={{ width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 12, flexShrink: 0, backgroundColor: '#FF3B30' }}
               >
                 <SymbolView name="trash.fill" tintColor="#fff" size={17} type="monochrome" />
               </View>

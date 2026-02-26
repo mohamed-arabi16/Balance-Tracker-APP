@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useColorScheme } from 'nativewind';
 
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
@@ -21,6 +22,7 @@ import { useClients } from '@/hooks/useClients';
 
 import { parseNetWorthConfig } from '@/lib/netWorth';
 import { sumInDisplayCurrency } from '@/lib/finance';
+import { SHADOWS } from '@/lib/tokens';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DisplayStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
@@ -75,19 +77,25 @@ function RevenuePerClientWidget({
     `${displayCurrency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
-    <View style={widgetStyles.container}>
-      <Text style={widgetStyles.title}>{t('advancedDashboard.revenue.title')}</Text>
-      <Text style={widgetStyles.subtitle}>{t('advancedDashboard.revenue.subtitle')}</Text>
+    <View className="rounded-2xl bg-white dark:bg-neutral-900 p-4 mt-4" style={SHADOWS.card}>
+      <Text className="text-base font-bold text-gray-900 dark:text-white mb-0.5">
+        {t('advancedDashboard.revenue.title')}
+      </Text>
+      <Text className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+        {t('advancedDashboard.revenue.subtitle')}
+      </Text>
 
       {entries.length === 0 ? (
-        <Text style={widgetStyles.empty}>{t('advancedDashboard.revenue.empty')}</Text>
+        <Text className="text-sm text-gray-400 dark:text-gray-500 italic text-center py-2">
+          {t('advancedDashboard.revenue.empty')}
+        </Text>
       ) : (
         entries.map(([clientId, revenue]) => (
-          <View key={clientId} style={widgetStyles.row}>
-            <Text style={widgetStyles.rowLabel} numberOfLines={1}>
+          <View key={clientId} className="flex-row justify-between items-center py-2 border-t border-gray-100 dark:border-neutral-800">
+            <Text className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-2" numberOfLines={1}>
               {clientMap[clientId] ?? 'Unknown Client'}
             </Text>
-            <Text style={widgetStyles.rowValue}>{fmt(revenue)}</Text>
+            <Text className="text-sm font-semibold text-green-700 dark:text-green-400">{fmt(revenue)}</Text>
           </View>
         ))
       )}
@@ -136,20 +144,28 @@ function OutstandingInvoicesWidget({
     `${displayCurrency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
-    <View style={widgetStyles.container}>
-      <Text style={widgetStyles.title}>{t('advancedDashboard.outstanding.title')}</Text>
-      <Text style={widgetStyles.subtitle}>{t('advancedDashboard.outstanding.subtitle')}</Text>
+    <View className="rounded-2xl bg-white dark:bg-neutral-900 p-4 mt-4" style={SHADOWS.card}>
+      <Text className="text-base font-bold text-gray-900 dark:text-white mb-0.5">
+        {t('advancedDashboard.outstanding.title')}
+      </Text>
+      <Text className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+        {t('advancedDashboard.outstanding.subtitle')}
+      </Text>
 
       {outstandingInvoices.length === 0 ? (
-        <Text style={widgetStyles.empty}>{t('advancedDashboard.outstanding.empty')}</Text>
+        <Text className="text-sm text-gray-400 dark:text-gray-500 italic text-center py-2">
+          {t('advancedDashboard.outstanding.empty')}
+        </Text>
       ) : (
         <>
           {/* Total outstanding */}
-          <View style={widgetStyles.totalOutstandingRow}>
-            <Text style={widgetStyles.totalOutstandingLabel}>
+          <View className="flex-row justify-between items-center py-2.5 px-3 bg-orange-50 dark:bg-orange-950 rounded-lg mb-3">
+            <Text className="text-sm font-semibold text-orange-900 dark:text-orange-200">
               {t('advancedDashboard.outstanding.total')}
             </Text>
-            <Text style={widgetStyles.totalOutstandingValue}>{fmt(totalOutstanding)}</Text>
+            <Text className="text-base font-bold text-orange-900 dark:text-orange-200">
+              {fmt(totalOutstanding)}
+            </Text>
           </View>
 
           {/* Individual invoices */}
@@ -160,22 +176,26 @@ function OutstandingInvoicesWidget({
             const amount = fmt(convertCurrency(Number(inv.total ?? 0), inv.currency));
 
             return (
-              <View key={inv.id} style={widgetStyles.invoiceRow}>
-                <View style={widgetStyles.invoiceRowLeft}>
-                  <Text style={widgetStyles.invoiceNumber}>
+              <View key={inv.id} className="flex-row justify-between items-start py-2.5 border-t border-gray-100 dark:border-neutral-800">
+                <View className="flex-1 mr-2">
+                  <Text className="text-sm font-semibold text-gray-900 dark:text-white">
                     INV-{inv.invoice_number}
                   </Text>
-                  <Text style={widgetStyles.invoiceClient} numberOfLines={1}>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5" numberOfLines={1}>
                     {clientName}
                   </Text>
                   {inv.due_date ? (
-                    <Text style={widgetStyles.invoiceDueDate}>Due: {inv.due_date}</Text>
+                    <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                      Due: {inv.due_date}
+                    </Text>
                   ) : null}
                 </View>
-                <View style={widgetStyles.invoiceRowRight}>
-                  <Text style={widgetStyles.invoiceAmount}>{amount}</Text>
-                  <View style={[widgetStyles.statusBadge, { backgroundColor: statusColor.bg }]}>
-                    <Text style={[widgetStyles.statusText, { color: statusColor.text }]}>
+                <View className="items-end" style={{ gap: 4 }}>
+                  <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {amount}
+                  </Text>
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, backgroundColor: statusColor.bg }}>
+                    <Text style={{ fontSize: 11, fontWeight: '600', color: statusColor.text }}>
                       {STATUS_LABELS[displayStatus]}
                     </Text>
                   </View>
@@ -192,6 +212,8 @@ function OutstandingInvoicesWidget({
 // ─── DashboardScreen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
+  const pageBg = colorScheme === 'dark' ? '#1C1C1E' : '#F2F2F7';
   const { currency, convertCurrency } = useCurrency();
   const { isAdvanced } = useMode();
 
@@ -326,9 +348,9 @@ export default function DashboardScreen() {
   }
 
   return (
-    <SafeScreen edges={['top']}>
+    <SafeScreen edges={['top']} style={{ backgroundColor: pageBg }}>
       <ScrollView
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, backgroundColor: pageBg }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -414,126 +436,3 @@ export default function DashboardScreen() {
   );
 }
 
-// ─── Widget Styles ────────────────────────────────────────────────────────────
-const widgetStyles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#111',
-    marginBottom: 2,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginBottom: 14,
-  },
-  empty: {
-    fontSize: 13,
-    color: '#9ca3af',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    paddingVertical: 8,
-  },
-  // Revenue per client rows
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
-  },
-  rowLabel: {
-    fontSize: 14,
-    color: '#374151',
-    flex: 1,
-    marginRight: 8,
-  },
-  rowValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#065f46',
-  },
-  // Outstanding total row
-  totalOutstandingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff7ed',
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#fed7aa',
-  },
-  totalOutstandingLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#9a3412',
-  },
-  totalOutstandingValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#9a3412',
-  },
-  // Individual invoice rows
-  invoiceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
-  },
-  invoiceRowLeft: {
-    flex: 1,
-    marginRight: 8,
-  },
-  invoiceRowRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  invoiceNumber: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111',
-  },
-  invoiceClient: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginTop: 1,
-  },
-  invoiceDueDate: {
-    fontSize: 11,
-    color: '#9ca3af',
-    marginTop: 2,
-  },
-  invoiceAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-});
