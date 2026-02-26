@@ -51,6 +51,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 11-advanced-mode-pdf-export P04 | 5 | 2 tasks | 3 files |
 | Phase 13-apple-hig-ui-polish P01 | 2 | 2 tasks | 6 files |
 | Phase 13-apple-hig-ui-polish P04 | 3 | 2 tasks | 7 files |
+| Phase 13-apple-hig-ui-polish P03 | 6 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Key decisions for v2.0:
 - [Phase 13-apple-hig-ui-polish]: SafeScreen grouped prop uses inline hex values (#F2F2F7 / #1C1C1E) matching UIKit system grouped colors
 - [Phase 13-apple-hig-ui-polish]: EmptyState symbolName prop uses 'as any' type assertion on SymbolView name prop — expo-symbols name union is extremely long; silently shows nothing for invalid names so tradeoff is acceptable
 - [Phase 13-apple-hig-ui-polish]: SettingsCard shadow: StyleSheet.create({ card: SHADOWS.card }) pattern used — cleaner than inline spread; consistent with Phase 13 shadow token pattern
+- [Phase 13-apple-hig-ui-polish]: dynamicStyles pattern: compute isDark from useColorScheme, build per-element color overrides, spread as second element in style arrays — chosen for direct StyleSheet control over form input colors without NativeWind className interference
+- [Phase 13-apple-hig-ui-polish]: Stack.Screen headerLeft Cancel button pattern for form screens pushed via router.push — overrides navigation bar Cancel affordance from within the screen component
 
 ### Pending Todos
 
