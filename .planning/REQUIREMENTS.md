@@ -73,22 +73,22 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### iOS Native UX
 
-- [ ] **UX-01**: All screens respect safe areas (notch, Dynamic Island, home indicator)
-- [ ] **UX-02**: All form screens have proper keyboard avoidance (fields not obscured by keyboard)
-- [ ] **UX-03**: Haptic feedback on save, delete, and error actions
-- [ ] **UX-04**: Privacy screen blurs app content in iOS app switcher
+- [x] **UX-01**: All screens respect safe areas (notch, Dynamic Island, home indicator)
+- [x] **UX-02**: All form screens have proper keyboard avoidance (fields not obscured by keyboard)
+- [x] **UX-03**: Haptic feedback on save, delete, and error actions
+- [x] **UX-04**: Privacy screen blurs app content in iOS app switcher
 - [x] **UX-05**: Native scroll physics on all scrollable views
-- [ ] **UX-06**: Empty states with call-to-action on all list screens
+- [x] **UX-06**: Empty states with call-to-action on all list screens
 - [x] **UX-07**: Portrait-only orientation lock
 
 ### Localization & Theming
 
-- [ ] **I18N-01**: App supports English and Arabic languages
-- [ ] **I18N-02**: Arabic mode flips layout to RTL (with app restart prompt on switch)
-- [ ] **I18N-03**: Multi-currency support with live exchange rates
-- [ ] **I18N-04**: Locale-aware number formatting (decimal separator, grouping per currency/locale)
-- [ ] **THEME-01**: Dark/light theme synced with iOS system setting
-- [ ] **THEME-02**: User can manually override theme in Settings
+- [x] **I18N-01**: App supports English and Arabic languages
+- [x] **I18N-02**: Arabic mode flips layout to RTL (with app restart prompt on switch)
+- [x] **I18N-03**: Multi-currency support with live exchange rates
+- [x] **I18N-04**: Locale-aware number formatting (decimal separator, grouping per currency/locale)
+- [x] **THEME-01**: Dark/light theme synced with iOS system setting
+- [x] **THEME-02**: User can manually override theme in Settings
 
 ### App Store
 
@@ -173,19 +173,19 @@ Deferred to v2.x milestones. Not in current roadmap.
 | ADV-05 | Phase 11 | Pending |
 | ADV-06 | Phase 11 | Pending |
 | FIX-01 | Phase 11 | Pending |
-| UX-01 | Phase 7 | Pending |
-| UX-02 | Phase 7 | Pending |
-| UX-03 | Phase 7 | Pending |
-| UX-04 | Phase 7 | Pending |
+| UX-01 | Phase 7 | Complete |
+| UX-02 | Phase 7 | Complete |
+| UX-03 | Phase 7 | Complete |
+| UX-04 | Phase 7 | Complete |
 | UX-05 | Phase 7 | Complete |
-| UX-06 | Phase 7 | Pending |
+| UX-06 | Phase 7 | Complete |
 | UX-07 | Phase 7 | Complete |
-| I18N-01 | Phase 7 | Pending |
-| I18N-02 | Phase 7 | Pending |
-| I18N-03 | Phase 7 | Pending |
-| I18N-04 | Phase 7 | Pending |
-| THEME-01 | Phase 7 | Pending |
-| THEME-02 | Phase 7 | Pending |
+| I18N-01 | Phase 7 | Complete |
+| I18N-02 | Phase 7 | Complete |
+| I18N-03 | Phase 7 | Complete |
+| I18N-04 | Phase 7 | Complete |
+| THEME-01 | Phase 7 | Complete |
+| THEME-02 | Phase 7 | Complete |
 | STORE-01 | Phase 12 | Pending |
 | STORE-02 | Phase 12 | Pending |
 | STORE-03 | Phase 12 | Pending |

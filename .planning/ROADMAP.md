@@ -48,7 +48,7 @@ Plans:
 
 **Milestone Goal:** Port the full Balance Tracker experience to iOS as a native React Native app with Apple HIG design, reusing the existing Supabase backend. App Store distribution via Expo EAS.
 
-- [ ] **Phase 7: Project Scaffold + Foundation** - Expo SDK 52 project with Supabase client, polyfills, ported logic layer, i18n, theming, and all native UX patterns established
+- [x] **Phase 7: Project Scaffold + Foundation** - Expo SDK 52 project with Supabase client, polyfills, ported logic layer, i18n, theming, and all native UX patterns established (completed 2026-02-26)
 - [ ] **Phase 8: Auth Shell + Navigation** - Sign-in/sign-up screens, session persistence, auth guard, bottom tab navigation, and context providers
 - [ ] **Phase 9: Simple Mode Screens** - Full CRUD for income, expense, debts, and assets with native iOS interactions (swipe-to-delete, pull-to-refresh, inline status toggles)
 - [ ] **Phase 10: Dashboard + CSV Export** - Net worth dashboard with Victory Native charts, tap-to-callout interaction, and CSV export via iOS share sheet
@@ -171,7 +171,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 4. Transaction-Client Linking | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 5. Invoices & PDF Export | v1.0 | 7/7 | Complete | 2026-02-25 |
 | 6. Advanced Dashboard | v1.1 | 2/2 | Complete | 2026-02-25 |
-| 7. Project Scaffold + Foundation | 2/3 | In Progress|  | - |
+| 7. Project Scaffold + Foundation | 3/3 | Complete   | 2026-02-26 | - |
 | 8. Auth Shell + Navigation | v2.0 | 0/2 | Not started | - |
 | 9. Simple Mode Screens | v2.0 | 0/4 | Not started | - |
 | 10. Dashboard + CSV Export | v2.0 | 0/2 | Not started | - |

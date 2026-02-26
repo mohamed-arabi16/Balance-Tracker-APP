@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 7 of 12 (Project Scaffold + Foundation)
-Plan: 2 of 3 in Phase 7
-Status: In progress
-Last activity: 2026-02-26 — 07-02 complete: Supabase RN client + React Query configured
+Plan: 3 of 3 in Phase 7 (COMPLETE)
+Status: Phase 7 complete
+Last activity: 2026-02-26 — 07-03 complete: UX foundation components, i18n init, ThemeContext
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -60,6 +60,9 @@ Key decisions for v2.0:
 - [07-02]: expo-sqlite localStorage polyfill used for Supabase session storage (not expo-secure-store — 2KB per-item limit exceeded by Supabase sessions)
 - [07-02]: NetInfo online manager omitted from queryClient.ts — requires dev build; deferred to Phase 8
 - [07-02]: SplashScreen.preventAutoHideAsync() called in _layout.tsx; hide delegated to Phase 8 after auth+i18n init
+- [07-03]: FormScreen uses KeyboardAvoidingView + ScrollView fallback — react-native-keyboard-controller requires dev build; Expo Go phase; upgrade deferred to Phase 8
+- [07-03]: setColorScheme in nativewind v4 is a method on useColorScheme() return value, not a named export — destructure from hook
+- [07-03]: SplashScreen.hideAsync() moved to _layout.tsx after initI18n() — Plan 03 owns i18n gate, so splash hide belongs here
 - [01-03]: Generated columns (tax_amount, total, amount) excluded from Insert/Update types — same pattern applies to RN port
 
 ### Pending Todos
@@ -75,5 +78,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 07-02-PLAN.md — Supabase RN client + React Query configured
+Stopped at: Completed 07-03-PLAN.md — UX foundation components, i18n init, ThemeContext, PrivacyOverlay
 Resume file: None
