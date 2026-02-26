@@ -10,7 +10,7 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 ### Foundation
 
 - [x] **FOUND-01**: Expo SDK 52 project scaffolded with React Native 0.76, NativeWind v4, and Expo Router v3
-- [ ] **FOUND-02**: Supabase client configured with expo-secure-store session adapter, URL polyfill, and ws/stream Metro aliases
+- [x] **FOUND-02**: Supabase client configured with expo-secure-store session adapter, URL polyfill, and ws/stream Metro aliases
 - [x] **FOUND-03**: Portable layer copied from web (hooks, types, lib functions, query keys) with import paths adjusted
 - [ ] **FOUND-04**: Tab bar navigation with 5 sections (Dashboard, Transactions, Debts, Assets, More) using SF Symbols icons
 
@@ -137,7 +137,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 7 | Complete |
-| FOUND-02 | Phase 7 | Pending |
+| FOUND-02 | Phase 7 | Complete |
 | FOUND-03 | Phase 7 | Complete |
 | FOUND-04 | Phase 8 | Pending |
 | AUTH-01 | Phase 8 | Pending |

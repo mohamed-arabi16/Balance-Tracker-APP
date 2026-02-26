@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 7 of 12 (Project Scaffold + Foundation)
-Plan: 1 of 3 in Phase 7
+Plan: 2 of 3 in Phase 7
 Status: In progress
-Last activity: 2026-02-26 — 07-01 complete: Expo scaffold + portable layer ported
+Last activity: 2026-02-26 — 07-02 complete: Supabase RN client + React Query configured
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -57,6 +57,9 @@ Key decisions for v2.0:
 - [07-01]: Placeholder stubs pattern — AuthContext, useLogActivity, analytics.ts created as type-safe no-ops to allow hooks to compile before Plan 02/08 implementation
 - [07-01]: EXPO_PUBLIC_ prefix for all public env vars (replaces VITE_ prefix from web app)
 - [07-01]: URL polyfill (react-native-url-polyfill/auto) imported first in app/_layout.tsx
+- [07-02]: expo-sqlite localStorage polyfill used for Supabase session storage (not expo-secure-store — 2KB per-item limit exceeded by Supabase sessions)
+- [07-02]: NetInfo online manager omitted from queryClient.ts — requires dev build; deferred to Phase 8
+- [07-02]: SplashScreen.preventAutoHideAsync() called in _layout.tsx; hide delegated to Phase 8 after auth+i18n init
 - [01-03]: Generated columns (tax_amount, total, amount) excluded from Insert/Update types — same pattern applies to RN port
 
 ### Pending Todos
@@ -72,5 +75,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 07-01-PLAN.md — Expo scaffold + portable layer complete
+Stopped at: Completed 07-02-PLAN.md — Supabase RN client + React Query configured
 Resume file: None
