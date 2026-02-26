@@ -173,7 +173,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 5. Invoices & PDF Export | v1.0 | 7/7 | Complete | 2026-02-25 |
 | 6. Advanced Dashboard | v1.1 | 2/2 | Complete | 2026-02-25 |
 | 7. Project Scaffold + Foundation | v2.0 | 3/3 | Complete | 2026-02-26 |
-| 8. Auth Shell + Navigation | v2.0 | 0/2 | Not started | - |
+| 8. Auth Shell + Navigation | 1/2 | In Progress|  | - |
 | 9. Simple Mode Screens | v2.0 | 0/4 | Not started | - |
 | 10. Dashboard + CSV Export | v2.0 | 0/3 | Not started | - |
 | 11. Advanced Mode + PDF Export | v2.0 | 0/5 | Not started | - |

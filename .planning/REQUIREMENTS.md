@@ -16,10 +16,10 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across app restarts (session persisted via expo-secure-store)
+- [x] **AUTH-01**: User can sign up with email and password
+- [x] **AUTH-02**: User can log in and stay logged in across app restarts (session persisted via expo-secure-store)
 - [ ] **AUTH-03**: User can log out from Settings
-- [ ] **AUTH-04**: User can reset password via email link
+- [x] **AUTH-04**: User can reset password via email link
 - [ ] **AUTH-05**: Unauthenticated users are redirected to login screen
 
 ### Transactions
@@ -140,10 +140,10 @@ Deferred to v2.x milestones. Not in current roadmap.
 | FOUND-02 | Phase 7 | Complete |
 | FOUND-03 | Phase 7 | Complete |
 | FOUND-04 | Phase 8 | Pending |
-| AUTH-01 | Phase 8 | Pending |
-| AUTH-02 | Phase 8 | Pending |
+| AUTH-01 | Phase 8 | Complete |
+| AUTH-02 | Phase 8 | Complete |
 | AUTH-03 | Phase 8 | Pending |
-| AUTH-04 | Phase 8 | Pending |
+| AUTH-04 | Phase 8 | Complete |
 | AUTH-05 | Phase 8 | Pending |
 | TXN-01 | Phase 9 | Pending |
 | TXN-02 | Phase 9 | Pending |

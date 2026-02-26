@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 7: Project Scaffold + Foundation
+**Current focus:** v2.0 iOS Native App — Phase 8: Auth Shell + Navigation
 
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 7 of 12 (Project Scaffold + Foundation)
-Plan: 3 of 3 in Phase 7 (COMPLETE)
-Status: Phase 7 complete
-Last activity: 2026-02-26 — 07-03 complete: UX foundation components, i18n init, ThemeContext
+Phase: 8 of 12 (Auth Shell + Navigation)
+Plan: 1 of 3 in Phase 8 (COMPLETE)
+Status: In progress — Phase 8 Plan 01 complete
+Last activity: 2026-02-26 — 08-01 complete: Real Supabase AuthContext, auth screens (sign-in, sign-up, forgot-password), expo-symbols
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -64,6 +64,9 @@ Key decisions for v2.0:
 - [07-03]: setColorScheme in nativewind v4 is a method on useColorScheme() return value, not a named export — destructure from hook
 - [07-03]: SplashScreen.hideAsync() moved to _layout.tsx after initI18n() — Plan 03 owns i18n gate, so splash hide belongs here
 - [01-03]: Generated columns (tax_amount, total, amount) excluded from Insert/Update types — same pattern applies to RN port
+- [08-01]: expo-router typed routes: .expo/types/router.d.ts is gitignored — use 'as any' type assertions on Link hrefs for new routes until first expo start regenerates the file
+- [08-01]: queryClient.clear() called only in explicit signOut(), NOT in onAuthStateChange — avoids clearing cache on token auto-refresh
+- [08-01]: resetPassword has no redirectTo — Phase 12 adds deep link redirect for password reset flow
 
 ### Pending Todos
 
@@ -78,5 +81,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 07-03-PLAN.md — UX foundation components, i18n init, ThemeContext, PrivacyOverlay
+Stopped at: Completed 08-01-PLAN.md — Real Supabase AuthContext, auth screens (sign-in, sign-up, forgot-password), expo-symbols
 Resume file: None
