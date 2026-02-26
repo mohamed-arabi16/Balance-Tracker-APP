@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -9,9 +9,8 @@ import type { SharedValue } from 'react-native-reanimated';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useDeleteIncome, useIncomes, useUpdateIncome, type Income } from '@/hooks/useIncomes';
+import { useDeleteExpense, useExpenses, useUpdateExpense, type Expense } from '@/hooks/useExpenses';
 import { haptics } from '@/lib/haptics';
-import { ExpenseScreen } from './expenses';
 
 // ─────────────────────────────────────────────
 // Delete action rendered inside the swipeable
@@ -35,7 +34,7 @@ function DeleteAction(
         }}
         style={styles.deleteButton}
         accessibilityRole="button"
-        accessibilityLabel="Delete income"
+        accessibilityLabel="Delete expense"
       >
         <Text style={styles.deleteText}>Delete</Text>
       </Pressable>
@@ -44,26 +43,27 @@ function DeleteAction(
 }
 
 // ─────────────────────────────────────────────
-// Inline status badge — toggles expected/received
+// Inline status badge — toggles pending/paid
 // ─────────────────────────────────────────────
 interface StatusBadgeProps {
-  item: Income;
+  item: Expense;
 }
 
 function StatusBadge({ item }: StatusBadgeProps) {
-  const updateIncome = useUpdateIncome();
-  const isReceived = item.status === 'received';
+  const updateExpense = useUpdateExpense();
+  const isPaid = item.status === 'paid';
 
   function handleToggle() {
     haptics.onToggle();
-    updateIncome.mutate({
+    updateExpense.mutate({
       id: item.id,
       title: item.title,
       date: item.date,
-      status: isReceived ? 'expected' : 'received',
+      status: isPaid ? 'pending' : 'paid',
       currency: item.currency,
       category: item.category,
       amount: item.amount,
+      type: item.type,
       client_id: item.client_id,
     });
   }
@@ -71,26 +71,26 @@ function StatusBadge({ item }: StatusBadgeProps) {
   return (
     <Pressable
       onPress={handleToggle}
-      style={[styles.badge, isReceived ? styles.badgeReceived : styles.badgeExpected]}
+      style={[styles.badge, isPaid ? styles.badgePaid : styles.badgePending]}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
     >
-      <Text style={[styles.badgeText, isReceived ? styles.badgeTextReceived : styles.badgeTextExpected]}>
-        {isReceived ? 'Received' : 'Expected'}
+      <Text style={[styles.badgeText, isPaid ? styles.badgeTextPaid : styles.badgeTextPending]}>
+        {isPaid ? 'Paid' : 'Pending'}
       </Text>
     </Pressable>
   );
 }
 
 // ─────────────────────────────────────────────
-// Single income row with swipe-to-delete
+// Single expense row with swipe-to-delete
 // ─────────────────────────────────────────────
-interface IncomeRowProps {
-  item: Income;
-  onDelete: (income: Income) => void;
+interface ExpenseRowProps {
+  item: Expense;
+  onDelete: (expense: Expense) => void;
 }
 
-function IncomeRow({ item, onDelete }: IncomeRowProps) {
+function ExpenseRow({ item, onDelete }: ExpenseRowProps) {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
 
@@ -104,7 +104,7 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
   );
 
   function handlePress() {
-    router.push(`/(tabs)/transactions/add-income?id=${item.id}` as any);
+    router.push(`/(tabs)/transactions/add-expense?id=${item.id}` as any);
   }
 
   return (
@@ -123,6 +123,9 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
             <View style={styles.categoryChip}>
               <Text style={styles.categoryText}>{item.category}</Text>
             </View>
+            <View style={styles.typeChip}>
+              <Text style={styles.typeText}>{item.type}</Text>
+            </View>
           </View>
         </View>
         <View style={styles.rowRight}>
@@ -135,143 +138,68 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
 }
 
 // ─────────────────────────────────────────────
-// Income list content (used when tab = 'income')
+// Main expense screen (named + default export)
 // ─────────────────────────────────────────────
-function IncomeScreen() {
+export function ExpenseScreen() {
   const router = useRouter();
-  const { data: incomes, isRefetching, refetch } = useIncomes();
-  const deleteIncome = useDeleteIncome();
+  const { data: expenses, isRefetching, refetch } = useExpenses();
+  const deleteExpense = useDeleteExpense();
 
-  function handleDelete(income: Income) {
-    deleteIncome.mutate(income);
+  function handleDelete(expense: Expense) {
+    deleteExpense.mutate(expense);
   }
 
-  function handleAddIncome() {
-    router.push('/(tabs)/transactions/add-income' as any);
+  function handleAddExpense() {
+    router.push('/(tabs)/transactions/add-expense' as any);
   }
 
   const renderItem = useCallback(
-    ({ item }: { item: Income }) => (
-      <IncomeRow item={item} onDelete={handleDelete} />
+    ({ item }: { item: Expense }) => (
+      <ExpenseRow item={item} onDelete={handleDelete} />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  const keyExtractor = useCallback((item: Income) => item.id, []);
+  const keyExtractor = useCallback((item: Expense) => item.id, []);
 
   return (
-    <>
+    <SafeScreen edges={['bottom']}>
       <FlatList
-        data={incomes ?? []}
+        data={expenses ?? []}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={
-          (incomes?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
+          (expenses?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
         }
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
         ListEmptyComponent={
           <EmptyState
-            title="No income yet"
-            message="Start tracking your income to see it here."
-            ctaLabel="Add Income"
-            onCta={handleAddIncome}
+            title="No expenses yet"
+            message="Start tracking your expenses to see them here."
+            ctaLabel="Add Expense"
+            onCta={handleAddExpense}
           />
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
       <TouchableOpacity
-        onPress={handleAddIncome}
+        onPress={handleAddExpense}
         style={styles.fab}
         accessibilityRole="button"
-        accessibilityLabel="Add Income"
+        accessibilityLabel="Add Expense"
       >
-        <Text style={styles.fabText}>+ Add Income</Text>
+        <Text style={styles.fabText}>+ Add Expense</Text>
       </TouchableOpacity>
-    </>
-  );
-}
-
-// ─────────────────────────────────────────────
-// Main transactions screen with tab switcher
-// ─────────────────────────────────────────────
-type Tab = 'income' | 'expenses';
-
-export default function TransactionsScreen() {
-  const [activeTab, setActiveTab] = useState<Tab>('income');
-
-  function handleTabPress(tab: Tab) {
-    haptics.onToggle();
-    setActiveTab(tab);
-  }
-
-  return (
-    <SafeScreen edges={['bottom']}>
-      {/* Tab chip switcher */}
-      <View style={styles.tabBar}>
-        <Pressable
-          onPress={() => handleTabPress('income')}
-          style={[styles.tabChip, activeTab === 'income' && styles.tabChipActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'income' }}
-        >
-          <Text style={[styles.tabChipText, activeTab === 'income' && styles.tabChipTextActive]}>
-            Income
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress('expenses')}
-          style={[styles.tabChip, activeTab === 'expenses' && styles.tabChipActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'expenses' }}
-        >
-          <Text style={[styles.tabChipText, activeTab === 'expenses' && styles.tabChipTextActive]}>
-            Expenses
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* Content */}
-      {activeTab === 'income' ? <IncomeScreen /> : <ExpenseScreen />}
     </SafeScreen>
   );
 }
 
+export default ExpenseScreen;
+
 const styles = StyleSheet.create({
-  // Tab bar
-  tabBar: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    backgroundColor: '#ffffff',
-  },
-  tabChip: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  tabChipActive: {
-    backgroundColor: '#dbeafe',
-    borderColor: '#3b82f6',
-  },
-  tabChipText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6b7280',
-  },
-  tabChipTextActive: {
-    color: '#1d4ed8',
-    fontWeight: '600',
-  },
   // Delete action
   deleteContainer: {
     width: 80,
@@ -296,20 +224,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 6,
   },
-  badgeReceived: {
+  badgePaid: {
     backgroundColor: '#dcfce7',
   },
-  badgeExpected: {
+  badgePending: {
     backgroundColor: '#fef9c3',
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
   },
-  badgeTextReceived: {
+  badgeTextPaid: {
     color: '#166534',
   },
-  badgeTextExpected: {
+  badgeTextPending: {
     color: '#854d0e',
   },
   // Row
@@ -335,6 +263,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
     gap: 8,
+    flexWrap: 'wrap',
   },
   rowDate: {
     fontSize: 12,
@@ -349,6 +278,16 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 11,
     color: '#374151',
+  },
+  typeChip: {
+    backgroundColor: '#ede9fe',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  typeText: {
+    fontSize: 11,
+    color: '#5b21b6',
   },
   rowRight: {
     alignItems: 'flex-end',
@@ -375,7 +314,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 24,
     alignSelf: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: '#ef4444',
     borderRadius: 24,
     paddingHorizontal: 24,
     paddingVertical: 12,
