@@ -160,10 +160,28 @@ Plans:
 - [ ] 12-02-PLAN.md — App icon + splash assets, app.json bundle ID, EAS Build production profile (STORE-03 prerequisites)
 - [ ] 12-03-PLAN.md — EAS init + production build, TestFlight device verification, App Store metadata + EAS Submit (STORE-03, STORE-04)
 
+### Phase 13: Apple HIG UI Polish
+**Goal**: Every screen in the app looks and feels like a native Apple app — cards have elevation and hierarchy, lists use iOS-native section styling, forms are consistent and polished, typography and spacing follow Apple HIG, and empty/loading states are visually complete
+**Depends on**: Phase 10
+**Requirements**: POLISH-01, POLISH-02, POLISH-03, POLISH-04, POLISH-05
+**Success Criteria** (what must be TRUE):
+  1. The Dashboard screen uses elevated card design — net worth card, summary cards, and chart container all have visible shadow/elevation, rounded corners, and clear visual hierarchy
+  2. All list screens (Transactions, Debts, Assets) use iOS grouped section styling — proper row heights (min 44pt), section headers, separators, and row tap feedback
+  3. All add/edit form sheets use consistent iOS input styling — rounded rect fields, clear labels above inputs, prominent primary action button, and cancel affordance
+  4. Typography follows Apple HIG throughout — title/headline/body/caption size scale is consistent, no raw pixel font sizes, adequate line-height and letter-spacing
+  5. Every screen has a polished empty state — SF Symbol icon, short descriptive message, and a CTA where applicable (no blank white screens)
+**Plans**: TBD
+
+Plans:
+- [ ] 13-01-PLAN.md — Dashboard polish: elevated card components, chart container, section headers, color-coded summary cards
+- [ ] 13-02-PLAN.md — List screen polish: Transactions, Debts, Assets — grouped sections, row styling, swipe action design
+- [ ] 13-03-PLAN.md — Form sheet polish: consistent input fields, labels, primary button, cancel button across all add/edit sheets
+- [ ] 13-04-PLAN.md — Global polish pass: typography scale, spacing tokens, empty states, loading states, Settings screen
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
+Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -179,3 +197,4 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 10. Dashboard + CSV Export | 3/3 | Complete    | 2026-02-26 | - |
 | 11. Advanced Mode + PDF Export | 1/5 | In Progress|  | - |
 | 12. App Store Compliance + Submission | v2.0 | 0/3 | Not started | - |
+| 13. Apple HIG UI Polish | v2.0 | 0/4 | Not started | - |

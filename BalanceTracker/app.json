@@ -31,7 +31,9 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      "expo-sqlite",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true
