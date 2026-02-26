@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PrivacyOverlay } from '@/components/layout/PrivacyOverlay';
@@ -68,16 +69,18 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-      {/* PrivacyOverlay is outside providers so it renders above everything */}
-      <PrivacyOverlay />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+        {/* PrivacyOverlay is outside providers so it renders above everything */}
+        <PrivacyOverlay />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
