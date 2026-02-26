@@ -9,9 +9,9 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Expo SDK 52 project scaffolded with React Native 0.76, NativeWind v4, and Expo Router v3
+- [x] **FOUND-01**: Expo SDK 52 project scaffolded with React Native 0.76, NativeWind v4, and Expo Router v3
 - [ ] **FOUND-02**: Supabase client configured with expo-secure-store session adapter, URL polyfill, and ws/stream Metro aliases
-- [ ] **FOUND-03**: Portable layer copied from web (hooks, types, lib functions, query keys) with import paths adjusted
+- [x] **FOUND-03**: Portable layer copied from web (hooks, types, lib functions, query keys) with import paths adjusted
 - [ ] **FOUND-04**: Tab bar navigation with 5 sections (Dashboard, Transactions, Debts, Assets, More) using SF Symbols icons
 
 ### Authentication
@@ -77,9 +77,9 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 - [ ] **UX-02**: All form screens have proper keyboard avoidance (fields not obscured by keyboard)
 - [ ] **UX-03**: Haptic feedback on save, delete, and error actions
 - [ ] **UX-04**: Privacy screen blurs app content in iOS app switcher
-- [ ] **UX-05**: Native scroll physics on all scrollable views
+- [x] **UX-05**: Native scroll physics on all scrollable views
 - [ ] **UX-06**: Empty states with call-to-action on all list screens
-- [ ] **UX-07**: Portrait-only orientation lock
+- [x] **UX-07**: Portrait-only orientation lock
 
 ### Localization & Theming
 
@@ -136,9 +136,9 @@ Deferred to v2.x milestones. Not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 7 | Pending |
+| FOUND-01 | Phase 7 | Complete |
 | FOUND-02 | Phase 7 | Pending |
-| FOUND-03 | Phase 7 | Pending |
+| FOUND-03 | Phase 7 | Complete |
 | FOUND-04 | Phase 8 | Pending |
 | AUTH-01 | Phase 8 | Pending |
 | AUTH-02 | Phase 8 | Pending |
@@ -177,9 +177,9 @@ Deferred to v2.x milestones. Not in current roadmap.
 | UX-02 | Phase 7 | Pending |
 | UX-03 | Phase 7 | Pending |
 | UX-04 | Phase 7 | Pending |
-| UX-05 | Phase 7 | Pending |
+| UX-05 | Phase 7 | Complete |
 | UX-06 | Phase 7 | Pending |
-| UX-07 | Phase 7 | Pending |
+| UX-07 | Phase 7 | Complete |
 | I18N-01 | Phase 7 | Pending |
 | I18N-02 | Phase 7 | Pending |
 | I18N-03 | Phase 7 | Pending |

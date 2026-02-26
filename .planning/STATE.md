@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 7 of 12 (Project Scaffold + Foundation)
-Plan: 0 of 3 in Phase 7
-Status: Ready to plan
-Last activity: 2026-02-26 — v2.0 roadmap created (Phases 7–12, 54 requirements mapped)
+Plan: 1 of 3 in Phase 7
+Status: In progress
+Last activity: 2026-02-26 — 07-01 complete: Expo scaffold + portable layer ported
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -52,6 +52,11 @@ Key decisions for v2.0:
 - [v2.0 Roadmap]: Victory Native replaces Recharts (web-only) — validate tap-to-callout API before Phase 10 planning
 - [v2.0 Roadmap]: UX patterns (safe areas, haptics, swipe-to-delete, keyboard avoidance) assigned to Phase 7 — architectural decisions baked in before any feature screen
 - [v2.0 Roadmap]: Expo SDK 52 pinned — SDK 53+ has unresolved ws/stream Metro crash with supabase-js (#1400/#1403)
+- [v2.0 Roadmap, 07-01 update]: Expo SDK 55 installed (create-expo-app latest stable) — SDK 52 pin may be stale; monitor ws/stream Metro compatibility in Plan 02 when full Supabase client is built
+- [07-01]: AsyncStorage replaces localStorage for all RN context persistence (DateContext, CurrencyContext)
+- [07-01]: Placeholder stubs pattern — AuthContext, useLogActivity, analytics.ts created as type-safe no-ops to allow hooks to compile before Plan 02/08 implementation
+- [07-01]: EXPO_PUBLIC_ prefix for all public env vars (replaces VITE_ prefix from web app)
+- [07-01]: URL polyfill (react-native-url-polyfill/auto) imported first in app/_layout.tsx
 - [01-03]: Generated columns (tax_amount, total, amount) excluded from Insert/Update types — same pattern applies to RN port
 
 ### Pending Todos
@@ -67,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: v2.0 roadmap created — Phases 7–12 defined, 54 requirements mapped, STATE.md initialized for v2.0
+Stopped at: Completed 07-01-PLAN.md — Expo scaffold + portable layer complete
 Resume file: None
