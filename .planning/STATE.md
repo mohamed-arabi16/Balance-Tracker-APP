@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 11 of 12 (Advanced Mode + PDF Export)
-Plan: 0 of 5 in Phase 11 (NOT STARTED)
-Status: Phase 10 COMPLETE — DASH-01, DASH-02, DASH-03, EXPRT-01 verified on device; Phase 11 next
-Last activity: 2026-02-26 — 10-03 human verification approved: Victory Native XL + Skia charts, tap-callout, navigable cards, CSV export all confirmed on physical iPhone
+Plan: 1 of 5 in Phase 11 (IN PROGRESS)
+Status: Phase 11 Plan 01 COMPLETE — ModeProvider wired, conditional Clients/Invoices tabs, 5 deps installed; Plan 02 next
+Last activity: 2026-02-26 — 11-01 complete: ModeProvider in root layout, href:null tab gating, stub screens, tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -44,6 +44,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 10 P02 | 3 | 2 tasks | 3 files |
 | Phase 10-dashboard-csv-export P01 | 5 | 3 tasks | 6 files |
 | Phase 10-dashboard-csv-export P03 | human-gated | 1 tasks | 0 files |
+| Phase 11-advanced-mode-pdf-export P01 | 2 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Key decisions for v2.0:
 - [Phase 10-dashboard-csv-export]: Inter-Medium.ttf downloaded from rsms/inter v4.0 GitHub raw URL (299KB) for chart axis label rendering via victory-native useFont()
 - [Phase 10-dashboard-csv-export]: Skia native module is present in Expo Go SDK 54 — no dev build required for Victory Native XL chart rendering
 - [Phase 10-dashboard-csv-export]: Phase 10 complete — DASH-01, DASH-02, DASH-03, EXPRT-01 all verified on device; Phase 11 unblocked
+- [Phase 11-advanced-mode-pdf-export]: ModeProvider placed inside AuthProvider (not beside it) because useUserSettings calls useAuth — ordering enforces dependency
+- [Phase 11-advanced-mode-pdf-export]: href: isAdvanced ? undefined : null hides Advanced tabs without unmounting routes — enables instant show/hide on toggle
+- [Phase 11-advanced-mode-pdf-export]: expo-install for expo-print (SDK version resolution); npm install for pure-JS libs (react-hook-form, zod, @hookform/resolvers)
 
 ### Pending Todos
 
@@ -108,5 +112,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 10-03-PLAN.md — Phase 10 human verification approved; DASH-01, DASH-02, DASH-03, EXPRT-01 all verified on physical device; Phase 10 complete; Phase 11 next
+Stopped at: Completed 11-01-PLAN.md — ModeProvider wired into root layout, conditional Clients/Invoices tabs using href:null pattern, 5 Phase 11 deps installed; Plan 11-02 next
 Resume file: None

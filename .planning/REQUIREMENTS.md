@@ -60,7 +60,7 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Advanced Mode
 
-- [ ] **ADV-01**: User can toggle between Simple and Advanced mode
+- [x] **ADV-01**: User can toggle between Simple and Advanced mode
 - [ ] **ADV-02**: User can create and manage clients (name, contact info) with native list + detail views
 - [ ] **ADV-03**: User can create invoices linked to a client with line items
 - [ ] **ADV-04**: User can manage invoice status (Draft → Sent → Paid) — inline status change without opening edit
@@ -117,6 +117,14 @@ Deferred to v2.x milestones. Not in current roadmap.
 - **OPT-01**: Optimistic UI updates on transaction add/edit
 - **SKEL-01**: Skeleton loading states with content shape hints
 
+### Apple HIG Polish (Phase 13)
+
+- **POLISH-01**: Dashboard uses Apple HIG card design — elevated cards with subtle shadows, rounded corners, clear visual hierarchy, and proper section spacing
+- **POLISH-02**: List screens (Transactions, Debts, Assets) use iOS-native grouped section styling with proper row heights, separators, and tappable row feedback
+- **POLISH-03**: Form add/edit sheets use consistent iOS input field styling (rounded rect, proper padding, clear labels, prominent primary action button)
+- **POLISH-04**: Typography and spacing follow Apple HIG throughout — SF Pro scale (title, headline, body, caption), 16pt base padding, 44pt minimum touch targets
+- **POLISH-05**: Empty states and loading indicators are visually polished — SF Symbol icons, descriptive copy, and consistent placement across all screens
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -166,7 +174,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | DASH-03 | Phase 10 | Complete |
 | EXPRT-01 | Phase 10 | Complete |
 | EXPRT-02 | Phase 11 | Pending |
-| ADV-01 | Phase 11 | Pending |
+| ADV-01 | Phase 11 | Complete |
 | ADV-02 | Phase 11 | Pending |
 | ADV-03 | Phase 11 | Pending |
 | ADV-04 | Phase 11 | Pending |
@@ -190,10 +198,15 @@ Deferred to v2.x milestones. Not in current roadmap.
 | STORE-02 | Phase 12 | Pending |
 | STORE-03 | Phase 12 | Pending |
 | STORE-04 | Phase 12 | Pending |
+| POLISH-01 | Phase 13 | Pending |
+| POLISH-02 | Phase 13 | Pending |
+| POLISH-03 | Phase 13 | Pending |
+| POLISH-04 | Phase 13 | Pending |
+| POLISH-05 | Phase 13 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 54 total
-- Mapped to phases: 54
+- v2.0 requirements: 59 total
+- Mapped to phases: 59
 - Unmapped: 0
 
 ---

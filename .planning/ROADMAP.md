@@ -54,6 +54,7 @@ Plans:
 - [x] **Phase 10: Dashboard + CSV Export** - Net worth dashboard with Victory Native charts, tap-to-callout interaction, and CSV export via iOS share sheet (completed 2026-02-26)
 - [ ] **Phase 11: Advanced Mode + PDF Export** - Clients, invoicing, invoice lifecycle, expo-print PDF generation, and transaction-client linking
 - [ ] **Phase 12: App Store Compliance + Submission** - Account deletion, privacy policy, TestFlight, EAS Submit, and App Store approval
+- [ ] **Phase 13: Apple HIG UI Polish** - Dashboard cards, list screen styling, form sheet design, typography/spacing, and empty state polish across all screens
 
 ## Phase Details
 
@@ -176,5 +177,5 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 8. Auth Shell + Navigation | v2.0 | 2/2 | Complete | 2026-02-26 |
 | 9. Simple Mode Screens | 4/4 | Complete    | 2026-02-26 | - |
 | 10. Dashboard + CSV Export | 3/3 | Complete    | 2026-02-26 | - |
-| 11. Advanced Mode + PDF Export | v2.0 | 0/5 | Not started | - |
+| 11. Advanced Mode + PDF Export | 1/5 | In Progress|  | - |
 | 12. App Store Compliance + Submission | v2.0 | 0/3 | Not started | - |
