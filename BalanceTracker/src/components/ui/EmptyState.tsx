@@ -1,8 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
+import { SymbolView } from 'expo-symbols';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SymbolView } from 'expo-symbols';
 
 import { haptics } from '@/lib/haptics';
+import { getIoniconsName } from '@/lib/iconMap';
 
 interface EmptyStateProps {
   title: string;
@@ -39,6 +41,14 @@ export function EmptyState({ title, message, ctaLabel, onCta, symbolName }: Empt
           size={56}
           type="hierarchical"
           style={{ marginBottom: 20 }}
+          fallback={
+            <Ionicons
+              name={getIoniconsName(symbolName)}
+              size={56}
+              color="#9ca3af"
+              style={{ marginBottom: 20 }}
+            />
+          }
         />
       ) : null}
       <Text
