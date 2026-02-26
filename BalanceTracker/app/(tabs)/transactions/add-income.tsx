@@ -1,0 +1,347 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+import { FormScreen } from '@/components/layout/FormScreen';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAddIncome, useIncomes, useUpdateIncome } from '@/hooks/useIncomes';
+import { haptics } from '@/lib/haptics';
+
+const CATEGORIES = ['freelance', 'commission', 'rent', 'debt', 'other'] as const;
+type IncomeCategory = typeof CATEGORIES[number];
+
+const CURRENCIES = ['USD', 'TRY'] as const;
+type IncomeCurrency = typeof CURRENCIES[number];
+
+const STATUSES = ['expected', 'received'] as const;
+type IncomeStatus = typeof STATUSES[number];
+
+export default function AddIncomeScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditMode = Boolean(id);
+
+  // Fetch existing incomes to get the one we're editing
+  const { data: incomes } = useIncomes();
+  const existingIncome = isEditMode
+    ? incomes?.find((inc) => inc.id === id)
+    : undefined;
+
+  // Form state
+  const [title, setTitle] = useState('');
+  const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState<IncomeCurrency>('USD');
+  const [category, setCategory] = useState<IncomeCategory>('freelance');
+  const [status, setStatus] = useState<IncomeStatus>('expected');
+  const [dateValue, setDateValue] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Pre-fill form in edit mode once existing income is loaded
+  useEffect(() => {
+    if (existingIncome) {
+      setTitle(existingIncome.title);
+      setAmount(String(existingIncome.amount));
+      setCurrency(existingIncome.currency as IncomeCurrency);
+      setCategory(existingIncome.category as IncomeCategory);
+      setStatus(existingIncome.status);
+      setDateValue(new Date(existingIncome.date));
+    }
+  }, [existingIncome]);
+
+  const addIncomeMutation = useAddIncome();
+  const updateIncomeMutation = useUpdateIncome();
+
+  const isPending = addIncomeMutation.isPending || updateIncomeMutation.isPending;
+
+  async function handleSubmit() {
+    if (!title.trim()) {
+      Alert.alert('Validation Error', 'Title is required.');
+      return;
+    }
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      Alert.alert('Validation Error', 'Please enter a valid amount.');
+      return;
+    }
+    if (!user) {
+      Alert.alert('Error', 'You must be signed in to add income.');
+      return;
+    }
+
+    const isoDate = dateValue.toISOString().split('T')[0];
+
+    try {
+      if (isEditMode && id) {
+        await updateIncomeMutation.mutateAsync({
+          id,
+          title: title.trim(),
+          amount: parsedAmount,
+          currency,
+          category,
+          status,
+          date: isoDate,
+          client_id: existingIncome?.client_id ?? null,
+        });
+      } else {
+        await addIncomeMutation.mutateAsync({
+          user_id: user.id,
+          title: title.trim(),
+          amount: parsedAmount,
+          currency,
+          category,
+          status,
+          date: isoDate,
+          client_id: null,
+        });
+      }
+      haptics.onSave();
+      router.back();
+    } catch (error) {
+      haptics.onError();
+      const message = error instanceof Error ? error.message : 'Something went wrong.';
+      Alert.alert('Error', message);
+    }
+  }
+
+  function handleDateChange(_event: unknown, selectedDate?: Date) {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setDateValue(selectedDate);
+    }
+  }
+
+  const formattedDate = dateValue.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  return (
+    <FormScreen>
+      <View style={styles.container}>
+
+        {/* Title */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.title')}</Text>
+          <TextInput
+            style={styles.input}
+            value={title}
+            onChangeText={setTitle}
+            placeholder={t('income.form.placeholder.title')}
+            placeholderTextColor="#9ca3af"
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+        </View>
+
+        {/* Amount */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.amount')}</Text>
+          <TextInput
+            style={styles.input}
+            value={amount}
+            onChangeText={setAmount}
+            placeholder={t('income.form.placeholder.amount')}
+            placeholderTextColor="#9ca3af"
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+          />
+        </View>
+
+        {/* Currency */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.currency')}</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={currency}
+              onValueChange={(val) => setCurrency(val as IncomeCurrency)}
+              style={styles.picker}
+            >
+              {CURRENCIES.map((cur) => (
+                <Picker.Item key={cur} label={cur} value={cur} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        {/* Category */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.category')}</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={category}
+              onValueChange={(val) => setCategory(val as IncomeCategory)}
+              style={styles.picker}
+            >
+              {CATEGORIES.map((cat) => (
+                <Picker.Item
+                  key={cat}
+                  label={t(`income.form.category.${cat}`)}
+                  value={cat}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        {/* Status */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.status')}</Text>
+          <View style={styles.statusRow}>
+            {STATUSES.map((s) => (
+              <Pressable
+                key={s}
+                onPress={() => setStatus(s)}
+                style={[
+                  styles.statusButton,
+                  status === s && styles.statusButtonActive,
+                ]}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: status === s }}
+              >
+                <Text
+                  style={[
+                    styles.statusButtonText,
+                    status === s && styles.statusButtonTextActive,
+                  ]}
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* Date */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>{t('income.form.date')}</Text>
+          <Pressable
+            onPress={() => setShowDatePicker(true)}
+            style={styles.dateButton}
+            accessibilityRole="button"
+            accessibilityLabel={`Date: ${formattedDate}. Tap to change.`}
+          >
+            <Text style={styles.dateButtonText}>{formattedDate}</Text>
+          </Pressable>
+          {showDatePicker && (
+            <DateTimePicker
+              value={dateValue}
+              mode="date"
+              display="spinner"
+              onChange={handleDateChange}
+              maximumDate={new Date(2100, 11, 31)}
+            />
+          )}
+        </View>
+
+        {/* Save button */}
+        <Pressable
+          onPress={handleSubmit}
+          style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
+          disabled={isPending}
+          accessibilityRole="button"
+          accessibilityLabel={isEditMode ? 'Save changes' : 'Add income'}
+        >
+          <Text style={styles.saveButtonText}>
+            {isPending ? 'Saving…' : isEditMode ? 'Save Changes' : 'Add Income'}
+          </Text>
+        </Pressable>
+
+      </View>
+    </FormScreen>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    gap: 16,
+  },
+  fieldGroup: {
+    gap: 6,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: '#111827',
+    backgroundColor: '#ffffff',
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+  },
+  picker: {
+    height: 44,
+    color: '#111827',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statusButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+  },
+  statusButtonActive: {
+    backgroundColor: '#dbeafe',
+    borderColor: '#3b82f6',
+  },
+  statusButtonText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  statusButtonTextActive: {
+    color: '#1d4ed8',
+    fontWeight: '600',
+  },
+  dateButton: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#ffffff',
+  },
+  dateButtonText: {
+    fontSize: 15,
+    color: '#111827',
+  },
+  saveButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#93c5fd',
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});
