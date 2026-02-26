@@ -61,7 +61,7 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 ### Advanced Mode
 
 - [x] **ADV-01**: User can toggle between Simple and Advanced mode
-- [ ] **ADV-02**: User can create and manage clients (name, contact info) with native list + detail views
+- [x] **ADV-02**: User can create and manage clients (name, contact info) with native list + detail views
 - [ ] **ADV-03**: User can create invoices linked to a client with line items
 - [ ] **ADV-04**: User can manage invoice status (Draft → Sent → Paid) — inline status change without opening edit
 - [ ] **ADV-05**: User can link transactions to clients (optional, on creation or edit)
@@ -175,7 +175,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | EXPRT-01 | Phase 10 | Complete |
 | EXPRT-02 | Phase 11 | Pending |
 | ADV-01 | Phase 11 | Complete |
-| ADV-02 | Phase 11 | Pending |
+| ADV-02 | Phase 11 | Complete |
 | ADV-03 | Phase 11 | Pending |
 | ADV-04 | Phase 11 | Pending |
 | ADV-05 | Phase 11 | Pending |

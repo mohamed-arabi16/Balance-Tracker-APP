@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 11 of 12 (Advanced Mode + PDF Export)
-Plan: 1 of 5 in Phase 11 (IN PROGRESS)
-Status: Phase 11 Plan 01 COMPLETE — ModeProvider wired, conditional Clients/Invoices tabs, 5 deps installed; Plan 02 next
-Last activity: 2026-02-26 — 11-01 complete: ModeProvider in root layout, href:null tab gating, stub screens, tsc clean
+Plan: 2 of 5 in Phase 11 (IN PROGRESS)
+Status: Phase 11 Plan 02 COMPLETE — Full Clients CRUD screens built (list, new, detail, edit) with swipe-to-delete, react-hook-form+zod, linked transactions; Plan 03 next
+Last activity: 2026-02-26 — 11-02 complete: ClientsListScreen (swipe-to-delete), ClientNewScreen, ClientDetailScreen, ClientEditScreen all tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -45,6 +45,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 10-dashboard-csv-export P01 | 5 | 3 tasks | 6 files |
 | Phase 10-dashboard-csv-export P03 | human-gated | 1 tasks | 0 files |
 | Phase 11-advanced-mode-pdf-export P01 | 2 | 2 tasks | 6 files |
+| Phase 11-advanced-mode-pdf-export P02 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,10 @@ Key decisions for v2.0:
 - [Phase 11-advanced-mode-pdf-export]: ModeProvider placed inside AuthProvider (not beside it) because useUserSettings calls useAuth — ordering enforces dependency
 - [Phase 11-advanced-mode-pdf-export]: href: isAdvanced ? undefined : null hides Advanced tabs without unmounting routes — enables instant show/hide on toggle
 - [Phase 11-advanced-mode-pdf-export]: expo-install for expo-print (SDK version resolution); npm install for pure-JS libs (react-hook-form, zod, @hookform/resolvers)
+- [Phase 11-advanced-mode-pdf-export Plan 02]: clients/_layout.tsx required for Expo Router to resolve nested routes under clients/ with formSheet presentation
+- [Phase 11-advanced-mode-pdf-export Plan 02]: Client detail uses FlatList+ListHeaderComponent (not SectionList) — simpler two-section layout without VirtualizedList nesting concerns
+- [Phase 11-advanced-mode-pdf-export Plan 02]: Client-side filtering of incomes/expenses by client_id — data already in TanStack Query cache, no extra queries
+- [Phase 11-advanced-mode-pdf-export Plan 02]: useEffect+reset() for ClientEditScreen pre-fill — prevents empty defaultValues flash before useClient() resolves
 
 ### Pending Todos
 
@@ -112,5 +117,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 11-01-PLAN.md — ModeProvider wired into root layout, conditional Clients/Invoices tabs using href:null pattern, 5 Phase 11 deps installed; Plan 11-02 next
+Stopped at: Completed 11-02-PLAN.md — Full Clients CRUD screens (list+swipe-delete, new form, detail, edit form) built and tsc clean; Plan 11-03 next
 Resume file: None
