@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "BalanceTracker",
-    "slug": "BalanceTracker",
+    "name": "Balance Tracker",
+    "slug": "balance-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "balancetracker",
@@ -9,21 +9,25 @@
     "icon": "./assets/icon.png",
     "jsEngine": "hermes",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.balancetracker.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Not used",
+        "UIRequiresFullScreen": true
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.balancetracker.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,10 +37,16 @@
       "expo-localization",
       "expo-splash-screen",
       "expo-sqlite",
+      "expo-symbols",
       "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
     }
   }
 }
