@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 11: Advanced Mode + PDF Export
+**Current focus:** v2.0 iOS Native App — Phase 13: Apple HIG UI Polish
 
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 11 of 12 (Advanced Mode + PDF Export)
-Plan: 5 of 5 in Phase 11 (COMPLETE)
-Status: Phase 11 Plan 05 COMPLETE — Client picker added to income and expense forms behind isAdvanced gate; ADV-05 complete; Phase 12 next
-Last activity: 2026-02-26 — 11-05 complete: add-income.tsx and add-expense.tsx updated with conditional client picker; income-form.tsx and expense-form.tsx stubs created; client_id wired in mutation payloads; tsc clean
+Phase: 13 of 14 (Apple HIG UI Polish)
+Plan: 1 of 5 in Phase 13 (COMPLETE)
+Status: Phase 13 Plan 01 COMPLETE — tokens.ts created; dashboard cards polished with SHADOWS.card; SafeScreen grouped prop added; ActivityIndicator loading state; POLISH-01 and POLISH-04 complete
+Last activity: 2026-02-26 — 13-01 complete: tokens.ts (SHADOWS, TYPOGRAPHY, SPACING, RADIUS, COLORS); NetWorthCard/FinancialSummaryCard/IncomeExpenseChart use SHADOWS.card; SafeScreen grouped prop; ActivityIndicator loading state; section headers added; tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -49,6 +49,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 11 P03 | 9 | 2 tasks | 5 files |
 | Phase 11-advanced-mode-pdf-export P05 | 4 | 1 tasks | 4 files |
 | Phase 11-advanced-mode-pdf-export P04 | 5 | 2 tasks | 3 files |
+| Phase 13-apple-hig-ui-polish P01 | 2 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Key decisions for v2.0:
 - [Phase 11-advanced-mode-pdf-export]: income-form.tsx and expense-form.tsx created as re-export stubs pointing to add-income.tsx and add-expense.tsx — Phase 9 named the screens differently from the plan spec; stubs satisfy artifact contract without duplicating logic
 - [Phase 11-04]: const inv = invoice narrowing pattern — TypeScript cannot narrow hook return types across closure boundaries; assign to const after guard for type-safe closures
 - [Phase 11-04]: convertCurrency() before summing in advanced widgets — per-invoice conversion required before aggregation to avoid mixed-currency arithmetic errors
+- [Phase 13-apple-hig-ui-polish]: SHADOWS.card applied via style prop (not NativeWind className) — shadow-sm does not produce iOS native shadows on physical devices
+- [Phase 13-apple-hig-ui-polish]: style array merge [borderStyle, SHADOWS.card] in FinancialSummaryCard preserves borderLeft while adding iOS shadow
+- [Phase 13-apple-hig-ui-polish]: SafeScreen grouped prop uses inline hex values (#F2F2F7 / #1C1C1E) matching UIKit system grouped colors
 
 ### Pending Todos
 
@@ -126,5 +130,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 11-05-PLAN.md — income and expense forms updated with conditional client picker (isAdvanced gate); client_id wired in mutation payloads; ADV-05 complete; Phase 11 all 5 plans done; Phase 12 next
+Stopped at: Completed 13-01-PLAN.md — tokens.ts created; dashboard cards polished with SHADOWS.card; SafeScreen grouped prop added; ActivityIndicator loading state; POLISH-01 and POLISH-04 complete; Phase 13 Plan 01 done; Plan 02 next
 Resume file: None

@@ -198,10 +198,10 @@ Deferred to v2.x milestones. Not in current roadmap.
 | STORE-02 | Phase 12 | Pending |
 | STORE-03 | Phase 12 | Pending |
 | STORE-04 | Phase 12 | Pending |
-| POLISH-01 | Phase 13 | Pending |
+| POLISH-01 | Phase 13 | Complete |
 | POLISH-02 | Phase 13 | Pending |
 | POLISH-03 | Phase 13 | Pending |
-| POLISH-04 | Phase 13 | Pending |
+| POLISH-04 | Phase 13 | Complete |
 | POLISH-05 | Phase 13 | Pending |
 
 **Coverage:**
