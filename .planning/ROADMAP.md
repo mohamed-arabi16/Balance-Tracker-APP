@@ -84,11 +84,11 @@ Plans:
   3. An unauthenticated user who opens the app is taken to the login screen — no tab bar content is accessible
   4. A user can log out from the Settings tab and is returned to the login screen
   5. A user can initiate a password reset from the login screen and receive an email link
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: Auth screens (sign-in, sign-up, forgot password), AuthContext with AppState token refresh
-- [ ] 08-02: Root layout with Stack.Protected auth guard, bottom tab bar (5 tabs, SF Symbols), stub screens per tab
+- [ ] 08-01-PLAN.md — Replace AuthContext stub with real Supabase auth, build auth screens (sign-in, sign-up, forgot-password), install expo-symbols
+- [ ] 08-02-PLAN.md — Wire root auth guard (Stack.Protected), 5-tab navigation with SF Symbol icons, stub screens, Settings sign-out, human verification
 
 ### Phase 9: Simple Mode Screens
 **Goal**: Users can add, edit, delete, and browse all income, expense, debt, and asset entries on iOS with native interactions — the core financial tracking value proposition is fully functional
