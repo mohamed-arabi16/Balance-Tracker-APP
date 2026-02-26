@@ -14,7 +14,9 @@ import { queryClient } from '@/lib/queryClient';
 
 // Prevent the splash screen from auto-hiding.
 // It will be hidden once auth and i18n are initialized.
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Ignore errors when running in Expo Go (no native splash screen registered)
+});
 
 export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false);
@@ -25,7 +27,7 @@ export default function RootLayout() {
       await initI18n();
       setI18nReady(true);
       // Hide splash screen after i18n is ready
-      await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync().catch(() => {});
     }
     prepare();
   }, []);
