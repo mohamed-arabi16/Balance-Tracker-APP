@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import React, { useCallback, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -11,6 +12,7 @@ import { SafeScreen } from '@/components/layout/SafeScreen';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useDeleteIncome, useIncomes, useUpdateIncome, type Income } from '@/hooks/useIncomes';
 import { haptics } from '@/lib/haptics';
+import { COLORS } from '@/lib/tokens';
 import { ExpenseScreen } from './expenses';
 
 // ─────────────────────────────────────────────
@@ -74,6 +76,7 @@ function StatusBadge({ item }: StatusBadgeProps) {
       style={[styles.badge, isReceived ? styles.badgeReceived : styles.badgeExpected]}
       accessibilityRole="button"
       accessibilityLabel={`Status: ${item.status}. Tap to toggle.`}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Text style={[styles.badgeText, isReceived ? styles.badgeTextReceived : styles.badgeTextExpected]}>
         {isReceived ? 'Received' : 'Expected'}
@@ -93,6 +96,8 @@ interface IncomeRowProps {
 function IncomeRow({ item, onDelete }: IncomeRowProps) {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
+  const { colorScheme } = useColorScheme();
+  const rowBg = colorScheme === 'dark' ? COLORS.cellBg.dark : COLORS.cellBg.light;
 
   const formattedDate = format(new Date(item.date), 'MMM d, yyyy');
   const formattedAmount = formatCurrency(item.amount, item.currency);
@@ -113,7 +118,14 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
       rightThreshold={40}
       renderRightActions={renderRightActions}
     >
-      <Pressable onPress={handlePress} style={styles.row}>
+      <Pressable
+        onPress={handlePress}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: rowBg },
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
+      >
         <View style={styles.rowLeft}>
           <Text style={styles.rowTitle} numberOfLines={1}>
             {item.title}
@@ -138,7 +150,6 @@ function IncomeRow({ item, onDelete }: IncomeRowProps) {
 // Income list content (used when tab = 'income')
 // ─────────────────────────────────────────────
 function IncomeScreen() {
-  const router = useRouter();
   const { data: incomes, isRefetching, refetch } = useIncomes();
   const deleteIncome = useDeleteIncome();
 
@@ -147,7 +158,7 @@ function IncomeScreen() {
   }
 
   function handleAddIncome() {
-    router.push('/(tabs)/transactions/add-income' as any);
+    // Handled via headerRight nav button in TransactionsScreen
   }
 
   const renderItem = useCallback(
@@ -161,36 +172,27 @@ function IncomeScreen() {
   const keyExtractor = useCallback((item: Income) => item.id, []);
 
   return (
-    <>
-      <FlatList
-        data={incomes ?? []}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        contentContainerStyle={
-          (incomes?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
-        }
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            title="No income yet"
-            message="Start tracking your income to see it here."
-            ctaLabel="Add Income"
-            onCta={handleAddIncome}
-          />
-        }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
-      <TouchableOpacity
-        onPress={handleAddIncome}
-        style={styles.fab}
-        accessibilityRole="button"
-        accessibilityLabel="Add Income"
-      >
-        <Text style={styles.fabText}>+ Add Income</Text>
-      </TouchableOpacity>
-    </>
+    <FlatList
+      data={incomes ?? []}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      contentContainerStyle={
+        (incomes?.length ?? 0) === 0 ? styles.emptyContainer : styles.listContainer
+      }
+      refreshControl={
+        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+      }
+      ListEmptyComponent={
+        <EmptyState
+          symbolName="arrow.up.circle"
+          title="No income yet"
+          message="Start tracking your income to see it here."
+          ctaLabel="Add Income"
+          onCta={handleAddIncome}
+        />
+      }
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
   );
 }
 
@@ -200,6 +202,7 @@ function IncomeScreen() {
 type Tab = 'income' | 'expenses';
 
 export default function TransactionsScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('income');
 
   function handleTabPress(tab: Tab) {
@@ -208,7 +211,25 @@ export default function TransactionsScreen() {
   }
 
   return (
-    <SafeScreen edges={['bottom']}>
+    <SafeScreen edges={['bottom']} grouped>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => router.push(
+                activeTab === 'income'
+                  ? '/(tabs)/transactions/add-income'
+                  : '/(tabs)/transactions/add-expense' as any
+              )}
+              style={{ paddingHorizontal: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={activeTab === 'income' ? 'Add Income' : 'Add Expense'}
+            >
+              <Text style={{ color: '#007AFF', fontSize: 17 }}>+</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
       {/* Tab chip switcher */}
       <View style={styles.tabBar}>
         <Pressable
@@ -246,9 +267,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    backgroundColor: '#ffffff',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#C6C6C8',
   },
   tabChip: {
     flex: 1,
@@ -319,7 +339,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    minHeight: 44,
   },
   rowLeft: {
     flex: 1,
@@ -366,28 +386,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   separator: {
-    height: 1,
-    backgroundColor: '#f3f4f6',
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C6C6C8',
     marginStart: 16,
-  },
-  // FAB
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
-    backgroundColor: '#2563eb',
-    borderRadius: 24,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  fabText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
   },
 });

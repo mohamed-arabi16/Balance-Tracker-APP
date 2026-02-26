@@ -198,6 +198,7 @@ export default function DebtsScreen() {
         ListEmptyComponent={
           !isLoading ? (
             <EmptyState
+              symbolName="creditcard"
               title="No Debts Yet"
               message="Track debts you owe or are owed to stay on top of your finances."
               ctaLabel="Add Debt"

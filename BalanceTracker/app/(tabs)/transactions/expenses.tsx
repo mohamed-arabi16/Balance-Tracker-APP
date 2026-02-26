@@ -177,6 +177,7 @@ export function ExpenseScreen() {
         }
         ListEmptyComponent={
           <EmptyState
+            symbolName="arrow.down.circle"
             title="No expenses yet"
             message="Start tracking your expenses to see them here."
             ctaLabel="Add Expense"

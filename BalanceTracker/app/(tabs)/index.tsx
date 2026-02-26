@@ -315,6 +315,7 @@ export default function DashboardScreen() {
     return (
       <SafeScreen>
         <EmptyState
+          symbolName="chart.bar"
           title={t('dashboard.title')}
           message={t('dashboard.subtitle')}
           ctaLabel={t('dashboard.quickActions.addIncome.title')}

@@ -193,6 +193,7 @@ export default function AssetScreen() {
         }
         ListEmptyComponent={
           <EmptyState
+            symbolName="banknote"
             title="No assets yet"
             message="Start tracking your assets to see them here."
             ctaLabel="Add Asset"

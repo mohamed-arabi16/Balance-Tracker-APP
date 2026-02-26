@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ScrollView,
+  StyleSheet,
   View,
   Text,
   TouchableOpacity,
@@ -21,6 +22,7 @@ import { useDebts } from '@/hooks/useDebts';
 import { useAssets } from '@/hooks/useAssets';
 import { exportCsv } from '@/lib/exportCsv';
 import { haptics } from '@/lib/haptics';
+import { SHADOWS } from '@/lib/tokens';
 
 // ─── Section header ────────────────────────────────────────────────────────────
 function SectionHeader({ label }: { label: string }) {
@@ -34,7 +36,10 @@ function SectionHeader({ label }: { label: string }) {
 // ─── Grouped card ──────────────────────────────────────────────────────────────
 function SettingsCard({ children }: { children: React.ReactNode }) {
   return (
-    <View className="rounded-2xl bg-white dark:bg-neutral-900 shadow-sm overflow-hidden mt-2">
+    <View
+      className="rounded-2xl bg-white dark:bg-neutral-900 overflow-hidden mt-2"
+      style={cardStyles.card}
+    >
       {children}
     </View>
   );
@@ -256,3 +261,8 @@ export default function SettingsScreen() {
     </SafeScreen>
   );
 }
+
+// ─── Styles ────────────────────────────────────────────────────────────────────
+const cardStyles = StyleSheet.create({
+  card: SHADOWS.card,
+});
