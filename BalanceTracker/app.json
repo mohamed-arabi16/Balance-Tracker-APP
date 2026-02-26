@@ -32,13 +32,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "androidStatusBar": {
+      "barStyle": "auto",
+      "translucent": true
+    },
     "plugins": [
       "expo-router",
       "expo-localization",
       "expo-splash-screen",
       "expo-sqlite",
-      "expo-symbols",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-system-ui"
     ],
     "experiments": {
       "typedRoutes": true
