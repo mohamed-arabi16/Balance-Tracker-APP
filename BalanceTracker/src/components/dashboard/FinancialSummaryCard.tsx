@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { router } from 'expo-router';
 import { haptics } from '@/lib/haptics';
+import { SHADOWS } from '@/lib/tokens';
 
 interface FinancialSummaryCardProps {
   title: string;
@@ -29,8 +30,8 @@ export function FinancialSummaryCard({
       accessibilityLabel={title}
     >
       <View
-        className="rounded-2xl bg-white dark:bg-neutral-900 p-4 shadow-sm mb-3 flex-row items-center"
-        style={{ borderLeftWidth: 3, borderLeftColor: color }}
+        className="rounded-2xl bg-white dark:bg-neutral-900 p-4 mb-3 flex-row items-center"
+        style={[{ borderLeftWidth: 3, borderLeftColor: color }, SHADOWS.card]}
       >
         <View className="flex-1">
           <Text className="text-sm text-gray-500 dark:text-gray-400">{title}</Text>

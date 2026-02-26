@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import { CartesianChart, Line, useChartPressState } from 'victory-native';
 import { Circle, useFont } from '@shopify/react-native-skia';
 import { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
+import { SHADOWS } from '@/lib/tokens';
 
 interface Props {
   incomes: Array<{ date: string; amount: number }>;
@@ -65,7 +66,10 @@ export function IncomeExpenseChart({ incomes, expenses, title }: Props) {
 
   if (chartData.length === 0) {
     return (
-      <View className="h-56 rounded-2xl bg-white dark:bg-neutral-900 p-4 items-center justify-center mb-3">
+      <View
+        className="h-56 rounded-2xl bg-white dark:bg-neutral-900 p-4 items-center justify-center mb-3"
+        style={SHADOWS.card}
+      >
         <Text className="text-gray-400 dark:text-gray-500 text-sm">
           No data for last 6 months
         </Text>
@@ -74,7 +78,7 @@ export function IncomeExpenseChart({ incomes, expenses, title }: Props) {
   }
 
   return (
-    <View className="rounded-2xl bg-white dark:bg-neutral-900 p-4 mb-3">
+    <View className="rounded-2xl bg-white dark:bg-neutral-900 p-4 mb-3" style={SHADOWS.card}>
       {title ? (
         <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           {title}

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { SafeScreen } from '@/components/layout/SafeScreen';
@@ -303,8 +303,9 @@ export default function DashboardScreen() {
   if (isLoading) {
     return (
       <SafeScreen>
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-gray-500 dark:text-gray-400 text-base">Loading...</Text>
+        <View className="flex-1 items-center justify-center gap-3">
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text className="text-sm text-gray-500 dark:text-gray-400">Loading your finances…</Text>
         </View>
       </SafeScreen>
     );
@@ -334,6 +335,11 @@ export default function DashboardScreen() {
           {t('dashboard.title')}
         </Text>
 
+        {/* Section: Overview */}
+        <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
+          Overview
+        </Text>
+
         {/* Net Worth Card */}
         <NetWorthCard
           netWorth={netWorth}
@@ -347,6 +353,11 @@ export default function DashboardScreen() {
           expenses={chartExpenses}
           title={t('dashboard.subtitle')}
         />
+
+        {/* Section: Summary */}
+        <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 mt-2 px-1">
+          Summary
+        </Text>
 
         {/* Financial Summary Cards */}
         <FinancialSummaryCard
