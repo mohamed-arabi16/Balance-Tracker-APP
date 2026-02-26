@@ -117,11 +117,12 @@ Plans:
   2. Tapping a chart data point shows a callout with the exact value — no hover interaction is required
   3. Tapping a financial summary card (e.g., total income) navigates to the corresponding list screen
   4. User can tap "Export CSV" in Settings and receive an iOS share sheet to save or send the CSV file
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: Dashboard screen — Victory Native charts, net worth card, navigable financial cards, tap callouts
-- [ ] 10-02: CSV export via expo-sharing share sheet
+- [ ] 10-01-PLAN.md — Install Victory Native XL + Skia + font; build NetWorthCard, FinancialSummaryCard, IncomeExpenseChart, Dashboard screen (DASH-01, DASH-02, DASH-03)
+- [ ] 10-02-PLAN.md — Build exportCsv utility + Settings screen with Export CSV button (EXPRT-01)
+- [ ] 10-03-PLAN.md — Human verification of Dashboard charts, tap callout, and CSV export on device
 
 ### Phase 11: Advanced Mode + PDF Export
 **Goal**: Users in Advanced mode can manage clients and invoices on iOS, export professional PDF invoices, link transactions to clients, and see advanced dashboard widgets — with the tax_amount bug fixed
