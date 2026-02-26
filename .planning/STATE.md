@@ -48,6 +48,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 11-advanced-mode-pdf-export P02 | 3 | 2 tasks | 5 files |
 | Phase 11 P03 | 9 | 2 tasks | 5 files |
 | Phase 11-advanced-mode-pdf-export P05 | 4 | 1 tasks | 4 files |
+| Phase 11-advanced-mode-pdf-export P04 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Key decisions for v2.0:
 - [Phase 11]: invoiceFormSchema extracted to src/lib/ — avoids TypeScript path resolution issues with [id] bracket in cross-directory imports
 - [Phase 11]: currency enum USD|TRY only — matches DB currency_code enum exactly (EUR/GBP not in Supabase schema)
 - [Phase 11-advanced-mode-pdf-export]: income-form.tsx and expense-form.tsx created as re-export stubs pointing to add-income.tsx and add-expense.tsx — Phase 9 named the screens differently from the plan spec; stubs satisfy artifact contract without duplicating logic
+- [Phase 11-04]: const inv = invoice narrowing pattern — TypeScript cannot narrow hook return types across closure boundaries; assign to const after guard for type-safe closures
+- [Phase 11-04]: convertCurrency() before summing in advanced widgets — per-invoice conversion required before aggregation to avoid mixed-currency arithmetic errors
 
 ### Pending Todos
 

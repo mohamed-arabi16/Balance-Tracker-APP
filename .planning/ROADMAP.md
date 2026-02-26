@@ -52,7 +52,7 @@ Plans:
 - [x] **Phase 8: Auth Shell + Navigation** - Sign-in/sign-up screens, session persistence, auth guard, bottom tab navigation, and context providers (completed 2026-02-26)
 - [x] **Phase 9: Simple Mode Screens** - Full CRUD for income, expense, debts, and assets with native iOS interactions (swipe-to-delete, pull-to-refresh, inline status toggles) (completed 2026-02-26)
 - [x] **Phase 10: Dashboard + CSV Export** - Net worth dashboard with Victory Native charts, tap-to-callout interaction, and CSV export via iOS share sheet (completed 2026-02-26)
-- [ ] **Phase 11: Advanced Mode + PDF Export** - Clients, invoicing, invoice lifecycle, expo-print PDF generation, and transaction-client linking
+- [x] **Phase 11: Advanced Mode + PDF Export** - Clients, invoicing, invoice lifecycle, expo-print PDF generation, and transaction-client linking (completed 2026-02-26)
 - [ ] **Phase 12: App Store Compliance + Submission** - Account deletion, privacy policy, TestFlight, EAS Submit, and App Store approval
 - [ ] **Phase 13: Apple HIG UI Polish** - Dashboard cards, list screen styling, form sheet design, typography/spacing, and empty state polish across all screens
 
@@ -196,6 +196,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 8. Auth Shell + Navigation | v2.0 | 2/2 | Complete | 2026-02-26 |
 | 9. Simple Mode Screens | 4/4 | Complete    | 2026-02-26 | - |
 | 10. Dashboard + CSV Export | 3/3 | Complete    | 2026-02-26 | - |
-| 11. Advanced Mode + PDF Export | 4/5 | In Progress|  | - |
+| 11. Advanced Mode + PDF Export | 5/5 | Complete   | 2026-02-26 | - |
 | 12. App Store Compliance + Submission | v2.0 | 0/3 | Not started | - |
 | 13. Apple HIG UI Polish | v2.0 | 0/4 | Not started | - |

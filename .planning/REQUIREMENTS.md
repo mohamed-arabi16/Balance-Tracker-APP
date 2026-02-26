@@ -56,16 +56,16 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 ### Export
 
 - [x] **EXPRT-01**: User can export financial data as CSV via iOS share sheet
-- [ ] **EXPRT-02**: User can export invoices as PDF via expo-print + iOS share sheet
+- [x] **EXPRT-02**: User can export invoices as PDF via expo-print + iOS share sheet
 
 ### Advanced Mode
 
 - [x] **ADV-01**: User can toggle between Simple and Advanced mode
 - [x] **ADV-02**: User can create and manage clients (name, contact info) with native list + detail views
 - [x] **ADV-03**: User can create invoices linked to a client with line items
-- [ ] **ADV-04**: User can manage invoice status (Draft → Sent → Paid) — inline status change without opening edit
+- [x] **ADV-04**: User can manage invoice status (Draft → Sent → Paid) — inline status change without opening edit
 - [x] **ADV-05**: User can link transactions to clients (optional, on creation or edit)
-- [ ] **ADV-06**: Advanced dashboard shows revenue per client and outstanding invoices
+- [x] **ADV-06**: Advanced dashboard shows revenue per client and outstanding invoices
 
 ### Bug Fixes
 
@@ -173,13 +173,13 @@ Deferred to v2.x milestones. Not in current roadmap.
 | DASH-02 | Phase 10 | Complete |
 | DASH-03 | Phase 10 | Complete |
 | EXPRT-01 | Phase 10 | Complete |
-| EXPRT-02 | Phase 11 | Pending |
+| EXPRT-02 | Phase 11 | Complete |
 | ADV-01 | Phase 11 | Complete |
 | ADV-02 | Phase 11 | Complete |
 | ADV-03 | Phase 11 | Complete |
-| ADV-04 | Phase 11 | Pending |
+| ADV-04 | Phase 11 | Complete |
 | ADV-05 | Phase 11 | Complete |
-| ADV-06 | Phase 11 | Pending |
+| ADV-06 | Phase 11 | Complete |
 | FIX-01 | Phase 11 | Complete |
 | UX-01 | Phase 7 | Complete |
 | UX-02 | Phase 7 | Complete |
