@@ -1,5 +1,6 @@
 import React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface FormScreenProps {
   children: React.ReactNode;
@@ -7,32 +8,34 @@ interface FormScreenProps {
 }
 
 /**
- * Keyboard-aware scrollable form wrapper.
+ * Keyboard-aware scrollable form wrapper with safe area insets.
  *
+ * Wraps content in SafeAreaView so auth screens respect the notch/Dynamic Island.
  * Scrolls content above the keyboard automatically on iOS.
- * Uses KeyboardAvoidingView + ScrollView (Expo Go compatible).
- * When the project moves to a dev build (Phase 8+), this can be upgraded
- * to react-native-keyboard-controller's KeyboardAwareScrollView for
- * more precise control via bottomOffset.
  */
 export function FormScreen({ children, className }: FormScreenProps) {
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.content}
-        className={className}
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.content}
+          className={className}
+        >
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

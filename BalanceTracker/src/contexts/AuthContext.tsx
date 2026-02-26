@@ -35,10 +35,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     });
 
-    // Subscribe to auth state changes
+    // Subscribe to auth state changes (sign-in, sign-out, token refresh)
+    // Do NOT set isLoading here — getSession above handles the initial load
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setIsLoading(false);
     });
 
     return () => {
