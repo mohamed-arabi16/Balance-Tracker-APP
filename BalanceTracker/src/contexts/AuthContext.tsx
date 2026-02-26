@@ -63,8 +63,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
-    // No redirectTo — Supabase handles via browser for now; Phase 12 adds deep link
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    // Phase 12: redirectTo sends the recovery link back into the app via deep link.
+    // The OS handles balancetracker:// links and Expo Router opens /(auth)/reset-password.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'balancetracker://reset-password',
+    });
     return { error };
   };
 
