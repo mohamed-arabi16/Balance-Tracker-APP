@@ -62,14 +62,14 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 - [x] **ADV-01**: User can toggle between Simple and Advanced mode
 - [x] **ADV-02**: User can create and manage clients (name, contact info) with native list + detail views
-- [ ] **ADV-03**: User can create invoices linked to a client with line items
+- [x] **ADV-03**: User can create invoices linked to a client with line items
 - [ ] **ADV-04**: User can manage invoice status (Draft → Sent → Paid) — inline status change without opening edit
 - [ ] **ADV-05**: User can link transactions to clients (optional, on creation or edit)
 - [ ] **ADV-06**: Advanced dashboard shows revenue per client and outstanding invoices
 
 ### Bug Fixes
 
-- [ ] **FIX-01**: Invoice creation no longer errors on generated column tax_amount (exclude from INSERT payload)
+- [x] **FIX-01**: Invoice creation no longer errors on generated column tax_amount (exclude from INSERT payload)
 
 ### iOS Native UX
 
@@ -176,11 +176,11 @@ Deferred to v2.x milestones. Not in current roadmap.
 | EXPRT-02 | Phase 11 | Pending |
 | ADV-01 | Phase 11 | Complete |
 | ADV-02 | Phase 11 | Complete |
-| ADV-03 | Phase 11 | Pending |
+| ADV-03 | Phase 11 | Complete |
 | ADV-04 | Phase 11 | Pending |
 | ADV-05 | Phase 11 | Pending |
 | ADV-06 | Phase 11 | Pending |
-| FIX-01 | Phase 11 | Pending |
+| FIX-01 | Phase 11 | Complete |
 | UX-01 | Phase 7 | Complete |
 | UX-02 | Phase 7 | Complete |
 | UX-03 | Phase 7 | Complete |

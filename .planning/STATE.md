@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 11 of 12 (Advanced Mode + PDF Export)
-Plan: 2 of 5 in Phase 11 (IN PROGRESS)
-Status: Phase 11 Plan 02 COMPLETE — Full Clients CRUD screens built (list, new, detail, edit) with swipe-to-delete, react-hook-form+zod, linked transactions; Plan 03 next
-Last activity: 2026-02-26 — 11-02 complete: ClientsListScreen (swipe-to-delete), ClientNewScreen, ClientDetailScreen, ClientEditScreen all tsc clean
+Plan: 3 of 5 in Phase 11 (IN PROGRESS)
+Status: Phase 11 Plan 03 COMPLETE — Invoice screens built (list with status badges, new with useFieldArray, edit with pre-fill); FIX-01 confirmed; Plan 04 next
+Last activity: 2026-02-26 — 11-03 complete: InvoicesListScreen (status badges, swipe-to-delete), InvoiceNewScreen (useFieldArray, Modal client picker), InvoiceEditScreen (pre-fill, read-only banner) all tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -46,6 +46,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 10-dashboard-csv-export P03 | human-gated | 1 tasks | 0 files |
 | Phase 11-advanced-mode-pdf-export P01 | 2 | 2 tasks | 6 files |
 | Phase 11-advanced-mode-pdf-export P02 | 3 | 2 tasks | 5 files |
+| Phase 11 P03 | 9 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,9 @@ Key decisions for v2.0:
 - [Phase 11-advanced-mode-pdf-export Plan 02]: Client detail uses FlatList+ListHeaderComponent (not SectionList) — simpler two-section layout without VirtualizedList nesting concerns
 - [Phase 11-advanced-mode-pdf-export Plan 02]: Client-side filtering of incomes/expenses by client_id — data already in TanStack Query cache, no extra queries
 - [Phase 11-advanced-mode-pdf-export Plan 02]: useEffect+reset() for ClientEditScreen pre-fill — prevents empty defaultValues flash before useClient() resolves
+- [Phase 11]: z.number() + parseFloat() in onChangeText replaces z.coerce.number() — zod v4 coerce output type is unknown, breaking zodResolver; no .default() on fields to avoid input/output type split
+- [Phase 11]: invoiceFormSchema extracted to src/lib/ — avoids TypeScript path resolution issues with [id] bracket in cross-directory imports
+- [Phase 11]: currency enum USD|TRY only — matches DB currency_code enum exactly (EUR/GBP not in Supabase schema)
 
 ### Pending Todos
 
@@ -117,5 +121,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 11-02-PLAN.md — Full Clients CRUD screens (list+swipe-delete, new form, detail, edit form) built and tsc clean; Plan 11-03 next
+Stopped at: Completed 11-03-PLAN.md — InvoicesListScreen, InvoiceNewScreen, InvoiceEditScreen all tsc clean; FIX-01 confirmed (tax_amount never in payload); Plan 11-04 next
 Resume file: None
