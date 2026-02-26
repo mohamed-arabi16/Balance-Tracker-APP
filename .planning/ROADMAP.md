@@ -134,14 +134,14 @@ Plans:
   3. User can export an invoice as a PDF and share it via the iOS share sheet — the PDF is readable and contains correct line item totals (no tax_amount column error)
   4. User can link an income or expense transaction to a client when creating or editing it
   5. The Advanced Dashboard shows revenue per client and outstanding invoices with correct totals
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 11-01: Advanced mode toggle, ModeContext, conditional tab/navigation visibility
-- [ ] 11-02: Clients screen — list, create, edit, client detail with linked transactions
-- [ ] 11-03: Invoices screen — list, create with line items (useFieldArray), edit; FIX-01 (exclude tax_amount from INSERT)
-- [ ] 11-04: Invoice detail — status lifecycle, inline status toggle, expo-print PDF generation + expo-sharing; Advanced Dashboard widgets
-- [ ] 11-05: Transaction-client linking on income and expense forms (ADV-05)
+- [ ] 11-01-PLAN.md — Install Phase 11 deps (expo-print, expo-sharing, react-hook-form, zod), mount ModeProvider in root layout, wire conditional Clients/Invoices tabs with href: null
+- [ ] 11-02-PLAN.md — Clients screens: list (swipe-to-delete), create, detail with linked transactions, edit (react-hook-form + zod)
+- [ ] 11-03-PLAN.md — Invoices screens: list (status badges), create with useFieldArray line items (FIX-01 verified), edit with pre-filled line items
+- [ ] 11-04-PLAN.md — Invoice detail (inline status toggle + PDF export via expo-print/expo-sharing), Advanced Dashboard widgets (revenue per client + outstanding invoices); human verification checkpoint
+- [ ] 11-05-PLAN.md — Transaction-client linking: optional client picker on income and expense forms (isAdvanced conditional)
 
 ### Phase 12: App Store Compliance + Submission
 **Goal**: The app passes App Store review and is publicly available — all Apple-required flows are in place, the release build is verified on a physical device, and EAS Submit completes successfully
