@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 9: Simple Mode Screens
+**Current focus:** v2.0 iOS Native App — Phase 10: Dashboard + CSV Export
 
 ## Current Position
 
@@ -41,6 +41,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 09 P04 | 3 | 2 tasks | 3 files |
 | Phase 09 P03 | 4 | 2 tasks | 5 files |
 | Phase 09 P02 | 3 | 2 tasks | 3 files |
+| Phase 10 P02 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Key decisions for v2.0:
 - [Phase 09]: payment.tsx uses note:'Payment' + payment_date to distinguish payment history entries from edit history entries in useUpdateDebt
 - [Phase 09]: ExpenseScreen dual export (named+default) enables inline tab switching in index.tsx without navigation push
 - [Phase 09]: index.tsx tab chip switcher: useState<'income'|'expenses'> drives conditional render of IncomeScreen vs ExpenseScreen
+- [Phase 10]: expo-file-system v19 new API used (File + Paths) instead of deprecated legacy writeAsStringAsync + cacheDirectory
+- [Phase 10]: Hook types (Income, Expense, Debt, Asset) imported from hook files, not Database types — hooks define own interfaces with extra fields like is_receivable
 
 ### Pending Todos
 
@@ -99,5 +102,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 08-02-PLAN.md — Stack.Protected auth guard, 5-tab SF Symbol navigation, Settings sign-out, device-verified all 5 success criteria
+Stopped at: Completed 10-02-PLAN.md — exportCsv utility (expo-file-system v19 File API + expo-sharing) + Settings screen with Export button wired to all four data hooks, EXPRT-01 complete
 Resume file: None

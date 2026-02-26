@@ -55,7 +55,7 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 ### Export
 
-- [ ] **EXPRT-01**: User can export financial data as CSV via iOS share sheet
+- [x] **EXPRT-01**: User can export financial data as CSV via iOS share sheet
 - [ ] **EXPRT-02**: User can export invoices as PDF via expo-print + iOS share sheet
 
 ### Advanced Mode
@@ -164,7 +164,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | DASH-01 | Phase 10 | Pending |
 | DASH-02 | Phase 10 | Pending |
 | DASH-03 | Phase 10 | Pending |
-| EXPRT-01 | Phase 10 | Pending |
+| EXPRT-01 | Phase 10 | Complete |
 | EXPRT-02 | Phase 11 | Pending |
 | ADV-01 | Phase 11 | Pending |
 | ADV-02 | Phase 11 | Pending |
