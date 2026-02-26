@@ -49,7 +49,7 @@ Plans:
 **Milestone Goal:** Port the full Balance Tracker experience to iOS as a native React Native app with Apple HIG design, reusing the existing Supabase backend. App Store distribution via Expo EAS.
 
 - [x] **Phase 7: Project Scaffold + Foundation** - Expo SDK 52 project with Supabase client, polyfills, ported logic layer, i18n, theming, and all native UX patterns established (completed 2026-02-26)
-- [ ] **Phase 8: Auth Shell + Navigation** - Sign-in/sign-up screens, session persistence, auth guard, bottom tab navigation, and context providers
+- [x] **Phase 8: Auth Shell + Navigation** - Sign-in/sign-up screens, session persistence, auth guard, bottom tab navigation, and context providers (completed 2026-02-26)
 - [x] **Phase 9: Simple Mode Screens** - Full CRUD for income, expense, debts, and assets with native iOS interactions (swipe-to-delete, pull-to-refresh, inline status toggles) (completed 2026-02-26)
 - [ ] **Phase 10: Dashboard + CSV Export** - Net worth dashboard with Victory Native charts, tap-to-callout interaction, and CSV export via iOS share sheet
 - [ ] **Phase 11: Advanced Mode + PDF Export** - Clients, invoicing, invoice lifecycle, expo-print PDF generation, and transaction-client linking
@@ -87,8 +87,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Replace AuthContext stub with real Supabase auth, build auth screens (sign-in, sign-up, forgot-password), install expo-symbols
-- [ ] 08-02-PLAN.md — Wire root auth guard (Stack.Protected), 5-tab navigation with SF Symbol icons, stub screens, Settings sign-out, human verification
+- [x] 08-01-PLAN.md — Replace AuthContext stub with real Supabase auth, build auth screens (sign-in, sign-up, forgot-password), install expo-symbols
+- [x] 08-02-PLAN.md — Wire root auth guard (Stack.Protected), 5-tab navigation with SF Symbol icons, stub screens, Settings sign-out, human verification
 
 ### Phase 9: Simple Mode Screens
 **Goal**: Users can add, edit, delete, and browse all income, expense, debt, and asset entries on iOS with native interactions — the core financial tracking value proposition is fully functional
@@ -173,7 +173,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 5. Invoices & PDF Export | v1.0 | 7/7 | Complete | 2026-02-25 |
 | 6. Advanced Dashboard | v1.1 | 2/2 | Complete | 2026-02-25 |
 | 7. Project Scaffold + Foundation | v2.0 | 3/3 | Complete | 2026-02-26 |
-| 8. Auth Shell + Navigation | v2.0 | 0/2 | Not started | - |
+| 8. Auth Shell + Navigation | v2.0 | 2/2 | Complete | 2026-02-26 |
 | 9. Simple Mode Screens | 4/4 | Complete   | 2026-02-26 | - |
 | 10. Dashboard + CSV Export | v2.0 | 0/3 | Not started | - |
 | 11. Advanced Mode + PDF Export | v2.0 | 0/5 | Not started | - |

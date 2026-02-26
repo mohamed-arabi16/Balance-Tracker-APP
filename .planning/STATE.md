@@ -70,6 +70,11 @@ Key decisions for v2.0:
 - [08-01]: expo-router typed routes: .expo/types/router.d.ts is gitignored — use 'as any' type assertions on Link hrefs for new routes until first expo start regenerates the file
 - [08-01]: queryClient.clear() called only in explicit signOut(), NOT in onAuthStateChange — avoids clearing cache on token auto-refresh
 - [08-01]: resetPassword has no redirectTo — covered in Phase 12 plan 12-01 Task 3 (balancetracker://reset-password deep link + reset-password screen)
+- [08-02]: Stack.Protected auth guard pattern — two guards in RootNavigator (!session shows (auth), !!session shows (tabs)); no imperative router.replace() redirect
+- [08-02]: RootNavigator returns null while isLoading — splash screen covers this gap; SplashScreen.hideAsync() fires only when both i18n and auth resolve
+- [08-02]: Tab directories (debts/, assets/) require their own _layout.tsx so Expo Router names route segments correctly to match Tabs.Screen name props
+- [08-02]: AuthContext.onAuthStateChange must NOT call setIsLoading(false) — getSession already sets it; duplicate call causes null→Stack→null flicker in RootNavigator
+- [08-02]: FormScreen wrapped in SafeAreaView so auth screens respect notch and Dynamic Island on modern iPhones
 - [09-01]: DeleteAction is a plain function (not React component) to match ReanimatedSwipeable renderRightActions SharedValue signature
 - [09-01]: StatusBadge passes ALL UpdateIncomePayload fields on mutate to prevent Supabase null overwrites
 - [09-01]: date-fns was not pre-installed — auto-installed as blocking dep; now available to Plans 09-02/03/04
@@ -94,5 +99,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 09-04-PLAN.md — Assets FlatList screen, formSheet layout, add/edit asset form with auto_update Switch
+Stopped at: Completed 08-02-PLAN.md — Stack.Protected auth guard, 5-tab SF Symbol navigation, Settings sign-out, device-verified all 5 success criteria
 Resume file: None
