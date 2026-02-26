@@ -1,6 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -17,8 +16,6 @@ export default function AddAssetScreen() {
   const { user } = useAuth();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
 
   // Find the existing asset from cache when editing
   const { data: assets } = useAssets();
@@ -49,24 +46,6 @@ export default function AddAssetScreen() {
   const updateAssetMutation = useUpdateAsset();
 
   const isPending = addAssetMutation.isPending || updateAssetMutation.isPending;
-
-  const dynamicStyles = {
-    input: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    pickerWrapper: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    picker: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    label: {
-      color: isDark ? '#EBEBF5' : '#374151',
-    },
-  };
 
   async function handleSubmit() {
     setErrorMessage(null);
@@ -147,9 +126,9 @@ export default function AddAssetScreen() {
 
           {/* Asset Type */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Asset Type</Text>
+            <Text style={[styles.label]}>Asset Type</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={type}
               onChangeText={setType}
               placeholder="e.g., Bitcoin, Gold, USD"
@@ -161,9 +140,9 @@ export default function AddAssetScreen() {
 
           {/* Quantity */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Quantity</Text>
+            <Text style={[styles.label]}>Quantity</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={quantity}
               onChangeText={setQuantity}
               placeholder="e.g., 0.5, 2, 100"
@@ -175,9 +154,9 @@ export default function AddAssetScreen() {
 
           {/* Unit */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Unit</Text>
+            <Text style={[styles.label]}>Unit</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={unit}
               onChangeText={setUnit}
               placeholder="e.g., BTC, oz, shares"
@@ -189,9 +168,9 @@ export default function AddAssetScreen() {
 
           {/* Price Per Unit */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Price Per Unit</Text>
+            <Text style={[styles.label]}>Price Per Unit</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={pricePerUnit}
               onChangeText={setPricePerUnit}
               placeholder="e.g., 45000"
@@ -203,12 +182,12 @@ export default function AddAssetScreen() {
 
           {/* Currency */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Currency</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label]}>Currency</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={currency}
                 onValueChange={(val) => setCurrency(val as AssetCurrency)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CURRENCIES.map((cur) => (
                   <Picker.Item key={cur} label={cur} value={cur} />
@@ -221,7 +200,7 @@ export default function AddAssetScreen() {
           <View style={styles.fieldGroup}>
             <View style={styles.switchRow}>
               <View style={styles.switchLabel}>
-                <Text style={[styles.label, dynamicStyles.label]}>Auto Update Price</Text>
+                <Text style={[styles.label]}>Auto Update Price</Text>
                 <Text style={styles.switchNote}>
                   When on, price updates automatically from market data
                 </Text>

@@ -1,7 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -30,9 +29,6 @@ export default function AddIncomeScreen() {
   const { data: clients = [] } = useClients();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
   // Fetch existing incomes to get the one we're editing
   const { data: incomes } = useIncomes();
   const existingIncome = isEditMode
@@ -67,31 +63,6 @@ export default function AddIncomeScreen() {
   const updateIncomeMutation = useUpdateIncome();
 
   const isPending = addIncomeMutation.isPending || updateIncomeMutation.isPending;
-
-  const dynamicStyles = {
-    input: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    pickerWrapper: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    picker: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    dateButton: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    dateButtonText: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    label: {
-      color: isDark ? '#EBEBF5' : '#374151',
-    },
-  };
 
   async function handleSubmit() {
     if (!title.trim()) {
@@ -177,9 +148,9 @@ export default function AddIncomeScreen() {
 
           {/* Title */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.title')}</Text>
+            <Text style={[styles.label, styles.label]}>{t('income.form.title')}</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={title}
               onChangeText={setTitle}
               placeholder={t('income.form.placeholder.title')}
@@ -191,9 +162,9 @@ export default function AddIncomeScreen() {
 
           {/* Amount */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.amount')}</Text>
+            <Text style={[styles.label, styles.label]}>{t('income.form.amount')}</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={amount}
               onChangeText={setAmount}
               placeholder={t('income.form.placeholder.amount')}
@@ -205,12 +176,12 @@ export default function AddIncomeScreen() {
 
           {/* Currency */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.currency')}</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label, styles.label]}>{t('income.form.currency')}</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={currency}
                 onValueChange={(val) => setCurrency(val as IncomeCurrency)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CURRENCIES.map((cur) => (
                   <Picker.Item key={cur} label={cur} value={cur} />
@@ -221,12 +192,12 @@ export default function AddIncomeScreen() {
 
           {/* Category */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.category')}</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label, styles.label]}>{t('income.form.category')}</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={category}
                 onValueChange={(val) => setCategory(val as IncomeCategory)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CATEGORIES.map((cat) => (
                   <Picker.Item
@@ -241,7 +212,7 @@ export default function AddIncomeScreen() {
 
           {/* Status */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.status')}</Text>
+            <Text style={[styles.label, styles.label]}>{t('income.form.status')}</Text>
             <View style={styles.statusRow}>
               {STATUSES.map((s) => (
                 <Pressable
@@ -270,7 +241,7 @@ export default function AddIncomeScreen() {
           {/* Client Picker — visible only in Advanced mode */}
           {isAdvanced && (
             <View style={styles.fieldGroup}>
-              <Text style={[styles.label, dynamicStyles.label]}>{t('transactions.form.client', 'Client (Optional)')}</Text>
+              <Text style={[styles.label, styles.label]}>{t('transactions.form.client', 'Client (Optional)')}</Text>
               <TouchableOpacity
                 onPress={() => setClientModalVisible(true)}
                 style={styles.clientButton}
@@ -319,14 +290,14 @@ export default function AddIncomeScreen() {
 
           {/* Date */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('income.form.date')}</Text>
+            <Text style={[styles.label, styles.label]}>{t('income.form.date')}</Text>
             <Pressable
               onPress={() => setShowDatePicker(true)}
-              style={[styles.dateButton, dynamicStyles.dateButton]}
+              style={[styles.dateButton]}
               accessibilityRole="button"
               accessibilityLabel={`Date: ${formattedDate}. Tap to change.`}
             >
-              <Text style={[styles.dateButtonText, dynamicStyles.dateButtonText]}>{formattedDate}</Text>
+              <Text style={[styles.dateButtonText]}>{formattedDate}</Text>
             </Pressable>
             {showDatePicker && (
               <DateTimePicker

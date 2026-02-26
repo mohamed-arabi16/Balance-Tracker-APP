@@ -1,7 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -24,8 +23,6 @@ export default function AddDebtScreen() {
   const { user } = useAuth();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
 
   // Fetch existing debts to get the one being edited
   const { data: debts } = useDebts();
@@ -62,39 +59,6 @@ export default function AddDebtScreen() {
   const updateDebtMutation = useUpdateDebt();
 
   const isPending = addDebtMutation.isPending || updateDebtMutation.isPending;
-
-  const dynamicStyles = {
-    input: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    pickerWrapper: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    picker: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    dateButton: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    dateButtonText: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    label: {
-      color: isDark ? '#EBEBF5' : '#374151',
-    },
-    toggleButton: {
-      backgroundColor: isDark ? '#2C2C2E' : '#F9FAFB',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    toggleButtonActive: {
-      backgroundColor: isDark ? '#0A84FF22' : '#DBEAFE',
-      borderColor: isDark ? '#0A84FF' : '#3B82F6',
-    },
-  };
 
   async function handleSubmit() {
     if (!title.trim()) {
@@ -187,9 +151,9 @@ export default function AddDebtScreen() {
 
           {/* Title */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Title</Text>
+            <Text style={[styles.label]}>Title</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={title}
               onChangeText={setTitle}
               placeholder="e.g. Car loan"
@@ -201,9 +165,9 @@ export default function AddDebtScreen() {
 
           {/* Creditor */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Creditor / Person</Text>
+            <Text style={[styles.label]}>Creditor / Person</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={creditor}
               onChangeText={setCreditor}
               placeholder="e.g. Bank or friend's name"
@@ -215,9 +179,9 @@ export default function AddDebtScreen() {
 
           {/* Amount */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Amount</Text>
+            <Text style={[styles.label]}>Amount</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={amount}
               onChangeText={setAmount}
               placeholder="0.00"
@@ -229,12 +193,12 @@ export default function AddDebtScreen() {
 
           {/* Currency */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Currency</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label]}>Currency</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={currency}
                 onValueChange={(val) => setCurrency(val as DebtCurrency)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CURRENCIES.map((cur) => (
                   <Picker.Item key={cur} label={cur} value={cur} />
@@ -245,7 +209,7 @@ export default function AddDebtScreen() {
 
           {/* Type */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Type</Text>
+            <Text style={[styles.label]}>Type</Text>
             <View style={styles.toggleRow}>
               {DEBT_TYPES.map((t) => (
                 <Pressable
@@ -253,9 +217,9 @@ export default function AddDebtScreen() {
                   onPress={() => setType(t)}
                   style={[
                     styles.toggleButton,
-                    dynamicStyles.toggleButton,
+                    styles.label,
                     type === t && styles.toggleButtonActive,
-                    type === t && dynamicStyles.toggleButtonActive,
+                    type === t && styles.label,
                   ]}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: type === t }}
@@ -270,7 +234,7 @@ export default function AddDebtScreen() {
 
           {/* Status */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Status</Text>
+            <Text style={[styles.label]}>Status</Text>
             <View style={styles.toggleRow}>
               {DEBT_STATUSES.map((s) => (
                 <Pressable
@@ -278,9 +242,9 @@ export default function AddDebtScreen() {
                   onPress={() => setStatus(s)}
                   style={[
                     styles.toggleButton,
-                    dynamicStyles.toggleButton,
+                    styles.label,
                     status === s && styles.toggleButtonActive,
-                    status === s && dynamicStyles.toggleButtonActive,
+                    status === s && styles.label,
                   ]}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: status === s }}
@@ -295,14 +259,14 @@ export default function AddDebtScreen() {
 
           {/* Due Date */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>Due Date</Text>
+            <Text style={[styles.label]}>Due Date</Text>
             <Pressable
               onPress={() => setShowDatePicker(true)}
-              style={[styles.dateButton, dynamicStyles.dateButton]}
+              style={[styles.dateButton]}
               accessibilityRole="button"
               accessibilityLabel={`Due date: ${formattedDueDate}. Tap to change.`}
             >
-              <Text style={[styles.dateButtonText, dynamicStyles.dateButtonText]}>{formattedDueDate}</Text>
+              <Text style={[styles.dateButtonText]}>{formattedDueDate}</Text>
             </Pressable>
             {showDatePicker && (
               <DateTimePicker
@@ -318,7 +282,7 @@ export default function AddDebtScreen() {
           <View style={styles.fieldGroup}>
             <View style={styles.switchRow}>
               <View style={styles.switchLabelGroup}>
-                <Text style={[styles.label, dynamicStyles.label]}>Direction</Text>
+                <Text style={[styles.label]}>Direction</Text>
                 <Text style={styles.switchSubLabel}>
                   {isReceivable ? 'Someone owes me' : 'I owe this debt'}
                 </Text>
@@ -393,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleButtonActive: {
-    // base active styles; color overridden by dynamicStyles.toggleButtonActive
+    // base active styles; color overridden by styles.label
   },
   toggleText: {
     fontSize: 14,

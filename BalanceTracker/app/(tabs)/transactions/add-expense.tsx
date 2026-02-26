@@ -1,7 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +32,6 @@ export default function AddExpenseScreen() {
   const { data: clients = [] } = useClients();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditMode = Boolean(id);
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
 
   // Fetch existing expenses to get the one we're editing
   const { data: expenses } = useExpenses();
@@ -72,31 +69,6 @@ export default function AddExpenseScreen() {
   const updateExpenseMutation = useUpdateExpense();
 
   const isPending = addExpenseMutation.isPending || updateExpenseMutation.isPending;
-
-  const dynamicStyles = {
-    input: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    pickerWrapper: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    picker: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    dateButton: {
-      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-      borderColor: isDark ? '#38383A' : '#D1D5DB',
-    },
-    dateButtonText: {
-      color: isDark ? '#FFFFFF' : '#111827',
-    },
-    label: {
-      color: isDark ? '#EBEBF5' : '#374151',
-    },
-  };
 
   async function handleSubmit() {
     if (!title.trim()) {
@@ -184,9 +156,9 @@ export default function AddExpenseScreen() {
 
           {/* Title */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.title')}</Text>
+            <Text style={[styles.label]}>{t('expenses.form.title')}</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={title}
               onChangeText={setTitle}
               placeholder={t('expenses.form.placeholder.title')}
@@ -198,9 +170,9 @@ export default function AddExpenseScreen() {
 
           {/* Amount */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.amount')}</Text>
+            <Text style={[styles.label]}>{t('expenses.form.amount')}</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={amount}
               onChangeText={setAmount}
               placeholder="0.00"
@@ -212,12 +184,12 @@ export default function AddExpenseScreen() {
 
           {/* Currency */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.currency')}</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label]}>{t('expenses.form.currency')}</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={currency}
                 onValueChange={(val) => setCurrency(val as ExpenseCurrency)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CURRENCIES.map((cur) => (
                   <Picker.Item key={cur} label={cur} value={cur} />
@@ -228,12 +200,12 @@ export default function AddExpenseScreen() {
 
           {/* Category */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.category')}</Text>
-            <View style={[styles.pickerWrapper, dynamicStyles.pickerWrapper]}>
+            <Text style={[styles.label]}>{t('expenses.form.category')}</Text>
+            <View style={[styles.pickerWrapper]}>
               <Picker
                 selectedValue={category}
                 onValueChange={(val) => setCategory(val as ExpenseCategory)}
-                style={[styles.picker, dynamicStyles.picker]}
+                style={[styles.picker]}
               >
                 {CATEGORIES.map((cat) => (
                   <Picker.Item
@@ -248,7 +220,7 @@ export default function AddExpenseScreen() {
 
           {/* Type (fixed / variable) */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.type')}</Text>
+            <Text style={[styles.label]}>{t('expenses.form.type')}</Text>
             <View style={styles.toggleRow}>
               {TYPES.map((tp) => (
                 <Pressable
@@ -276,7 +248,7 @@ export default function AddExpenseScreen() {
 
           {/* Status (pending / paid) */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.status')}</Text>
+            <Text style={[styles.label]}>{t('expenses.form.status')}</Text>
             <View style={styles.toggleRow}>
               {STATUSES.map((s) => (
                 <Pressable
@@ -305,7 +277,7 @@ export default function AddExpenseScreen() {
           {/* Client Picker — visible only in Advanced mode */}
           {isAdvanced && (
             <View style={styles.fieldGroup}>
-              <Text style={[styles.label, dynamicStyles.label]}>{t('transactions.form.client', 'Client (Optional)')}</Text>
+              <Text style={[styles.label]}>{t('transactions.form.client', 'Client (Optional)')}</Text>
               <TouchableOpacity
                 onPress={() => setClientModalVisible(true)}
                 style={styles.clientButton}
@@ -354,14 +326,14 @@ export default function AddExpenseScreen() {
 
           {/* Date */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, dynamicStyles.label]}>{t('expenses.form.date')}</Text>
+            <Text style={[styles.label]}>{t('expenses.form.date')}</Text>
             <Pressable
               onPress={() => setShowDatePicker(true)}
-              style={[styles.dateButton, dynamicStyles.dateButton]}
+              style={[styles.dateButton]}
               accessibilityRole="button"
               accessibilityLabel={`Date: ${formattedDate}. Tap to change.`}
             >
-              <Text style={[styles.dateButtonText, dynamicStyles.dateButtonText]}>{formattedDate}</Text>
+              <Text style={[styles.dateButtonText]}>{formattedDate}</Text>
             </Pressable>
             {showDatePicker && (
               <DateTimePicker
