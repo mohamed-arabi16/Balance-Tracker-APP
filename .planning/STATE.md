@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 11 of 12 (Advanced Mode + PDF Export)
-Plan: 3 of 5 in Phase 11 (IN PROGRESS)
-Status: Phase 11 Plan 03 COMPLETE — Invoice screens built (list with status badges, new with useFieldArray, edit with pre-fill); FIX-01 confirmed; Plan 04 next
-Last activity: 2026-02-26 — 11-03 complete: InvoicesListScreen (status badges, swipe-to-delete), InvoiceNewScreen (useFieldArray, Modal client picker), InvoiceEditScreen (pre-fill, read-only banner) all tsc clean
+Plan: 5 of 5 in Phase 11 (COMPLETE)
+Status: Phase 11 Plan 05 COMPLETE — Client picker added to income and expense forms behind isAdvanced gate; ADV-05 complete; Phase 12 next
+Last activity: 2026-02-26 — 11-05 complete: add-income.tsx and add-expense.tsx updated with conditional client picker; income-form.tsx and expense-form.tsx stubs created; client_id wired in mutation payloads; tsc clean
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -47,6 +47,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 11-advanced-mode-pdf-export P01 | 2 | 2 tasks | 6 files |
 | Phase 11-advanced-mode-pdf-export P02 | 3 | 2 tasks | 5 files |
 | Phase 11 P03 | 9 | 2 tasks | 5 files |
+| Phase 11-advanced-mode-pdf-export P05 | 4 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,7 @@ Key decisions for v2.0:
 - [Phase 11]: z.number() + parseFloat() in onChangeText replaces z.coerce.number() — zod v4 coerce output type is unknown, breaking zodResolver; no .default() on fields to avoid input/output type split
 - [Phase 11]: invoiceFormSchema extracted to src/lib/ — avoids TypeScript path resolution issues with [id] bracket in cross-directory imports
 - [Phase 11]: currency enum USD|TRY only — matches DB currency_code enum exactly (EUR/GBP not in Supabase schema)
+- [Phase 11-advanced-mode-pdf-export]: income-form.tsx and expense-form.tsx created as re-export stubs pointing to add-income.tsx and add-expense.tsx — Phase 9 named the screens differently from the plan spec; stubs satisfy artifact contract without duplicating logic
 
 ### Pending Todos
 
@@ -121,5 +123,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 11-03-PLAN.md — InvoicesListScreen, InvoiceNewScreen, InvoiceEditScreen all tsc clean; FIX-01 confirmed (tax_amount never in payload); Plan 11-04 next
+Stopped at: Completed 11-05-PLAN.md — income and expense forms updated with conditional client picker (isAdvanced gate); client_id wired in mutation payloads; ADV-05 complete; Phase 11 all 5 plans done; Phase 12 next
 Resume file: None
