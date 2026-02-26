@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 14 of 14 (Android Support APK Build)
-Plan: 1 of 3 complete in Phase 14 (next: 14-02)
-Status: Phase 14 Plan 01 COMPLETE — expo-system-ui installed, androidStatusBar config added, eas.json Android APK/AAB profiles added; DROID-03, DROID-04, DROID-05 requirements met
-Last activity: 2026-02-26 — 14-01 complete: expo-system-ui ~6.0.9, app.json androidStatusBar translucent, eas.json preview APK + production AAB profiles
+Plan: 2 of 3 complete in Phase 14 (next: 14-03)
+Status: Phase 14 Plan 02 COMPLETE — TabIcon wrapper + iconMap.ts created, _layout.tsx migrated to TabIcon, EmptyState Ionicons fallback added; DROID-01, DROID-02 requirements met
+Last activity: 2026-02-26 — 14-02 complete: src/lib/iconMap.ts (12 mappings), src/components/ui/TabIcon.tsx (SymbolView+Ionicons fallback), app/(tabs)/_layout.tsx (7 TabIcon usages), EmptyState.tsx (fallback prop)
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -56,6 +56,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 12 P01 | 5 | 3 tasks | 7 files |
 | Phase 12 P02 | 8 | 2 tasks | 4 files |
 | Phase 14 P01 | 2 | 2 tasks | 4 files |
+| Phase 14-android-support-apk-build P02 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,8 @@ Key decisions for v2.0:
 - [Phase 12]: eas.json production profile: distribution store, autoIncrement version, iOS Release; submit section uses placeholder credentials
 - [Phase 12]: eas init deferred to Plan 03 — requires eas login first; projectId placeholder left in app.json extra.eas
 - [Phase 14]: expo-system-ui installed via npx expo install for SDK 54 pinning; androidStatusBar at expo object level (not nested in android); cli.version updated to >= 16.0.0
+- [Phase 14-android-support-apk-build]: TabIcon uses SymbolView fallback prop (official expo-symbols API) — iOS SF Symbol quality preserved, Android/Web gets Ionicons, zero callsite complexity
+- [Phase 14-android-support-apk-build]: iconMap.ts centralizes all SF->Ionicons mappings — shared by TabIcon and EmptyState, single update point for new icons
 
 ### Pending Todos
 
@@ -149,5 +152,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 14-01-PLAN.md — expo-system-ui installed, androidStatusBar added, eas.json Android APK/AAB profiles added; DROID-03/04/05 complete; Phase 14 Plan 02 next
+Stopped at: Completed 14-02-PLAN.md — TabIcon wrapper, iconMap.ts, _layout.tsx TabIcon migration, EmptyState Ionicons fallback; DROID-01 + DROID-02 complete; Phase 14 Plan 03 next
 Resume file: None
