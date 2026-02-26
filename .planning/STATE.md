@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 Milestone: v2.0 iOS Native App
 Phase: 12 of 14 (App Store Compliance & Submission)
-Plan: 1 of 3 complete in Phase 12 (next: 12-02)
-Status: Phase 12 Plan 01 COMPLETE — account deletion RPC (delete_user_data), Delete Account in Settings, Privacy Policy screen, password reset deep link + screen; STORE-01 + STORE-02 requirements met
-Last activity: 2026-02-26 — 12-01 complete: delete_user_data migration, settings.tsx Danger Zone, privacy-policy.tsx, reset-password.tsx, AuthContext redirectTo
+Plan: 2 of 3 complete in Phase 12 (next: 12-03)
+Status: Phase 12 Plan 02 COMPLETE — eas.json production build profile, app.json bundleIdentifier com.balancetracker.app, splash.png + adaptive-icon.png assets, EAS CLI v18.0.5 installed; STORE-03 requirement met
+Last activity: 2026-02-26 — 12-02 complete: eas.json (distribution:store/Release), app.json ios/android config, assets/splash.png (1284x2778), assets/adaptive-icon.png (1024x1024)
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -54,6 +54,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 13-apple-hig-ui-polish P03 | 6 | 2 tasks | 4 files |
 | Phase 13-apple-hig-ui-polish P02 | 7 | 2 tasks | 4 files |
 | Phase 12 P01 | 5 | 3 tasks | 7 files |
+| Phase 12 P02 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,9 @@ Key decisions for v2.0:
 - [Phase 13-apple-hig-ui-polish]: Debts add button stays in ListHeaderComponent (not headerRight) — only color updated to #007AFF; structure not changed
 - [Phase 12]: delete_user_data RPC uses SECURITY DEFINER + search_path = public, auth to delete from auth.users
 - [Phase 12]: reset-password screen uses 3-second timeout guard to redirect direct navigation to sign-in
+- [Phase 12]: com.balancetracker.app chosen as bundle identifier — must not be changed after first App Store submission
+- [Phase 12]: eas.json production profile: distribution store, autoIncrement version, iOS Release; submit section uses placeholder credentials
+- [Phase 12]: eas init deferred to Plan 03 — requires eas login first; projectId placeholder left in app.json extra.eas
 
 ### Pending Todos
 
@@ -143,5 +147,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 12-01-PLAN.md — delete_user_data RPC migration, Delete Account in Settings (Danger Zone section), Privacy Policy screen (5 sections), password reset deep link redirectTo + reset-password.tsx; STORE-01 + STORE-02 complete; Phase 12 Plan 02 next
+Stopped at: Completed 12-02-PLAN.md — eas.json production profile, app.json bundleIdentifier com.balancetracker.app, splash.png + adaptive-icon.png assets; STORE-03 complete; Phase 12 Plan 03 next
 Resume file: None

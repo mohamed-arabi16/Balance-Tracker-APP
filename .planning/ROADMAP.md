@@ -210,6 +210,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12 → 13 → 1
 | 9. Simple Mode Screens | 4/4 | Complete    | 2026-02-26 | - |
 | 10. Dashboard + CSV Export | 3/3 | Complete    | 2026-02-26 | - |
 | 11. Advanced Mode + PDF Export | 5/5 | Complete    | 2026-02-26 | - |
-| 12. App Store Compliance + Submission | 1/3 | In Progress|  | - |
+| 12. App Store Compliance + Submission | 2/3 | In Progress|  | - |
 | 13. Apple HIG UI Polish | 4/5 | In Progress|  | - |
 | 14. Android Support + APK Build | v2.0 | 0/TBD | Not started | - |

@@ -94,7 +94,7 @@ Requirements for iOS native app release. Each maps to roadmap phases.
 
 - [x] **STORE-01**: User can delete their account from within the app (Apple requirement)
 - [x] **STORE-02**: Privacy policy accessible from app
-- [ ] **STORE-03**: App submitted to App Store via EAS Build + Submit
+- [x] **STORE-03**: App submitted to App Store via EAS Build + Submit
 - [ ] **STORE-04**: App passes TestFlight testing on physical device
 
 ### Android Support (Phase 14)
@@ -204,7 +204,7 @@ Deferred to v2.x milestones. Not in current roadmap.
 | THEME-02 | Phase 7 | Complete |
 | STORE-01 | Phase 12 | Complete |
 | STORE-02 | Phase 12 | Complete |
-| STORE-03 | Phase 12 | Pending |
+| STORE-03 | Phase 12 | Complete |
 | STORE-04 | Phase 12 | Pending |
 | POLISH-01 | Phase 13 | Complete |
 | POLISH-02 | Phase 13 | Complete |
