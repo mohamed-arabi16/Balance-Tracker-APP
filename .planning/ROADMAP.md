@@ -100,13 +100,13 @@ Plans:
   3. User can swipe left on any income, expense, debt, or asset row to reveal and confirm a delete action
   4. User can pull down on any list to refresh it and see updated data
   5. User can change the status of an income or expense entry inline via a tap-toggle without opening the full edit form
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 09-01: Transactions screen — Income list with FlatList, add/edit form (bottom sheet), swipe-to-delete, pull-to-refresh, inline status toggle
-- [ ] 09-02: Transactions screen — Expense list with same native patterns, inline status toggle
-- [ ] 09-03: Debts screen — Debt list with payment tracking, debt history view, swipe-to-delete, pull-to-refresh
-- [ ] 09-04: Assets screen — Asset list with price auto-update, swipe-to-delete, pull-to-refresh
+- [ ] 09-01-PLAN.md — Install native deps + i18n debt category key + income screen (FlatList, formSheet add/edit, swipe-to-delete, pull-to-refresh, inline status toggle)
+- [ ] 09-02-PLAN.md — Expense screen with same native patterns plus income/expense tab switcher on Transactions tab
+- [ ] 09-03-PLAN.md — Debts screen with payment tracking, payment history detail screen, swipe-to-delete, pull-to-refresh
+- [ ] 09-04-PLAN.md — Assets screen with live price auto-update display, swipe-to-delete, pull-to-refresh
 
 ### Phase 10: Dashboard + CSV Export
 **Goal**: Users can see their financial overview at a glance with native charts and navigate directly to any tracked category — and can export their data to CSV and share it via the iOS share sheet
@@ -172,9 +172,9 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 4. Transaction-Client Linking | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 5. Invoices & PDF Export | v1.0 | 7/7 | Complete | 2026-02-25 |
 | 6. Advanced Dashboard | v1.1 | 2/2 | Complete | 2026-02-25 |
-| 7. Project Scaffold + Foundation | 3/3 | Complete    | 2026-02-26 | - |
+| 7. Project Scaffold + Foundation | v2.0 | 3/3 | Complete | 2026-02-26 |
 | 8. Auth Shell + Navigation | v2.0 | 0/2 | Not started | - |
 | 9. Simple Mode Screens | v2.0 | 0/4 | Not started | - |
-| 10. Dashboard + CSV Export | v2.0 | 0/2 | Not started | - |
+| 10. Dashboard + CSV Export | v2.0 | 0/3 | Not started | - |
 | 11. Advanced Mode + PDF Export | v2.0 | 0/5 | Not started | - |
 | 12. App Store Compliance + Submission | v2.0 | 0/3 | Not started | - |
