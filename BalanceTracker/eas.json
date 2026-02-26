@@ -17,13 +17,14 @@
       }
     },
     "production": {
-      "autoIncrement": "version",
       "distribution": "store",
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "autoIncrement": true
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       }
     }
   },
