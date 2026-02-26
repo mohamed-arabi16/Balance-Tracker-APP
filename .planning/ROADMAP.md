@@ -190,7 +190,12 @@ Plans:
   3. The app visual design is consistent with iOS — same colors, same layout, same card/list styling from Phase 13 tokens
   4. Android-specific UX works correctly — system back button handled, keyboard avoidance works, safe areas respected on Android notch devices, status bar styled correctly
   5. A production APK/AAB is generated via EAS Build and installs successfully on a physical Android device
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Install expo-system-ui + configure app.json androidStatusBar + eas.json Android APK/AAB profiles
+- [ ] 14-02-PLAN.md — TabIcon cross-platform wrapper + iconMap + update _layout.tsx + EmptyState Ionicons fallback
+- [ ] 14-03-PLAN.md — Android device verification + EAS APK build trigger (human checkpoint)
 
 ## Progress
 
