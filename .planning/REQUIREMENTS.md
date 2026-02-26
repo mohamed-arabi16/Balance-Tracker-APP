@@ -136,66 +136,66 @@ Deferred to v2.x milestones. Not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | — | Pending |
-| FOUND-02 | — | Pending |
-| FOUND-03 | — | Pending |
-| FOUND-04 | — | Pending |
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| TXN-01 | — | Pending |
-| TXN-02 | — | Pending |
-| TXN-03 | — | Pending |
-| TXN-04 | — | Pending |
-| TXN-05 | — | Pending |
-| TXN-06 | — | Pending |
-| TXN-07 | — | Pending |
-| TXN-08 | — | Pending |
-| DEBT-01 | — | Pending |
-| DEBT-02 | — | Pending |
-| DEBT-03 | — | Pending |
-| DEBT-04 | — | Pending |
-| ASST-01 | — | Pending |
-| ASST-02 | — | Pending |
-| ASST-03 | — | Pending |
-| ASST-04 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| EXPRT-01 | — | Pending |
-| EXPRT-02 | — | Pending |
-| ADV-01 | — | Pending |
-| ADV-02 | — | Pending |
-| ADV-03 | — | Pending |
-| ADV-04 | — | Pending |
-| ADV-05 | — | Pending |
-| ADV-06 | — | Pending |
-| FIX-01 | — | Pending |
-| UX-01 | — | Pending |
-| UX-02 | — | Pending |
-| UX-03 | — | Pending |
-| UX-04 | — | Pending |
-| UX-05 | — | Pending |
-| UX-06 | — | Pending |
-| UX-07 | — | Pending |
-| I18N-01 | — | Pending |
-| I18N-02 | — | Pending |
-| I18N-03 | — | Pending |
-| I18N-04 | — | Pending |
-| THEME-01 | — | Pending |
-| THEME-02 | — | Pending |
-| STORE-01 | — | Pending |
-| STORE-02 | — | Pending |
-| STORE-03 | — | Pending |
-| STORE-04 | — | Pending |
+| FOUND-01 | Phase 7 | Pending |
+| FOUND-02 | Phase 7 | Pending |
+| FOUND-03 | Phase 7 | Pending |
+| FOUND-04 | Phase 8 | Pending |
+| AUTH-01 | Phase 8 | Pending |
+| AUTH-02 | Phase 8 | Pending |
+| AUTH-03 | Phase 8 | Pending |
+| AUTH-04 | Phase 8 | Pending |
+| AUTH-05 | Phase 8 | Pending |
+| TXN-01 | Phase 9 | Pending |
+| TXN-02 | Phase 9 | Pending |
+| TXN-03 | Phase 9 | Pending |
+| TXN-04 | Phase 9 | Pending |
+| TXN-05 | Phase 9 | Pending |
+| TXN-06 | Phase 9 | Pending |
+| TXN-07 | Phase 9 | Pending |
+| TXN-08 | Phase 9 | Pending |
+| DEBT-01 | Phase 9 | Pending |
+| DEBT-02 | Phase 9 | Pending |
+| DEBT-03 | Phase 9 | Pending |
+| DEBT-04 | Phase 9 | Pending |
+| ASST-01 | Phase 9 | Pending |
+| ASST-02 | Phase 9 | Pending |
+| ASST-03 | Phase 9 | Pending |
+| ASST-04 | Phase 9 | Pending |
+| DASH-01 | Phase 10 | Pending |
+| DASH-02 | Phase 10 | Pending |
+| DASH-03 | Phase 10 | Pending |
+| EXPRT-01 | Phase 10 | Pending |
+| EXPRT-02 | Phase 11 | Pending |
+| ADV-01 | Phase 11 | Pending |
+| ADV-02 | Phase 11 | Pending |
+| ADV-03 | Phase 11 | Pending |
+| ADV-04 | Phase 11 | Pending |
+| ADV-05 | Phase 11 | Pending |
+| ADV-06 | Phase 11 | Pending |
+| FIX-01 | Phase 11 | Pending |
+| UX-01 | Phase 7 | Pending |
+| UX-02 | Phase 7 | Pending |
+| UX-03 | Phase 7 | Pending |
+| UX-04 | Phase 7 | Pending |
+| UX-05 | Phase 7 | Pending |
+| UX-06 | Phase 7 | Pending |
+| UX-07 | Phase 7 | Pending |
+| I18N-01 | Phase 7 | Pending |
+| I18N-02 | Phase 7 | Pending |
+| I18N-03 | Phase 7 | Pending |
+| I18N-04 | Phase 7 | Pending |
+| THEME-01 | Phase 7 | Pending |
+| THEME-02 | Phase 7 | Pending |
+| STORE-01 | Phase 12 | Pending |
+| STORE-02 | Phase 12 | Pending |
+| STORE-03 | Phase 12 | Pending |
+| STORE-04 | Phase 12 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 48 total
-- Mapped to phases: 0
-- Unmapped: 48 (pending roadmap creation)
+- v2.0 requirements: 54 total
+- Mapped to phases: 54
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation (Phases 7–12)*
