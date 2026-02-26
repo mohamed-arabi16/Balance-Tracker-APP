@@ -152,12 +152,12 @@ Plans:
   2. A privacy policy is accessible from within the app and linked in App Store Connect
   3. The release build (not Expo Go, not dev build) launches without crashing on a physical iPhone running iOS 15.1 or later
   4. The app is live on the App Store and can be found and downloaded by any iOS user
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 12-01: Account deletion flow (Supabase RPC for atomic data + auth delete), privacy policy screen, app icon + splash screen
-- [ ] 12-02: EAS Build production profile, TestFlight upload, physical device verification
-- [ ] 12-03: App Store metadata (screenshots, description, privacy policy URL), EAS Submit
+- [ ] 12-01-PLAN.md — Account deletion (Supabase RPC + Settings screen) and privacy policy screen (STORE-01, STORE-02)
+- [ ] 12-02-PLAN.md — App icon + splash assets, app.json bundle ID, EAS Build production profile (STORE-03 prerequisites)
+- [ ] 12-03-PLAN.md — EAS init + production build, TestFlight device verification, App Store metadata + EAS Submit (STORE-03, STORE-04)
 
 ## Progress
 
@@ -173,7 +173,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11 → 12
 | 5. Invoices & PDF Export | v1.0 | 7/7 | Complete | 2026-02-25 |
 | 6. Advanced Dashboard | v1.1 | 2/2 | Complete | 2026-02-25 |
 | 7. Project Scaffold + Foundation | v2.0 | 3/3 | Complete | 2026-02-26 |
-| 8. Auth Shell + Navigation | 1/2 | In Progress|  | - |
+| 8. Auth Shell + Navigation | v2.0 | 0/2 | Not started | - |
 | 9. Simple Mode Screens | v2.0 | 0/4 | Not started | - |
 | 10. Dashboard + CSV Export | v2.0 | 0/3 | Not started | - |
 | 11. Advanced Mode + PDF Export | v2.0 | 0/5 | Not started | - |
