@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26 after v2.0 milestone start)
 
 **Core value:** Anyone can track their money simply — and freelancers can manage their business without switching apps.
-**Current focus:** v2.0 iOS Native App — Phase 10: Dashboard + CSV Export
+**Current focus:** v2.0 iOS Native App — Phase 11: Advanced Mode + PDF Export
 
 ## Current Position
 
 Milestone: v2.0 iOS Native App
-Phase: 10 of 12 (Dashboard + CSV Export)
-Plan: 1 of 3 in Phase 10 (COMPLETE)
-Status: In progress — Phase 10 Plan 01 complete (DASH-01, DASH-02, DASH-03 delivered)
-Last activity: 2026-02-26 — 10-01 complete: Victory Native XL + Skia dashboard with NetWorthCard, IncomeExpenseChart (tap callout), 4x FinancialSummaryCards
+Phase: 11 of 12 (Advanced Mode + PDF Export)
+Plan: 0 of 5 in Phase 11 (NOT STARTED)
+Status: Phase 10 COMPLETE — DASH-01, DASH-02, DASH-03, EXPRT-01 verified on device; Phase 11 next
+Last activity: 2026-02-26 — 10-03 human verification approved: Victory Native XL + Skia charts, tap-callout, navigable cards, CSV export all confirmed on physical iPhone
 
 Progress: [██████████░░░░░░░░░░] 50% (6/12 phases complete, v1.0+v1.1)
 
@@ -43,6 +43,7 @@ Progress: [██████████░░░░░░░░░░] 50% (6/
 | Phase 09 P02 | 3 | 2 tasks | 3 files |
 | Phase 10 P02 | 3 | 2 tasks | 3 files |
 | Phase 10-dashboard-csv-export P01 | 5 | 3 tasks | 6 files |
+| Phase 10-dashboard-csv-export P03 | human-gated | 1 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Key decisions for v2.0:
 - [Phase 10-dashboard-csv-export]: useAnimatedReaction+runOnJS replaces useDerivedValue+animatedProps for callout label — RN Text has no text prop natively, so animatedProps pattern fails
 - [Phase 10-dashboard-csv-export]: dashboard.tsx alongside index.tsx — tab bar uses index as dashboard; dashboard.tsx accessible as /dashboard route for Phase 10 testing without modifying tab bar
 - [Phase 10-dashboard-csv-export]: Inter-Medium.ttf downloaded from rsms/inter v4.0 GitHub raw URL (299KB) for chart axis label rendering via victory-native useFont()
+- [Phase 10-dashboard-csv-export]: Skia native module is present in Expo Go SDK 54 — no dev build required for Victory Native XL chart rendering
+- [Phase 10-dashboard-csv-export]: Phase 10 complete — DASH-01, DASH-02, DASH-03, EXPRT-01 all verified on device; Phase 11 unblocked
 
 ### Pending Todos
 
@@ -105,5 +108,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 10-01-PLAN.md — Dashboard with Victory Native charts, Skia Circle tap-callout, NetWorthCard, 4 FinancialSummaryCards, DASH-01/02/03 complete
+Stopped at: Completed 10-03-PLAN.md — Phase 10 human verification approved; DASH-01, DASH-02, DASH-03, EXPRT-01 all verified on physical device; Phase 10 complete; Phase 11 next
 Resume file: None
